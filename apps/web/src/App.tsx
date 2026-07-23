@@ -1,25 +1,16 @@
-import { useState, useEffect } from 'react';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import './App.css'
+import Authorized from './views/authorized';
+import Unauthorized from './views/unauthorized';
 
 function App() {
-  const [messages, setMessages] = useState<any[]>([]);
-
-  useEffect(() => {
-    fetch("http://localhost:3000/messages")
-      .then((res) => res.json())
-      .then(setMessages);
-  }, []);
-
   return (
-    <div>
-      <h1>Messages</h1>
-
-      {messages.map((message) => (
-        <div key={message._id}>
-          {message.text}
-        </div>
-      ))}
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/auth/*" element={<Authorized />} />
+        <Route path="/*" element={<Unauthorized />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
