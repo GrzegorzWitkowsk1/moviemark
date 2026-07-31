@@ -1,19 +1,23 @@
 import Box from "@mui/material/Box";
-import StyledCard from "../../../shared/components/card";
-import logo from '../../../../public/logo2.png'
+import StyledCard from "@/shared/components/card";
+import logo from '@/assets/logo2.png'
 import Typography from "@mui/material/Typography";
 import {  FormControl, FormControlLabel }  from "@mui/material";
-import ContainedButton from "../../../shared/components/buttons/containedButton";
-import StyledTextField from "../../../shared/components/textField";
-import StyledRadio from "../../../shared/components/buttons/radio";
+import ContainedButton from "@/shared/components/buttons/containedButton";
+import OutlinedButton from "@/shared/components/buttons/outlinedButton";
+import StyledTextField from "@/shared/components/textField";
+import StyledRadio from "@/shared/components/buttons/radio";
+import { useNavigate } from "react-router-dom";
 
 export default function LoginPage() {
+    const navigate = useNavigate();
     
     return (
       <Box
+        className="fade-in"
         sx={{
           minHeight: "100vh",
-            mx: { lg: "0%", md: "0%", xs: "2%" },
+          mx: { lg: "0%", md: "0%", xs: "2%" },
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -113,6 +117,9 @@ export default function LoginPage() {
             ></FormControlLabel>
           </FormControl>
           <ContainedButton variant="contained">Sign in</ContainedButton>
+          <OutlinedButton onClick={() => navigate("/register")}>
+            Don&apos;t have an account? Create it!
+          </OutlinedButton>
         </StyledCard>
       </Box>
     );

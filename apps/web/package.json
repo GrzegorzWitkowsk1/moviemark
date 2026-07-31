@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "check-types": "tsc -b",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -18,6 +19,8 @@
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-hook-form": "^7.83.0",
+    "react-router-dom": "^7.18.1",
+    "shared": "*",
     "zod": "^4.4.3"
   },
   "devDependencies": {

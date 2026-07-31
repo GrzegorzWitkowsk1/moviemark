@@ -14,6 +14,10 @@ const ContainedButton = styled(Button)<{ isDelete?: boolean }>(({ theme, isDelet
          backgroundColor: theme.palette.error.darker,
       },
    }),
+   '&.Mui-disabled': {
+      backgroundColor: theme.palette.grey[700],
+      color: theme.palette.grey[500],
+   },
 }))
 
 export default ContainedButton

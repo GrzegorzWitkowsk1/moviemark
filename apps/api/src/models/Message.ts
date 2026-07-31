@@ -1,6 +1,11 @@
 import mongoose from "mongoose";
 
-const MessageSchema = new mongoose.Schema({
+interface IMessage {
+  text: string;
+  createdAt?: Date;
+}
+
+const MessageSchema = new mongoose.Schema<IMessage>({
   text: {
     type: String,
     required: true,
@@ -12,5 +17,5 @@ const MessageSchema = new mongoose.Schema({
 });
 
 export const Message =
-  mongoose.models.Message ||
-  mongoose.model("Message", MessageSchema);
+  (mongoose.models.Message as mongoose.Model<IMessage>) ||
+  mongoose.model<IMessage>("Message", MessageSchema);

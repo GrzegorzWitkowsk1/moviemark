@@ -1,6 +1,6 @@
 export default function HomePage() { 
     return ( 
-        <div>
+        <div className="fade-in">
             home here
         </div>
     )

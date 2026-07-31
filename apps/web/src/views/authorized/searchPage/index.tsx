@@ -1,6 +1,6 @@
 export default function SearchPage() { 
     return ( 
-        <div>
+        <div className="fade-in">
             search here
         </div>
     )

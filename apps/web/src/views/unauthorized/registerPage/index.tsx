@@ -1,30 +1,66 @@
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import StyledCard from "../../../shared/components/card";
-import StyledTextField from "../../../shared/components/textField";
-import ContainedButton from "../../../shared/components/buttons/containedButton";
+import type { RegisterRequest } from "shared";
+import StyledCard from "@/shared/components/card";
+import StyledTextField from "@/shared/components/textField";
+import ContainedButton from "@/shared/components/buttons/containedButton";
+import OutlinedButton from "@/shared/components/buttons/outlinedButton";
 import { registerSchema, type RegisterFormValues } from "./schema";
-import logo from "../../../../public/logo2.png";
+import { registerUser } from "@/lib/api";
+import { useSnackbar } from "@/contexts/snackbarContext";
+import logo from "@/assets/logo2.png";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
+  const { open } = useSnackbar();
+  const [registered, setRegistered] = useState(false);
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isValid, isSubmitting },
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
+    mode: "onChange",
   });
 
-  const onSubmit = (data: RegisterFormValues) => {
-    console.log(data);
+  useEffect(() => {
+    if (!registered) return;
+    const timeout = setTimeout(() => navigate("/login"), 1500);
+    return () => clearTimeout(timeout);
+  }, [registered, navigate]);
+
+  const onSubmit = async (data: RegisterFormValues) => {
+    const payload: RegisterRequest = {
+      name: data.name,
+      surname: data.surname,
+      email: data.email,
+      password: data.password,
+    };
+
+    try {
+      await registerUser(payload);
+      open(
+        "Registration successful, you will be redirected to the login page",
+        "success"
+      );
+      setRegistered(true);
+    } catch (err) {
+      open(
+        err instanceof Error
+          ? err.message
+          : "Something went wrong. Please try again.",
+        "failure"
+      );
+    }
   };
 
   return (
     <Box
+      className="fade-in"
       sx={{
         minHeight: "100vh",
         mx: { lg: "0%", md: "0%", xs: "2%" },
@@ -154,22 +190,12 @@ export default function RegisterPage() {
               {...register("confirmPassword")}
             />
           </Box>
-          <ContainedButton type="submit">Register</ContainedButton>
-          <ContainedButton
-            type="button"
-            sx={{
-              backgroundColor: "transparent",
-              color: "primary.main",
-              border: "1px solid",
-              borderColor: "primary.main",
-              "&:hover": {
-                backgroundColor: "rgba(189, 159, 124, 0.08)",
-              },
-            }}
-            onClick={() => navigate("/login")}
-          >
-            Already have an account?
+          <ContainedButton type="submit" disabled={!isValid || isSubmitting}>
+            {isSubmitting ? "Registering..." : "Register"}
           </ContainedButton>
+          <OutlinedButton type="button" onClick={() => navigate("/login")}>
+            Already have an account?
+          </OutlinedButton>
         </Box>
       </StyledCard>
     </Box>
