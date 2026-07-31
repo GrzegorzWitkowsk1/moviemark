@@ -1,5 +1,4 @@
 import { Card, styled } from '@mui/material'
-import type { ReactNode } from 'react'
 
 const StyledCard =  styled(Card)(({theme}) => ({
           backgroundColor: theme.palette.primary.dark,
