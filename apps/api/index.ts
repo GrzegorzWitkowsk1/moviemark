@@ -4,6 +4,7 @@ import { messagesRoutes } from "./src/routes/messages";
 import { authRoutes } from "./src/routes/auth";
 import { connectMongo } from "./src/db/mongo";
 import { config } from "./src/config";
+import authPlugin from "./src/plugins/auth";
 
 const app = Fastify({
   logger: true,
@@ -19,8 +20,10 @@ async function start() {
 
   await app.register(cors, {
     origin: config.corsOrigin,
+    credentials: true,
   });
 
+  await app.register(authPlugin);
   await app.register(messagesRoutes);
   await app.register(authRoutes);
 

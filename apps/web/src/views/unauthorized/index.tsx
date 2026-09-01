@@ -1,8 +1,9 @@
 import { Routes, Route } from 'react-router-dom';
 import LoginPage from './loginPage';
 import RegisterPage from './registerPage';
+import { withPublic } from '@/hocs/withPublic';
 
-export default function Unauthorized() { 
+function Unauthorized() { 
     return(
         <Routes>
             <Route path="/login" element={<LoginPage />} />
@@ -10,3 +11,5 @@ export default function Unauthorized() {
         </Routes>
     )
 }
+
+export default withPublic(Unauthorized);

@@ -16,11 +16,25 @@ export default defineConfig([
       reactRefresh.configs.vite,
     ],
     languageOptions: {
+      parserOptions: {
+        tsconfigRootDir: import.meta.dirname,
+        projectService: true,
+      },
       globals: globals.browser,
     },
   },
   {
     files: ['src/contexts/**/*.{ts,tsx}'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
+    },
+  },
+  {
+    files: [
+      'src/hocs/**/*.{ts,tsx}',
+      'src/views/authorized/index.tsx',
+      'src/views/unauthorized/index.tsx',
+    ],
     rules: {
       'react-refresh/only-export-components': 'off',
     },

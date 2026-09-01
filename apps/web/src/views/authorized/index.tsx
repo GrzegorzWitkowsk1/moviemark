@@ -3,9 +3,10 @@ import HomePage from './homePage';
 import SearchPage from './searchPage';
 import SettingsPage from './settingsPage';
 import CollectionPage from './collectionPage';
+import { withAuth } from '@/hocs/withAuth';
 
 
-export default function Authorized() { 
+function Authorized() { 
     return(
         <Routes>
             <Route path="/home" element={<HomePage />} />
@@ -15,3 +16,5 @@ export default function Authorized() {
         </Routes>
     )
 }
+
+export default withAuth(Authorized);

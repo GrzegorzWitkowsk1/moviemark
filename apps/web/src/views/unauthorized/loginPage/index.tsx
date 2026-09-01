@@ -1,48 +1,83 @@
-import Box from "@mui/material/Box";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Box, Typography, FormControl, FormControlLabel } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import StyledCard from "@/shared/components/card";
-import logo from '@/assets/logo2.png'
-import Typography from "@mui/material/Typography";
-import {  FormControl, FormControlLabel }  from "@mui/material";
+import StyledTextField from "@/shared/components/textField";
 import ContainedButton from "@/shared/components/buttons/containedButton";
 import OutlinedButton from "@/shared/components/buttons/outlinedButton";
-import StyledTextField from "@/shared/components/textField";
 import StyledRadio from "@/shared/components/buttons/radio";
-import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/authContext";
+import { useSnackbar } from "@/contexts/snackbarContext";
+import { loginSchema, type LoginFormValues } from "./schema";
+import logo from "@/assets/logo2.png";
 
 export default function LoginPage() {
-    const navigate = useNavigate();
-    
-    return (
-      <Box
-        className="fade-in"
+  const navigate = useNavigate();
+  const { login } = useAuth();
+  const { open } = useSnackbar();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid, isSubmitting },
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    mode: "onChange",
+  });
+
+  const onSubmit = async (data: LoginFormValues) => {
+    try {
+      await login(data.email, data.password);
+      open("Welcome back!", "success");
+      navigate("/auth/home");
+    } catch (err) {
+      open(
+        err instanceof Error
+          ? err.message
+          : "Something went wrong. Please try again.",
+        "failure"
+      );
+    }
+  };
+
+  return (
+    <Box
+      className="fade-in"
+      sx={{
+        minHeight: "100vh",
+        mx: { lg: "0%", md: "0%", xs: "2%" },
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: { lg: "24px", md: "16px", xs: "12px" },
+        flexDirection: "column",
+      }}
+    >
+      <img
+        style={{
+          height: "240px",
+          width: "auto",
+        }}
+        src={logo}
+        alt="movie-mark-logotype"
+      />
+      <Typography sx={{ color: "primary.light" }} variant="h5">
+        Welcome in MovieMark.
+      </Typography>
+      <Typography sx={{ color: "secondary.light" }} variant="body1">
+        Complete your movie and series diary
+      </Typography>
+      <StyledCard
         sx={{
-          minHeight: "100vh",
-          mx: { lg: "0%", md: "0%", xs: "2%" },
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: { lg: "24px", md: "16px", xs: "12px" },
-          flexDirection: "column",
+          maxWidth: "450px",
+          width: "100%",
         }}
       >
-        <img
-          style={{
-            height: "240px",
-            width: "auto",
-          }}
-          src={logo}
-          alt="movie-mark-logotype"
-        />
-        <Typography sx={{ color: "primary.light" }} variant='h5'>
-            Welcome in MovieMark. 
-        </Typography>
-        <Typography sx={{ color: "secondary.light" }} variant="body1">
-             Complete your movie and series diary
-        </Typography>
-        <StyledCard
+        <Box
+          component="form"
+          onSubmit={handleSubmit(onSubmit)}
           sx={{
-            maxWidth: "450px",
-            width: "100%",
             display: "flex",
             flexDirection: "column",
             gap: { lg: "12px", md: "10px", xs: "8px" },
@@ -61,7 +96,10 @@ export default function LoginPage() {
               placeholder="you@example.com"
               variant="outlined"
               fullWidth
-            ></StyledTextField>
+              error={!!errors.email}
+              helperText={errors.email?.message}
+              {...register("email")}
+            />
           </Box>
           <Box
             sx={{
@@ -101,7 +139,10 @@ export default function LoginPage() {
               type="password"
               variant="outlined"
               fullWidth
-            ></StyledTextField>
+              error={!!errors.password}
+              helperText={errors.password?.message}
+              {...register("password")}
+            />
           </Box>
           <FormControl>
             <FormControlLabel
@@ -114,13 +155,16 @@ export default function LoginPage() {
                   Remember me
                 </Typography>
               }
-            ></FormControlLabel>
+            />
           </FormControl>
-          <ContainedButton variant="contained">Sign in</ContainedButton>
-          <OutlinedButton onClick={() => navigate("/register")}>
+          <ContainedButton type="submit" disabled={!isValid || isSubmitting}>
+            {isSubmitting ? "Signing in..." : "Sign in"}
+          </ContainedButton>
+          <OutlinedButton type="button" onClick={() => navigate("/register")}>
             Don&apos;t have an account? Create it!
           </OutlinedButton>
-        </StyledCard>
-      </Box>
-    );
+        </Box>
+      </StyledCard>
+    </Box>
+  );
 }

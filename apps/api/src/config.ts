@@ -23,4 +23,9 @@ export const config = {
   port: number("PORT", 3000),
   mongoUri: required("MONGO_URI"),
   corsOrigin: Bun.env.CORS_ORIGIN ?? "http://localhost:5173",
+  jwtSecret: Bun.env.JWT_SECRET ?? "dev-secret",
+  accessTokenTtl: Bun.env.ACCESS_TOKEN_TTL ?? "15m",
+  refreshTokenTtl: Bun.env.REFRESH_TOKEN_TTL ?? "7d",
+  cookieName: Bun.env.COOKIE_NAME ?? "refreshToken",
+  isProduction: Bun.env.NODE_ENV === "production",
 };
