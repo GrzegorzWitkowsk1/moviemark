@@ -10,16 +10,17 @@ import {
   Menu,
   MenuItem,
   IconButton,
-  OutlinedInput,
   InputAdornment,
   Box,
   useTheme,
   alpha,
   useMediaQuery,
+  Divider,
 } from '@mui/material';
 import { Search, LogOut, Settings, LayoutGrid } from 'lucide-react';
 import { useAuth } from '@/contexts/authContext';
 import logo from '@/assets/logo2.png';
+import StyledTextField from '@/shared/components/textField';
 
 const NAV_ITEMS = [
   { label: 'Home', path: '/auth/home' },
@@ -65,214 +66,238 @@ export default function Header() {
   };
 
   return (
-    <AppBar
-      position="sticky"
-      elevation={0}
-      sx={{
-        backgroundColor: alpha(theme.palette.secondary.darker, 0.35),
-        backdropFilter: 'blur(10px)',
-        borderBottom: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
-      }}
-    >
-      <Toolbar
-        sx={{
-          justifyContent: 'space-between',
-          gap: 2,
-          minHeight: { xs: 52, sm: 60 },
-          px: { xs: 1.5, sm: 2 },
-        }}
-      >
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1,
-            minWidth: 0,
-          }}
-        >
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1,
-              cursor: 'pointer',
-              flexShrink: 0,
-            }}
-            onClick={() => navigate('/auth/home')}
-          >
-            <Box
-              component="img"
-              src={logo}
-              alt="MovieMark logo"
-              sx={{ height: 32, width: 32, objectFit: 'contain' }}
-            />
-            <Typography
-              variant="h6"
-              noWrap
-              sx={{
-                fontWeight: 700,
-                fontSize: '1.15rem',
-                color: theme.palette.primary.main,
-                letterSpacing: '-0.02em',
-              }}
-            >
-              MovieMark
+		<AppBar
+			position="sticky"
+			elevation={0}
+			sx={{
+				backgroundColor: alpha(theme.palette.secondary.darker, 0.75),
+				borderBottom: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+			}}
+		>
+			<Toolbar
+				sx={{
+					justifyContent: "space-between",
+					gap: 2,
+					minHeight: { xs: 52, sm: 60 },
+					px: { xs: 1.5, sm: 2 },
+				}}
+			>
+				<Box
+					sx={{
+						display: "flex",
+						alignItems: "center",
+						gap: 1,
+						minWidth: 0,
+					}}
+				>
+					<Box
+						sx={{
+							display: "flex",
+							alignItems: "center",
+							gap: 1,
+							cursor: "pointer",
+							flexShrink: 0,
+						}}
+						onClick={() => navigate("/auth/home")}
+					>
+						<Box
+							component="img"
+							src={logo}
+							alt="MovieMark logo"
+							sx={{ height: 32, width: 32, objectFit: "contain" }}
+						/>
+						<Typography
+							variant="h6"
+							noWrap
+							sx={{
+								fontWeight: 700,
+								fontSize: "1.15rem",
+								color: theme.palette.primary.main,
+								letterSpacing: "-0.02em",
+							}}
+						>
+							MovieMark
+						</Typography>
+					</Box>
+
+					{!isMobile && (
+						<Tabs
+							value={currentTab >= 0 ? currentTab : false}
+							onChange={(_, newValue) => navigate(NAV_ITEMS[newValue].path)}
+							sx={{
+								ml: 1,
+								minHeight: 40,
+								"& .MuiTabs-indicator": {
+									display: "none",
+								},
+								"& .MuiTabs-flexContainer": {
+									gap: 0.75,
+								},
+								"& .MuiTab-root": {
+									textTransform: "none",
+									fontWeight: 500,
+									color: theme.palette.text.secondary,
+									minHeight: 36,
+									minWidth: 0,
+									ml: 0.5,
+									px: 1.75,
+									borderRadius: "12px",
+									transition: theme.transitions.create(
+										["background-color", "color"],
+										{ duration: theme.transitions.duration.short },
+									),
+									"&:hover": {
+										backgroundColor: alpha(theme.palette.primary.main, 0.1),
+										color: theme.palette.primary.main,
+									},
+									"&.Mui-selected": {
+										backgroundColor: alpha(theme.palette.primary.main, 0.18),
+										color: theme.palette.primary.main,
+									},
+								},
+							}}
+						>
+							{NAV_ITEMS.map((item) => (
+								<Tab key={item.path} label={item.label} />
+							))}
+						</Tabs>
+					)}
+				</Box>
+
+				<Box
+					sx={{
+						display: "flex",
+						alignItems: "center",
+						gap: 1.5,
+						flexShrink: 0,
+					}}
+				>
+					{isMobile ? (
+						<IconButton
+							onClick={() => navigate("/auth/search")}
+							sx={{ color: theme.palette.text.secondary }}
+						>
+							<Search size={22} />
+						</IconButton>
+					) : (
+						<form onSubmit={handleSearchSubmit}>
+							<StyledTextField
+								variant="outlined"
+								placeholder="Search movies & series..."
+								onClick={() => navigate("/auth/search")}
+								sx={{
+									width: 250,
+									borderRadius: "16px",
+									cursor: "pointer",
+									backgroundColor: alpha(theme.palette.common.white, 0.06),
+									"& .MuiOutlinedInput-input": {
+										cursor: "pointer",
+									},
+									"& .MuiOutlinedInput-notchedOutline": {
+										borderColor: alpha(theme.palette.primary.main, 0.2),
+									},
+									"&:hover .MuiOutlinedInput-notchedOutline": {
+										borderColor: alpha(theme.palette.primary.main, 0.4),
+									},
+									"&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+										borderColor: theme.palette.primary.main,
+									},
+								}}
+								slotProps={{
+									input: {
+										readOnly: true,
+										startAdornment: (
+											<InputAdornment position="start">
+												<Search
+													size={18}
+													style={{ color: theme.palette.text.secondary }}
+												/>
+											</InputAdornment>
+										),
+									},
+								}}
+							/>
+						</form>
+					)}
+
+					<IconButton onClick={handleAvatarClick} size="small">
+						<Avatar
+							sx={{
+								width: 32,
+								height: 32,
+								bgcolor: theme.palette.primary.main,
+								color: theme.palette.primary.contrastText,
+								fontSize: "0.8rem",
+								fontWeight: 600,
+							}}
+						>
+							{initials}
+						</Avatar>
+					</IconButton>
+
+					<Menu
+						anchorEl={anchorEl}
+						open={open}
+						onClose={handleMenuClose}
+						transformOrigin={{ horizontal: "right", vertical: "top" }}
+						anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+						slotProps={{
+							paper: {
+								sx: {
+									backgroundColor: theme.palette.secondary.darker,
+									border: `1px solid ${theme.palette.secondary.light}`,
+									minWidth: 250,
+									borderRadius: "16px",
+									boxShadow: `0 8px 32px ${alpha(theme.palette.common.black, 0.24)}`,
+									"& .MuiMenuItem-root": {
+										gap: 0,
+										borderRadius: "8px",
+										color: theme.palette.primary.light,
+										fontSize: "0.9rem",
+										transition: "background-color 0.2s ease, color 0.2s ease",
+										"&:hover": {
+											backgroundColor: theme.palette.primary.lighter,
+											color: theme.palette.primary.light,
+										},
+										"&:focus-visible": {
+											outline: `2px solid ${theme.palette.primary.main}`,
+											outlineOffset: "-2px",
+										},
+									},
+								},
+							},
+						}}
+					>
+            <Typography sx={{color: theme.palette.primary.light, ml:2,mt:1, fontWeight:'bold'}}>
+              {`${user?.name} ${user?.surname}` }
             </Typography>
-          </Box>
-
-          {!isMobile && (
-            <Tabs
-              value={currentTab >= 0 ? currentTab : false}
-              onChange={(_, newValue) => navigate(NAV_ITEMS[newValue].path)}
-              sx={{
-                ml: 1,
-                minHeight: 40,
-                '& .MuiTabs-indicator': {
-                  display: 'none',
-                },
-                '& .MuiTabs-flexContainer': {
-                  gap: 0.75,
-                },
-                '& .MuiTab-root': {
-                  textTransform: 'none',
-                  fontWeight: 500,
-                  color: theme.palette.text.secondary,
-                  minHeight: 36,
-                  minWidth: 0,
-                  px: 1.75,
-                  borderRadius: '12px',
-                  transition: theme.transitions.create(
-                    ['background-color', 'color'],
-                    { duration: theme.transitions.duration.short }
-                  ),
-                  '&:hover': {
-                    backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                    color: theme.palette.primary.main,
-                  },
-                  '&.Mui-selected': {
-                    backgroundColor: alpha(theme.palette.primary.main, 0.18),
-                    color: theme.palette.primary.main,
-                  },
-                },
-              }}
-            >
-              {NAV_ITEMS.map((item) => (
-                <Tab key={item.path} label={item.label} />
-              ))}
-            </Tabs>
-          )}
-        </Box>
-
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1.5,
-            flexShrink: 0,
-          }}
-        >
-          {isMobile ? (
-            <IconButton
-              onClick={() => navigate('/auth/search')}
-              sx={{ color: theme.palette.text.secondary }}
-            >
-              <Search size={22} />
-            </IconButton>
-          ) : (
-            <form onSubmit={handleSearchSubmit}>
-              <OutlinedInput
-                placeholder="Search movies & series..."
-                size="small"
-                readOnly
-                onClick={() => navigate('/auth/search')}
-                sx={{
-                  width: 200,
-                  borderRadius: '16px',
-                  cursor: 'pointer',
-                  backgroundColor: alpha(theme.palette.common.white, 0.06),
-                  '& .MuiOutlinedInput-input': {
-                    cursor: 'pointer',
-                  },
-                  '& .MuiOutlinedInput-notchedOutline': {
-                    borderColor: alpha(theme.palette.primary.main, 0.2),
-                  },
-                  '&:hover .MuiOutlinedInput-notchedOutline': {
-                    borderColor: alpha(theme.palette.primary.main, 0.4),
-                  },
-                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                    borderColor: theme.palette.primary.main,
-                  },
-                }}
-                startAdornment={
-                  <InputAdornment position="start">
-                    <Search
-                      size={18}
-                      style={{ color: theme.palette.text.secondary }}
-                    />
-                  </InputAdornment>
-                }
-              />
-            </form>
-          )}
-
-          <IconButton onClick={handleAvatarClick} size="small">
-            <Avatar
-              sx={{
-                width: 32,
-                height: 32,
-                bgcolor: theme.palette.primary.main,
-                color: theme.palette.primary.contrastText,
-                fontSize: '0.8rem',
-                fontWeight: 600,
-              }}
-            >
-              {initials}
-            </Avatar>
-          </IconButton>
-
-          <Menu
-            anchorEl={anchorEl}
-            open={open}
-            onClose={handleMenuClose}
-            transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-            anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-            slotProps={{
-              paper: {
-                sx: {
-                  mt: 1,
-                  minWidth: 180,
-                  borderRadius: '12px',
-                  backgroundColor: theme.palette.background.paper,
-                  boxShadow: `0 8px 32px ${alpha(theme.palette.common.black, 0.24)}`,
-                },
-              },
-            }}
-          >
-            <MenuItem
-              onClick={() => {
-                handleMenuClose();
-                navigate('/auth/collections');
-              }}
-            >
-              <LayoutGrid size={18} style={{ marginRight: 10 }} />
-              Collections
-            </MenuItem>
-            <MenuItem
-              onClick={() => {
-                handleMenuClose();
-                navigate('/auth/settings');
-              }}
-            >
-              <Settings size={18} style={{ marginRight: 10 }} />
-              Settings
-            </MenuItem>
-            <MenuItem onClick={handleLogout}>
-              <LogOut size={18} style={{ marginRight: 10 }} />
-              Log Out
-            </MenuItem>
-          </Menu>
-        </Box>
-      </Toolbar>
-    </AppBar>
-  );
+            <Divider flexItem sx={{my:1}}/>
+						<MenuItem
+							onClick={() => {
+								handleMenuClose();
+								navigate("/auth/collections");
+							}}
+						>
+							<LayoutGrid size={18} style={{ marginRight: 10 }} />
+							My collection
+						</MenuItem>
+						<MenuItem
+							onClick={() => {
+								handleMenuClose();
+								navigate("/auth/settings");
+							}}
+						>
+							<Settings size={18} style={{ marginRight: 10 }} />
+							Settings
+						</MenuItem>
+            <Divider flexItem/>
+						<MenuItem onClick={handleLogout}>
+							<LogOut size={18} style={{ marginRight: 10 }} />
+							Log Out
+						</MenuItem>
+					</Menu>
+				</Box>
+			</Toolbar>
+		</AppBar>
+	);
 }
