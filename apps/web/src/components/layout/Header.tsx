@@ -19,7 +19,7 @@ import {
 } from '@mui/material';
 import { Search, LogOut, Settings, LayoutGrid } from 'lucide-react';
 import { useAuth } from '@/contexts/authContext';
-import logo from '@/assets/logo2.png';
+import logo from '@/assets/logo_clean.png';
 import StyledTextField from '@/shared/components/textField';
 
 const NAV_ITEMS = [
@@ -70,7 +70,7 @@ export default function Header() {
 			position="sticky"
 			elevation={0}
 			sx={{
-				backgroundColor: alpha(theme.palette.secondary.darker, 0.75),
+				backgroundColor: alpha(theme.palette.secondary.darker, 0.9),
 				borderBottom: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
 			}}
 		>
@@ -101,11 +101,21 @@ export default function Header() {
 						onClick={() => navigate("/auth/home")}
 					>
 						<Box
-							component="img"
-							src={logo}
-							alt="MovieMark logo"
-							sx={{ height: 32, width: 32, objectFit: "contain" }}
-						/>
+							sx={{
+								p: 0.5,
+								backgroundColor: theme.palette.primary.lighter,
+								display: "flex",
+								alignItems: "center",
+								borderRadius: "12px",
+							}}
+						>
+							<Box
+								component="img"
+								src={logo}
+								alt="MovieMark logo"
+								sx={{ height: 42, width: 42, objectFit: "contain" }}
+							/>
+						</Box>
 						<Typography
 							variant="h6"
 							noWrap
@@ -136,7 +146,7 @@ export default function Header() {
 								"& .MuiTab-root": {
 									textTransform: "none",
 									fontWeight: 500,
-									color: theme.palette.text.secondary,
+									color: theme.palette.grey[400],
 									minHeight: 36,
 									minWidth: 0,
 									ml: 0.5,
@@ -148,11 +158,11 @@ export default function Header() {
 									),
 									"&:hover": {
 										backgroundColor: alpha(theme.palette.primary.main, 0.1),
-										color: theme.palette.primary.main,
+										color: "white",
 									},
 									"&.Mui-selected": {
 										backgroundColor: alpha(theme.palette.primary.main, 0.18),
-										color: theme.palette.primary.main,
+										color: "white",
 									},
 								},
 							}}
@@ -268,10 +278,17 @@ export default function Header() {
 							},
 						}}
 					>
-            <Typography sx={{color: theme.palette.primary.light, ml:2,mt:1, fontWeight:'bold'}}>
-              {`${user?.name} ${user?.surname}` }
-            </Typography>
-            <Divider flexItem sx={{my:1}}/>
+						<Typography
+							sx={{
+								color: theme.palette.primary.light,
+								ml: 2,
+								mt: 1,
+								fontWeight: "bold",
+							}}
+						>
+							{`${user?.name} ${user?.surname}`}
+						</Typography>
+						<Divider flexItem sx={{ my: 1 }} />
 						<MenuItem
 							onClick={() => {
 								handleMenuClose();
@@ -290,7 +307,7 @@ export default function Header() {
 							<Settings size={18} style={{ marginRight: 10 }} />
 							Settings
 						</MenuItem>
-            <Divider flexItem/>
+						<Divider flexItem />
 						<MenuItem onClick={handleLogout}>
 							<LogOut size={18} style={{ marginRight: 10 }} />
 							Log Out
