@@ -8,7 +8,7 @@ const StyledCard =  styled(Card)(({theme}) => ({
           [theme.breakpoints.down('lg')] : {
             padding:'16px',
           },
-          [theme.breakpoints.down('md')]: { 
+          [theme.breakpoints.down('md')]: {
             padding:'12px',
           },
           color: "#f2f0ea",

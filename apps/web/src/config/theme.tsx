@@ -13,7 +13,7 @@ export function ThemeConfig({ children }: ThemeConfigProps) {
   const { resolvedMode } = useThemeMode()
 
   const theme = useMemo(
-    () => createTheme({ palette: { ...palette[resolvedMode] } }),
+    () => createTheme({ palette: { mode: resolvedMode, ...palette[resolvedMode] } }),
     [resolvedMode]
   )
 

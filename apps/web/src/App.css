@@ -1,5 +1,19 @@
-body { 
+body {
+  background-color: #f8f3e9;
+}
+
+html.dark body {
   background-color: #171310;
+}
+
+html.system body {
+  background-color: #f8f3e9;
+}
+
+@media (prefers-color-scheme: dark) {
+  html.system body {
+    background-color: #171310;
+  }
 }
 
 #root { 

@@ -2,9 +2,9 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 
@@ -24,41 +24,54 @@ function getInitialMode(): ThemeMode {
     if (stored === "light" || stored === "dark" || stored === "system") {
       return stored;
     }
-  } catch {}
+  } catch {
+    console.error("Error reading theme from localStorage");
+  }
   return "system";
 }
 
 function resolveMode(mode: ThemeMode): "light" | "dark" {
+  document.documentElement.className =
+    mode === "dark" || (mode === "system") ? "dark" : "";
   if (mode !== "system") return mode;
+
   return window.matchMedia("(prefers-color-scheme: dark)").matches
     ? "dark"
     : "light";
+}
+
+function subscribeToColorScheme(onChange: () => void) {
+  const mq = window.matchMedia("(prefers-color-scheme: dark)");
+  mq.addEventListener("change", onChange);
+  return () => mq.removeEventListener("change", onChange);
+}
+
+function getColorSchemeSnapshot() {
+  return window.matchMedia("(prefers-color-scheme: dark)").matches;
 }
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [mode, setModeState] = useState<ThemeMode>(getInitialMode);
-  const [resolvedMode, setResolvedMode] = useState<"light" | "dark">(() =>
-    resolveMode(getInitialMode())
+  const prefersDark = useSyncExternalStore(
+    subscribeToColorScheme,
+    getColorSchemeSnapshot,
+    () => false
   );
-
-  useEffect(() => {
-    setResolvedMode(resolveMode(mode));
-
-    if (mode !== "system") return;
-
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const handler = () => setResolvedMode(resolveMode("system"));
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, [mode]);
+  const resolvedMode = useMemo<"light" | "dark">(
+    () => (mode === "system" ? (prefersDark ? "dark" : "light") : resolveMode(mode)),
+    [mode, prefersDark]
+  );
 
   const setMode = useCallback((newMode: ThemeMode) => {
     setModeState(newMode);
+    document.documentElement.className = newMode === "dark" || (newMode === "system" && prefersDark) ? "dark" : "";
     try {
       localStorage.setItem(STORAGE_KEY, newMode);
-    } catch {}
+    } catch {
+      console.error("Error saving theme to localStorage");
+    }
   }, []);
 
   const value = useMemo(

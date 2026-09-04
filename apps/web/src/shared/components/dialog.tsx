@@ -35,7 +35,7 @@ export default function SharedDialog({
       open={open}
       onClose={onCancel}
       slotProps={{
-        paper: { 
+        paper: {
           sx: {
             borderRadius: "16px",
             backgroundColor: theme.palette.primary.dark,
@@ -43,8 +43,7 @@ export default function SharedDialog({
             minWidth: 320,
             color: "#f2f0ea",
           },
-
-        }
+        },
       }}
     >
       <DialogTitle sx={{ fontWeight: 600, color: "primary.light" }}>

@@ -62,10 +62,10 @@ export default function LoginPage() {
         src={logo}
         alt="movie-mark-logotype"
       />
-      <Typography sx={{ color: "primary.light" }} variant="h5">
+      <Typography color='primary' variant="h5">
         Welcome in MovieMark.
       </Typography>
-      <Typography sx={{ color: "secondary.light" }} variant="body1">
+      <Typography color='primary' variant="body1">
         Complete your movie and series diary
       </Typography>
       <StyledCard
@@ -91,7 +91,7 @@ export default function LoginPage() {
               alignItems: "flex-start",
             }}
           >
-            <Typography variant="body2">Email</Typography>
+            <Typography color='primary' variant="body2">Email</Typography>
             <StyledTextField
               placeholder="you@example.com"
               variant="outlined"
@@ -118,7 +118,7 @@ export default function LoginPage() {
                 width: "100%",
               }}
             >
-              <Typography variant="body2">Password</Typography>
+              <Typography color='primary' variant="body2">Password</Typography>
               <Typography
                 variant="body2"
                 component={"a"}

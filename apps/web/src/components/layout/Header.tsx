@@ -70,7 +70,10 @@ export default function Header() {
 			position="sticky"
 			elevation={0}
 			sx={{
-				backgroundColor: alpha(theme.palette.secondary.darker, 0.9),
+				backgroundColor:
+					theme.palette.mode === "dark"
+						? alpha(theme.palette.secondary.darker, 0.9)
+						: alpha(theme.palette.primary.dark, 0.9),
 				borderBottom: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
 			}}
 		>
@@ -113,7 +116,7 @@ export default function Header() {
 								component="img"
 								src={logo}
 								alt="MovieMark logo"
-								sx={{ height: 42, width: 42, objectFit: "contain" }}
+								sx={{ height: {lg: 42, md:36, xs: 28}, width: {lg: 42, md:36, xs: 28}, objectFit: "contain" }}
 							/>
 						</Box>
 						<Typography
@@ -136,7 +139,7 @@ export default function Header() {
 							onChange={(_, newValue) => navigate(NAV_ITEMS[newValue].path)}
 							sx={{
 								ml: 1,
-								minHeight: 40,
+								minHeight: 30,
 								"& .MuiTabs-indicator": {
 									display: "none",
 								},
@@ -146,23 +149,32 @@ export default function Header() {
 								"& .MuiTab-root": {
 									textTransform: "none",
 									fontWeight: 500,
-									color: theme.palette.grey[400],
+									color:
+										theme.palette.mode === "dark"
+											? theme.palette.grey[400]
+											: theme.palette.grey[700],
 									minHeight: 36,
 									minWidth: 0,
 									ml: 0.5,
 									px: 1.75,
-									borderRadius: "12px",
+									borderRadius: "30px",
 									transition: theme.transitions.create(
 										["background-color", "color"],
 										{ duration: theme.transitions.duration.short },
 									),
 									"&:hover": {
 										backgroundColor: alpha(theme.palette.primary.main, 0.1),
-										color: "white",
+										color:
+											theme.palette.mode === "dark"
+												? "white"
+												: theme.palette.grey[900],
 									},
 									"&.Mui-selected": {
 										backgroundColor: alpha(theme.palette.primary.main, 0.18),
-										color: "white",
+										color:
+											theme.palette.mode === "dark"
+												? "white"
+												: theme.palette.grey[900],
 									},
 								},
 							}}
@@ -235,10 +247,9 @@ export default function Header() {
 							sx={{
 								width: 32,
 								height: 32,
-								bgcolor: theme.palette.primary.main,
-								color: theme.palette.primary.contrastText,
+								bgcolor: "#bd9f7c",
+								color: "black",
 								fontSize: "0.8rem",
-								fontWeight: 600,
 							}}
 						>
 							{initials}

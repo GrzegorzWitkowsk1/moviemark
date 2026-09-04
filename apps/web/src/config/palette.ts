@@ -62,15 +62,31 @@ declare module '@mui/material' {
 
 // SETUP COLORS
 
-const PRIMARY = {
-   lighter: '#b09574',
-   light: '#edebe5',
-   main: '#bd9f7c',
-   dark: '#23201d',
-   darker: '#202020',
+const PRIMARY_DARK = {
+	lighter: "#b09574",
+	light: "#664c3b",
+	main: "#bd9f7c",
+	dark: "#23201d",
+	darker: "#23201d",
+};
+
+const PRIMARY_LIGHT = {
+	lighter: "#f8f3e9",
+	light: "#bd9f79",
+	main: "#664c3b",
+	dark: "#fcfaf4",
+	darker: "#202020",
+};
+
+const SECONDARY_DARK = {
+   lighter: '#D6E4FF',
+   light: '#8f8983',
+   main: '#3366FF',
+   dark: '#1939B7',
+   darker: '#34302d',
 }
 
-const SECONDARY = {
+const SECONDARY_LIGHT = {
    lighter: '#D6E4FF',
    light: '#8f8983',
    main: '#3366FF',
@@ -132,7 +148,7 @@ const GREY = {
 }
 
 const GRADIENTS = {
-   primary: createGradient(PRIMARY.light, PRIMARY.main),
+   primary: createGradient(PRIMARY_DARK.light, PRIMARY_DARK.main),
    info: createGradient(INFO.light, INFO.main),
    success: createGradient(SUCCESS.light, SUCCESS.main),
    warning: createGradient(WARNING.light, WARNING.main),
@@ -147,10 +163,33 @@ const CHART_COLORS = {
    red: ['#FF6C40', '#FF8F6D', '#FFBD98', '#FFF2D4'],
 }
 
-const COMMON = {
+const DARK = {
    common: { black: '#000', white: '#fff' },
-   primary: { ...PRIMARY, contrastText: '#212B36' },
-   secondary: { ...SECONDARY, contrastText: '#fff' },
+   primary: { ...PRIMARY_DARK, contrastText: '#fff' },
+   secondary: { ...SECONDARY_DARK, contrastText: '#fff' },
+   info: { ...INFO, contrastText: '#fff' },
+   success: { ...SUCCESS, contrastText: GREY[800] },
+   warning: { ...WARNING, contrastText: GREY[800] },
+   error: { ...ERROR, contrastText: '#fff' },
+   grey: GREY,
+   gradients: GRADIENTS,
+   chart: CHART_COLORS,
+   divider: GREY[500_24],
+   action: {
+      hover: GREY[500_8],
+      selected: GREY[500_16],
+      disabled: GREY[500_80],
+      disabledBackground: GREY[500_24],
+      focus: GREY[500_24],
+      hoverOpacity: 0.08,
+      disabledOpacity: 0.48,
+   },
+}
+
+const LIGHT = {
+   common: { black: '#000', white: '#fff' },
+   primary: { ...PRIMARY_LIGHT, contrastText: '#212B36' },
+   secondary: { ...SECONDARY_LIGHT, contrastText: '#fff' },
    info: { ...INFO, contrastText: '#fff' },
    success: { ...SUCCESS, contrastText: GREY[800] },
    warning: { ...WARNING, contrastText: GREY[800] },
@@ -171,19 +210,19 @@ const COMMON = {
 }
 
 const palette = {
-   light: {
-      ...COMMON,
-      text: { primary: GREY[800], secondary: GREY[600], disabled: GREY[500] },
-      background: { paper: '#fff', default: '#fff', neutral: GREY[200] },
-      action: { active: GREY[600], ...COMMON.action },
-   },
+	light: {
+		...LIGHT,
+		text: { primary: "#000", secondary: GREY[500], disabled: GREY[600] },
+		background: { paper: GREY[800], default: "#e8e5e0", neutral: GREY[500_16] },
+		action: { active: GREY[500], ...LIGHT.action },
+	},
 
-   dark: {
-      ...COMMON,
-      text: { primary: '#fff', secondary: GREY[500], disabled: GREY[600] },
-      background: { paper: GREY[800], default: GREY[900], neutral: GREY[500_16] },
-      action: { active: GREY[500], ...COMMON.action },
-   },
-}
+	dark: {
+		...DARK,
+		text: { primary: "#fff", secondary: GREY[500], disabled: GREY[600] },
+		background: { paper: GREY[800], default: GREY[900], neutral: GREY[500_16] },
+		action: { active: GREY[500], ...DARK.action },
+	},
+};
 
 export default palette

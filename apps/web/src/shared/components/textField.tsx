@@ -6,10 +6,10 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
     borderRadius: "16px",
     borderColor: `1px solid white`,
     paddingY: "4px",
-    color: "white",
+    color: theme.palette.text.primary,
     fontSize: "14px",
     "& fieldset": {
-      borderColor: "#312d2a",
+      borderColor: theme.palette.primary.darker,
     },
     "&:hover fieldset": {
       borderColor: "#312d2a",
@@ -18,6 +18,9 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
       borderColor: theme.palette.primary.main
     },
   },
+  '& .MuiOutlinedInput-input': {
+    color: theme.palette.text.primary,
+  }
 }));
 
 export default StyledTextField

@@ -79,10 +79,10 @@ export default function RegisterPage() {
         src={logo}
         alt="movie-mark-logotype"
       />
-      <Typography sx={{ color: "primary.light" }} variant="h5">
+      <Typography color='primary' variant="h5">
         Welcome in MovieMark.
       </Typography>
-      <Typography sx={{ color: "secondary.light" }} variant="body1">
+      <Typography color='primary' variant="body1">
         Complete your movie and series diary
       </Typography>
       <StyledCard
@@ -108,7 +108,7 @@ export default function RegisterPage() {
               alignItems: "flex-start",
             }}
           >
-            <Typography variant="body2">Name</Typography>
+            <Typography color='primary' variant="body2">Name</Typography>
             <StyledTextField
               placeholder="John"
               variant="outlined"
@@ -126,7 +126,7 @@ export default function RegisterPage() {
               alignItems: "flex-start",
             }}
           >
-            <Typography variant="body2">Surname</Typography>
+            <Typography color='primary' variant="body2">Surname</Typography>
             <StyledTextField
               placeholder="Doe"
               variant="outlined"
@@ -144,7 +144,7 @@ export default function RegisterPage() {
               alignItems: "flex-start",
             }}
           >
-            <Typography variant="body2">Email</Typography>
+            <Typography color='primary' variant="body2">Email</Typography>
             <StyledTextField
               placeholder="you@example.com"
               variant="outlined"
@@ -162,7 +162,7 @@ export default function RegisterPage() {
               alignItems: "flex-start",
             }}
           >
-            <Typography variant="body2">Password</Typography>
+            <Typography color='primary' variant="body2">Password</Typography>
             <StyledTextField
               type="password"
               variant="outlined"
@@ -180,7 +180,7 @@ export default function RegisterPage() {
               alignItems: "flex-start",
             }}
           >
-            <Typography variant="body2">Repeat password</Typography>
+            <Typography color='primary' variant="body2">Repeat password</Typography>
             <StyledTextField
               type="password"
               variant="outlined"
