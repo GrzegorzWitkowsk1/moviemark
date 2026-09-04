@@ -1,22 +1,23 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { QueryClientProvider } from '@tanstack/react-query';
 import './App.css'
 import Authorized from './views/authorized';
 import Unauthorized from './views/unauthorized';
 import { ThemeConfig } from './config/theme';
 import { SnackbarProvider } from './contexts/snackbarContext';
-import { AuthProvider } from './contexts/authContext';
 import { ThemeProvider } from './contexts/themeContext';
 import { LanguageProvider } from './contexts/languageContext';
 import { DialogProvider } from './contexts/dialogContext';
+import { queryClient } from './lib/queryClient';
 
 function App() {
   return (
     <div style={{ width: "100%" }}>
-      <ThemeProvider>
-        <ThemeConfig>
-          <SnackbarProvider>
-            <DialogProvider>
-              <AuthProvider>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <ThemeConfig>
+            <SnackbarProvider>
+              <DialogProvider>
                 <LanguageProvider>
                   <BrowserRouter>
                     <Routes>
@@ -25,11 +26,11 @@ function App() {
                     </Routes>
                   </BrowserRouter>
                 </LanguageProvider>
-              </AuthProvider>
-            </DialogProvider>
-          </SnackbarProvider>
-        </ThemeConfig>
-      </ThemeProvider>
+              </DialogProvider>
+            </SnackbarProvider>
+          </ThemeConfig>
+        </ThemeProvider>
+      </QueryClientProvider>
     </div>
   );
 }

@@ -1,14 +1,14 @@
 import type { ComponentType } from "react";
 import { Navigate } from "react-router-dom";
-import { useAuth } from "@/contexts/authContext";
+import { useUser } from "@/hooks/useAuth";
 
 export function withPublic<P extends object>(
   Component: ComponentType<P>
 ) {
   return function WithPublic(props: P) {
-    const { isAuthenticated, isInitializing } = useAuth();
+    const { isAuthenticated, isLoading } = useUser();
 
-    if (isInitializing) {
+    if (isLoading) {
       return null;
     }
 

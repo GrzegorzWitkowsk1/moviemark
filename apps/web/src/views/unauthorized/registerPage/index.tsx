@@ -9,13 +9,14 @@ import StyledTextField from "@/shared/components/textField";
 import ContainedButton from "@/shared/components/buttons/containedButton";
 import OutlinedButton from "@/shared/components/buttons/outlinedButton";
 import { registerSchema, type RegisterFormValues } from "./schema";
-import { registerUser } from "@/lib/api";
+import { useRegister } from "@/hooks/useAuth";
 import { useSnackbar } from "@/contexts/snackbarContext";
 import logo from "@/assets/logo2.png";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
   const { open } = useSnackbar();
+  const registerMutation = useRegister();
   const [registered, setRegistered] = useState(false);
 
   const {
@@ -42,7 +43,7 @@ export default function RegisterPage() {
     };
 
     try {
-      await registerUser(payload);
+      await registerMutation.mutateAsync(payload);
       open(
         "Registration successful, you will be redirected to the login page",
         "success"

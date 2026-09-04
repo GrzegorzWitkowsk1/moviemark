@@ -7,14 +7,14 @@ import StyledTextField from "@/shared/components/textField";
 import ContainedButton from "@/shared/components/buttons/containedButton";
 import OutlinedButton from "@/shared/components/buttons/outlinedButton";
 import StyledRadio from "@/shared/components/buttons/radio";
-import { useAuth } from "@/contexts/authContext";
+import { useLogin } from "@/hooks/useAuth";
 import { useSnackbar } from "@/contexts/snackbarContext";
 import { loginSchema, type LoginFormValues } from "./schema";
 import logo from "@/assets/logo2.png";
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const loginMutation = useLogin();
   const { open } = useSnackbar();
 
   const {
@@ -28,7 +28,7 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginFormValues) => {
     try {
-      await login(data.email, data.password);
+      await loginMutation.mutateAsync({ email: data.email, password: data.password });
       open("Welcome back!", "success");
       navigate("/auth/home");
     } catch (err) {

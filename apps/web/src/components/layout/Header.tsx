@@ -18,7 +18,7 @@ import {
   Divider,
 } from '@mui/material';
 import { Search, LogOut, Settings, LayoutGrid } from 'lucide-react';
-import { useAuth } from '@/contexts/authContext';
+import { useUser, useLogout } from '@/hooks/useAuth';
 import logo from '@/assets/logo_clean.png';
 import StyledTextField from '@/shared/components/textField';
 
@@ -32,7 +32,8 @@ export default function Header() {
   const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user } = useUser();
+  const logoutMutation = useLogout();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -61,7 +62,7 @@ export default function Header() {
 
   const handleLogout = async () => {
     handleMenuClose();
-    await logout();
+    await logoutMutation.mutateAsync();
     navigate('/login');
   };
 

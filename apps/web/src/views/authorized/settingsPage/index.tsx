@@ -6,7 +6,7 @@ import StyledCard from "@/shared/components/card";
 import StyledTextField from "@/shared/components/textField";
 import {StyledSelect, PaperStyles, StyledMenuItem} from "@/shared/components/select";
 import ContainedButton from "@/shared/components/buttons/containedButton";
-import { useAuth } from "@/contexts/authContext";
+import { useUser } from "@/hooks/useAuth";
 import { useSnackbar } from "@/contexts/snackbarContext";
 import { useThemeMode, type ThemeMode } from "@/contexts/themeContext";
 import { useLanguage, type Language } from "@/contexts/languageContext";
@@ -65,7 +65,7 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
 
 export default function SettingsPage() {
   const theme = useTheme();
-  const { user } = useAuth();
+  const { user } = useUser();
   const { open } = useSnackbar();
   const { mode, setMode } = useThemeMode();
   const { language, setLanguage } = useLanguage();
