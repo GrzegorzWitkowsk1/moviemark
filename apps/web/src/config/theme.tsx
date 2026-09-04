@@ -3,15 +3,18 @@ import { createTheme, StyledEngineProvider, ThemeProvider } from '@mui/material/
 
 import { CssBaseline } from '@mui/material'
 import palette from './palette'
+import { useThemeMode } from '@/contexts/themeContext'
 
 type ThemeConfigProps = {
   children: ReactNode
 }
 
 export function ThemeConfig({ children }: ThemeConfigProps) {
+  const { resolvedMode } = useThemeMode()
+
   const theme = useMemo(
-    () => createTheme({ palette: { ...palette.light } }),
-    []
+    () => createTheme({ palette: { ...palette[resolvedMode] } }),
+    [resolvedMode]
   )
 
   return (

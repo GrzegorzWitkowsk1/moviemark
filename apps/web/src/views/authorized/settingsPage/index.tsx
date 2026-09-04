@@ -1,7 +1,314 @@
-export default function SettingsPage() { 
-    return (
-        <div className="fade-in">
-            settings here
-        </div>
-    )
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Box, Typography, MenuItem, useTheme, alpha } from "@mui/material";
+import { User, Lock, Palette, Globe } from "lucide-react";
+import StyledCard from "@/shared/components/card";
+import StyledTextField from "@/shared/components/textField";
+import StyledSelect from "@/shared/components/select";
+import ContainedButton from "@/shared/components/buttons/containedButton";
+import { useAuth } from "@/contexts/authContext";
+import { useSnackbar } from "@/contexts/snackbarContext";
+import { useThemeMode, type ThemeMode } from "@/contexts/themeContext";
+import { useLanguage, type Language } from "@/contexts/languageContext";
+import { useDialog } from "@/contexts/dialogContext";
+import {
+  profileSchema,
+  passwordSchema,
+  type ProfileFormValues,
+  type PasswordFormValues,
+} from "./schema";
+
+const THEME_OPTIONS: { value: ThemeMode; label: string; sublabel: string }[] = [
+  { value: "light", label: "Light", sublabel: "light theme" },
+  { value: "dark", label: "Dark", sublabel: "dark theme" },
+  { value: "system", label: "System", sublabel: "Match your OS" },
+];
+
+function SectionHeader({
+  icon,
+  title,
+}: {
+  icon: React.ReactNode;
+  title: string;
+}) {
+  const theme = useTheme();
+  return (
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2.5 }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: 40,
+          height: 40,
+          borderRadius: "12px",
+          backgroundColor: alpha(theme.palette.primary.main, 0.15),
+          color: theme.palette.primary.main,
+        }}
+      >
+        {icon}
+      </Box>
+      <Typography variant="h6" sx={{ fontWeight: 600, fontSize: "1.1rem" }}>
+        {title}
+      </Typography>
+    </Box>
+  );
+}
+
+function FieldLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 500, textAlign: "left" }}>
+      {children}
+    </Typography>
+  );
+}
+
+export default function SettingsPage() {
+  const theme = useTheme();
+  const { user } = useAuth();
+  const { open } = useSnackbar();
+  const { mode, setMode } = useThemeMode();
+  const { language, setLanguage } = useLanguage();
+  const { openDialog } = useDialog();
+
+  const profileForm = useForm<ProfileFormValues>({
+    resolver: zodResolver(profileSchema),
+    mode: "onChange",
+    defaultValues: {
+      name: user?.name ?? "",
+      surname: user?.surname ?? "",
+      email: user?.email ?? "",
+    },
+  });
+
+  const passwordForm = useForm<PasswordFormValues>({
+    resolver: zodResolver(passwordSchema),
+    mode: "onChange",
+  });
+
+  const onProfileSubmit = (data: ProfileFormValues) => {
+    console.log("Profile save:", data);
+    open("Profile updated!", "success");
+  };
+
+  const onPasswordSubmit = (data: PasswordFormValues) => {
+    console.log("Password change:", data);
+    open("Password changed!", "success");
+    passwordForm.reset();
+  };
+
+  const handleDeleteAccount = () => {
+    console.log("Account deletion requested");
+    open("Account deletion requested", "info");
+  };
+
+  const optionButtonStyles = (isActive: boolean) => ({
+    flex: 1,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-start",
+    justifyContent: "center",
+    py: 1.5,
+    px: 2.5,
+    borderRadius: "16px",
+    border: `2px solid ${isActive ? theme.palette.primary.main : alpha(theme.palette.primary.main, 0.15)}`,
+    backgroundColor: isActive
+      ? alpha(theme.palette.primary.main, 0.1)
+      : "transparent",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+    "&:hover": {
+      border: `2px solid ${alpha(theme.palette.primary.main, 0.5)}`,
+      backgroundColor: alpha(theme.palette.primary.main, 0.05),
+    },
+  });
+
+  return (
+    <Box
+      className="fade-in"
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 3,
+        py: 4,
+        px: { xs: 2, sm: 3, md: 4 },
+        maxWidth: 640,
+        mx: "auto",
+      }}
+    >
+      <Box>
+        <Typography variant="h4" sx={{ fontWeight: 700, mb: 0.5 }}>
+          Settings
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Tune MovieMark to feel like yours.
+        </Typography>
+      </Box>
+
+      <StyledCard>
+        <SectionHeader icon={<User size={20} />} title="Account Settings" />
+        <Box
+          component="form"
+          onSubmit={profileForm.handleSubmit(onProfileSubmit)}
+          sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+        >
+          <Box sx={{ display: "flex", gap: 2 }}>
+            <Box sx={{ flex: 1 }}>
+              <FieldLabel>Name</FieldLabel>
+              <StyledTextField
+                placeholder="Your name"
+                variant="outlined"
+                fullWidth
+                error={!!profileForm.formState.errors.name}
+                helperText={profileForm.formState.errors.name?.message}
+                {...profileForm.register("name")}
+              />
+            </Box>
+            <Box sx={{ flex: 1 }}>
+              <FieldLabel>Surname</FieldLabel>
+              <StyledTextField
+                placeholder="Your surname"
+                variant="outlined"
+                fullWidth
+                error={!!profileForm.formState.errors.surname}
+                helperText={profileForm.formState.errors.surname?.message}
+                {...profileForm.register("surname")}
+              />
+            </Box>
+          </Box>
+          <Box>
+            <FieldLabel>Email</FieldLabel>
+            <StyledTextField
+              placeholder="you@example.com"
+              variant="outlined"
+              fullWidth
+              error={!!profileForm.formState.errors.email}
+              helperText={profileForm.formState.errors.email?.message}
+              {...profileForm.register("email")}
+            />
+          </Box>
+          <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}>
+            <ContainedButton type="submit" sx={{ minWidth: 160 }}>
+              {profileForm.formState.isSubmitting ? "Saving..." : "Save Changes"}
+            </ContainedButton>
+          </Box>
+        </Box>
+      </StyledCard>
+
+      <StyledCard>
+        <SectionHeader icon={<Lock size={20} />} title="Change Password" />
+        <Box
+          component="form"
+          onSubmit={passwordForm.handleSubmit(onPasswordSubmit)}
+          sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+        >
+          <Box>
+            <FieldLabel>Current Password</FieldLabel>
+            <StyledTextField
+              type="password"
+              placeholder="Enter current password"
+              variant="outlined"
+              fullWidth
+              error={!!passwordForm.formState.errors.currentPassword}
+              helperText={
+                passwordForm.formState.errors.currentPassword?.message
+              }
+              {...passwordForm.register("currentPassword")}
+            />
+          </Box>
+          <Box sx={{ display: "flex", gap: 2 }}>
+            <Box sx={{ flex: 1 }}>
+              <FieldLabel>New Password</FieldLabel>
+              <StyledTextField
+                type="password"
+                placeholder="Enter new password"
+                variant="outlined"
+                fullWidth
+                error={!!passwordForm.formState.errors.newPassword}
+                helperText={passwordForm.formState.errors.newPassword?.message}
+                {...passwordForm.register("newPassword")}
+              />
+            </Box>
+            <Box sx={{ flex: 1 }}>
+              <FieldLabel>Confirm New Password</FieldLabel>
+              <StyledTextField
+                type="password"
+                placeholder="Confirm new password"
+                variant="outlined"
+                fullWidth
+                error={!!passwordForm.formState.errors.confirmPassword}
+                helperText={
+                  passwordForm.formState.errors.confirmPassword?.message
+                }
+                {...passwordForm.register("confirmPassword")}
+              />
+            </Box>
+          </Box>
+          <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}>
+            <ContainedButton type="submit" sx={{ minWidth: 160 }}>
+              {passwordForm.formState.isSubmitting
+                ? "Changing..."
+                : "Change Password"}
+            </ContainedButton>
+          </Box>
+        </Box>
+      </StyledCard>
+
+      <StyledCard>
+        <SectionHeader icon={<Palette size={20} />} title="Appearance" />
+        <Box sx={{ display: "flex", gap: 2 }}>
+          {THEME_OPTIONS.map((opt) => (
+            <Box
+              key={opt.value}
+              sx={optionButtonStyles(mode === opt.value)}
+              onClick={() => setMode(opt.value)}
+            >
+              <Typography
+                sx={{ fontWeight: 600, fontSize: "0.85rem", mb: 0.25 }}
+              >
+                {opt.label}
+              </Typography>
+              <Typography
+                variant="caption"
+                sx={{ color: "text.secondary", fontSize: "0.7rem" }}
+              >
+                {opt.sublabel}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+      </StyledCard>
+
+      <StyledCard>
+        <SectionHeader icon={<Globe size={20} />} title="Language" />
+        <StyledSelect
+          fullWidth
+          value={language}
+          onChange={(e) => setLanguage(e.target.value as Language)}
+        >
+          <MenuItem value="en">English</MenuItem>
+          <MenuItem value="pl">Polski</MenuItem>
+        </StyledSelect>
+      </StyledCard>
+
+      <Box sx={{ py: 1, display:'flex', justifyContent:'flex-end' }}>
+        <ContainedButton
+          isDelete
+          onClick={() =>
+            openDialog({
+              title: "Are you sure?",
+              content:
+                "This action cannot be undone. All your data will be permanently deleted.",
+              confirmLabel: "Yes",
+              cancelLabel: "No",
+              variant: "delete",
+              onConfirm: handleDeleteAccount,
+            })
+          }
+        >
+          Delete Account
+        </ContainedButton>
+      </Box>
+    </Box>
+  );
 }

@@ -5,22 +5,31 @@ import Unauthorized from './views/unauthorized';
 import { ThemeConfig } from './config/theme';
 import { SnackbarProvider } from './contexts/snackbarContext';
 import { AuthProvider } from './contexts/authContext';
+import { ThemeProvider } from './contexts/themeContext';
+import { LanguageProvider } from './contexts/languageContext';
+import { DialogProvider } from './contexts/dialogContext';
 
 function App() {
   return (
     <div style={{ width: "100%" }}>
-      <ThemeConfig>
-        <SnackbarProvider>
-          <AuthProvider>
-            <BrowserRouter>
-              <Routes>
-                <Route path="/auth/*" element={<Authorized />} />
-                <Route path="/*" element={<Unauthorized />} />
-              </Routes>
-            </BrowserRouter>
-          </AuthProvider>
-        </SnackbarProvider>
-      </ThemeConfig>
+      <ThemeProvider>
+        <ThemeConfig>
+          <SnackbarProvider>
+            <DialogProvider>
+              <AuthProvider>
+                <LanguageProvider>
+                  <BrowserRouter>
+                    <Routes>
+                      <Route path="/auth/*" element={<Authorized />} />
+                      <Route path="/*" element={<Unauthorized />} />
+                    </Routes>
+                  </BrowserRouter>
+                </LanguageProvider>
+              </AuthProvider>
+            </DialogProvider>
+          </SnackbarProvider>
+        </ThemeConfig>
+      </ThemeProvider>
     </div>
   );
 }
