@@ -10,7 +10,6 @@ export type ProfileFormValues = z.infer<typeof profileSchema>;
 
 export const passwordSchema = z
   .object({
-    currentPassword: z.string().min(1, "Current password is required"),
     newPassword: z
       .string()
       .min(8, "Password must be at least 8 characters")

@@ -7,7 +7,7 @@ const OutlinedButton = styled(Button)(({ theme }) => ({
 	fontSize: 11,
 	fontWeight: "bold",
 	cursor: "pointer",
-	color: theme.palette.mode === "dark" ? "black" : "white",
+	color:  "white",
 	border: `1px solid ${theme.palette.primary.main}`,
 	backgroundColor: "transparent",
 	"&:hover": {

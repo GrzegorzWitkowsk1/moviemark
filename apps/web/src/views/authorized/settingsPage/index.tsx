@@ -218,20 +218,6 @@ export default function SettingsPage() {
 					onSubmit={passwordForm.handleSubmit(onPasswordSubmit)}
 					sx={{ display: "flex", flexDirection: "column", gap: 2 }}
 				>
-					<Box>
-						<FieldLabel>Current Password</FieldLabel>
-						<StyledTextField
-							type="password"
-							placeholder="Enter current password"
-							variant="outlined"
-							fullWidth
-							error={!!passwordForm.formState.errors.currentPassword}
-							helperText={
-								passwordForm.formState.errors.currentPassword?.message
-							}
-							{...passwordForm.register("currentPassword")}
-						/>
-					</Box>
 					<Box sx={{ display: "flex",flexDirection: { md:'row', xs:'column'}, gap: 2 }}>
 						<Box sx={{ flex: 1 }}>
 							<FieldLabel>New Password</FieldLabel>

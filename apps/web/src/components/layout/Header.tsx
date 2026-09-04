@@ -117,7 +117,11 @@ export default function Header() {
 								component="img"
 								src={logo}
 								alt="MovieMark logo"
-								sx={{ height: {lg: 42, md:36, xs: 28}, width: {lg: 42, md:36, xs: 28}, objectFit: "contain" }}
+								sx={{
+									height: { lg: 42, md: 36, xs: 28 },
+									width: { lg: 42, md: 36, xs: 28 },
+									objectFit: "contain",
+								}}
 							/>
 						</Box>
 						<Typography
@@ -266,7 +270,7 @@ export default function Header() {
 						slotProps={{
 							paper: {
 								sx: {
-									backgroundColor: theme.palette.secondary.darker,
+									backgroundColor: theme.palette.mode === 'dark' ? theme.palette.secondary.darker : theme.palette.primary.lighter,
 									border: `1px solid ${theme.palette.secondary.light}`,
 									minWidth: 250,
 									borderRadius: "16px",
@@ -274,12 +278,12 @@ export default function Header() {
 									"& .MuiMenuItem-root": {
 										gap: 0,
 										borderRadius: "8px",
-										color: theme.palette.primary.light,
+										color: theme.palette.text.primary,
 										fontSize: "0.9rem",
 										transition: "background-color 0.2s ease, color 0.2s ease",
 										"&:hover": {
 											backgroundColor: theme.palette.primary.lighter,
-											color: theme.palette.primary.light,
+											color: theme.palette.text.primary,
 										},
 										"&:focus-visible": {
 											outline: `2px solid ${theme.palette.primary.main}`,
@@ -292,7 +296,7 @@ export default function Header() {
 					>
 						<Typography
 							sx={{
-								color: theme.palette.primary.light,
+								color: theme.palette.text.primary,
 								ml: 2,
 								mt: 1,
 								fontWeight: "bold",
