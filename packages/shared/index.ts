@@ -154,3 +154,56 @@ export interface TmdbSeasonDetails {
   air_date: string | null;
   episodes: TmdbEpisode[];
 }
+
+export interface WatchedEpisode {
+  season: number;
+  episode: number;
+}
+
+export interface WatchedMovieResponse {
+  tmdbId: number;
+  title: string;
+  posterPath: string | null;
+  watchedAt: string;
+}
+
+export interface WatchedSeriesResponse {
+  tmdbId: number;
+  name: string;
+  posterPath: string | null;
+  totalEpisodes: number;
+  watchedCount: number;
+  watchedEpisodes: WatchedEpisode[];
+  watchedAt: string;
+}
+
+export interface CollectionResponse {
+  movies: WatchedMovieResponse[];
+  series: WatchedSeriesResponse[];
+}
+
+export interface AddMovieRequest {
+  tmdbId: number;
+  title: string;
+  posterPath: string | null;
+}
+
+export interface MarkEpisodesRequest {
+  tmdbId: number;
+  season: number;
+  episodes: number[];
+  name: string;
+  posterPath: string | null;
+  totalEpisodes: number;
+}
+
+export interface MovieStatusResponse {
+  watched: boolean;
+}
+
+export interface SeriesStatusResponse {
+  watched: boolean;
+  watchedCount: number;
+  totalEpisodes: number;
+  watchedEpisodes: WatchedEpisode[];
+}

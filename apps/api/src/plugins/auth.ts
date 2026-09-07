@@ -33,23 +33,19 @@ export default fp(
 
     await app.register(cookie);
 
-    app.decorate("authenticate", async (request, reply) => {
-      try {
-        const payload = await request.jwtVerify<{
-          id: string;
-          name: string;
-          surname: string;
-          email: string;
-        }>();
-        request.user = {
-          id: payload.id,
-          name: payload.name,
-          surname: payload.surname,
-          email: payload.email,
-        };
-      } catch {
-        reply.code(401).send({ error: "Unauthorized" });
-      }
+    app.decorate("authenticate", async (request) => {
+      const payload = await request.jwtVerify<{
+        id: string;
+        name: string;
+        surname: string;
+        email: string;
+      }>();
+      request.user = {
+        id: payload.id,
+        name: payload.name,
+        surname: payload.surname,
+        email: payload.email,
+      };
     });
 
     app.decorate("signAccessToken", (payload: UserResponse) =>

@@ -1,31 +1,11 @@
-import Fastify from "fastify";
-import cors from "@fastify/cors";
-import { messagesRoutes } from "./src/routes/messages";
-import { authRoutes } from "./src/routes/auth";
+import { buildApp } from "./src/app";
 import { connectMongo } from "./src/db/mongo";
 import { config } from "./src/config";
-import authPlugin from "./src/plugins/auth";
-
-const app = Fastify({
-  logger: true,
-});
-
-app.setErrorHandler((error, request, reply) => {
-  request.log.error(error);
-  reply.code(500).send({ error: "Internal server error" });
-});
 
 async function start() {
   await connectMongo();
 
-  await app.register(cors, {
-    origin: config.corsOrigin,
-    credentials: true,
-  });
-
-  await app.register(authPlugin);
-  await app.register(messagesRoutes);
-  await app.register(authRoutes);
+  const app = await buildApp({ logger: true });
 
   await app.listen({
     port: config.port,

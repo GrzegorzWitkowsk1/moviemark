@@ -27,5 +27,6 @@ export const config = {
   accessTokenTtl: Bun.env.ACCESS_TOKEN_TTL ?? "15m",
   refreshTokenTtl: Bun.env.REFRESH_TOKEN_TTL ?? "7d",
   cookieName: Bun.env.COOKIE_NAME ?? "refreshToken",
+  rateLimitMax: number("RATE_LIMIT_MAX", 100),
   isProduction: Bun.env.NODE_ENV === "production",
 };

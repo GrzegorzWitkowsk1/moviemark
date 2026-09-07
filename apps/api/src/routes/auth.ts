@@ -29,7 +29,7 @@ function toUserResponse(user: {
 
 export async function authRoutes(app: FastifyInstance) {
   await app.register(rateLimit, {
-    max: 100,
+    max: config.rateLimitMax,
     timeWindow: "1 minute",
   });
 
