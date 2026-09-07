@@ -21,18 +21,21 @@ import {
 import { ChevronDown, Clock } from "lucide-react";
 import type { TmdbEpisode, TmdbSeasonSummary } from "shared";
 import { useTvSeason } from "@/hooks/useDetails";
-import { useWatched } from "@/lib/watched";
+import type { SeriesWatchedControls } from "@/hooks/useCollection";
+import { useWatchedPrompt } from "@/lib/watchedPrompt";
 import ContainedButton from "@/shared/components/buttons/containedButton";
 import OutlinedButton from "@/shared/components/buttons/outlinedButton";
 
 interface SeasonsSectionProps {
   tvId: number;
   seasons: TmdbSeasonSummary[];
+  watched: SeriesWatchedControls;
 }
 
 export default function SeasonsSection({
   tvId,
   seasons,
+  watched,
 }: SeasonsSectionProps) {
   const theme = useTheme();
   const [expanded, setExpanded] = useState<number[]>(() =>
@@ -72,6 +75,7 @@ export default function SeasonsSection({
             key={season.season_number}
             tvId={tvId}
             season={season}
+            watched={watched}
             expanded={expanded.includes(season.season_number)}
             onToggle={() => toggle(season.season_number)}
           />
@@ -84,6 +88,7 @@ export default function SeasonsSection({
 interface SeasonAccordionProps {
   tvId: number;
   season: TmdbSeasonSummary;
+  watched: SeriesWatchedControls;
   expanded: boolean;
   onToggle: () => void;
 }
@@ -96,18 +101,19 @@ interface PendingEpisodes {
 function SeasonAccordion({
   tvId,
   season,
+  watched,
   expanded,
   onToggle,
 }: SeasonAccordionProps) {
   const theme = useTheme();
-  const watched = useWatched();
+  const prompt = useWatchedPrompt();
   const { data, isLoading } = useTvSeason(tvId, season.season_number, {
     enabled: expanded,
   });
   const [pending, setPending] = useState<PendingEpisodes | null>(null);
   const [dontAskAgain, setDontAskAgain] = useState(false);
 
-  const watchedCount = watched.countWatchedEpisodes(tvId, season.season_number);
+  const watchedCount = watched.countWatchedEpisodes(season.season_number);
   const totalCount = season.episode_count;
   const progress = totalCount > 0 ? Math.min(watchedCount, totalCount) : 0;
   const progressPercent =
@@ -120,12 +126,15 @@ function SeasonAccordion({
       : "";
 
   const handleEpisodeClick = (episode: TmdbEpisode) => {
-    if (watched.isEpisodeWatched(tvId, episode.season_number, episode.episode_number)) {
-      watched.toggleEpisodeWatched(
-        tvId,
+    if (
+      watched.isEpisodeWatched(
         episode.season_number,
         episode.episode_number
-      );
+      )
+    ) {
+      watched
+        .unmarkEpisode(episode.season_number, episode.episode_number)
+        .catch(() => {});
       return;
     }
 
@@ -133,18 +142,20 @@ function SeasonAccordion({
       data?.episodes.filter(
         (e) =>
           e.episode_number < episode.episode_number &&
-          !watched.isEpisodeWatched(tvId, e.season_number, e.episode_number)
+          !watched.isEpisodeWatched(e.season_number, e.episode_number)
       ) ?? [];
 
-    if (earlierUnchecked.length > 0 && !watched.isEpisodePromptSkipped(tvId)) {
+    if (earlierUnchecked.length > 0 && !prompt.isPromptSkipped(tvId)) {
       setDontAskAgain(false);
       setPending({ episode, earlier: earlierUnchecked });
       return;
     }
 
-    watched.markEpisodesWatched(tvId, episode.season_number, [
-      episode.episode_number,
-    ]);
+    watched
+      .markEpisodesWatched(episode.season_number, [
+        episode.episode_number,
+      ])
+      .catch(() => {});
   };
 
   const closePending = (markEarlier: boolean) => {
@@ -152,18 +163,17 @@ function SeasonAccordion({
       return;
     }
     const { episode, earlier } = pending;
-    if (markEarlier) {
-      watched.markEpisodesWatched(tvId, episode.season_number, [
-        ...earlier.map((e) => e.episode_number),
-        episode.episode_number,
-      ]);
-    } else {
-      watched.markEpisodesWatched(tvId, episode.season_number, [
-        episode.episode_number,
-      ]);
-    }
+    const mark = markEarlier
+      ? watched.markEpisodesWatched(episode.season_number, [
+          ...earlier.map((e) => e.episode_number),
+          episode.episode_number,
+        ])
+      : watched.markEpisodesWatched(episode.season_number, [
+          episode.episode_number,
+        ]);
+    mark.catch(() => {});
     if (dontAskAgain) {
-      watched.skipEpisodePromptsFor(tvId);
+      prompt.skipPromptsFor(tvId);
     }
     setPending(null);
   };
@@ -247,7 +257,6 @@ function SeasonAccordion({
           <Box>
             {data.episodes.map((episode, index) => {
               const isWatched = watched.isEpisodeWatched(
-                tvId,
                 episode.season_number,
                 episode.episode_number
               );

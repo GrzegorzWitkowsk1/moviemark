@@ -8,6 +8,7 @@ export function useLogout() {
     mutationFn: logoutUser,
     onSettled: () => {
       queryClient.setQueryData(["user"], null);
+      queryClient.removeQueries({ queryKey: ["collection"] });
     },
   });
 }

@@ -8,8 +8,14 @@ import {
 import { useSearchParams } from "react-router-dom";
 import { Calendar, Check, Clock, Star } from "lucide-react";
 import type { TmdbMediaType } from "shared";
-import { useWatched } from "@/lib/watched";
 import { getBackdropUrl } from "@/lib/poster";
+import {
+  useAddMovie,
+  useMovieWatched,
+  useRemoveMovie,
+  useSeriesWatchedControls,
+  type SeriesWatchedControls,
+} from "@/hooks/useCollection";
 import {
   useMovieDetails,
   useSimilarMovies,
@@ -72,9 +78,11 @@ function ErrorState({ onRetry }: { onRetry: () => void }) {
 
 function MovieView({ id }: { id: number }) {
   const theme = useTheme();
-  const watched = useWatched();
   const { data, isLoading, isError, refetch } = useMovieDetails(id);
   const { data: similar } = useSimilarMovies(id);
+  const { data: watchedStatus } = useMovieWatched(id);
+  const addMovie = useAddMovie();
+  const removeMovie = useRemoveMovie();
 
   if (isError) {
     return <ErrorState onRetry={refetch} />;
@@ -83,7 +91,19 @@ function MovieView({ id }: { id: number }) {
     return <LoadingState />;
   }
 
-  const isWatched = watched.isMovieWatched(data.id);
+  const isWatched = watchedStatus?.watched ?? false;
+  const actionPending = addMovie.isPending || removeMovie.isPending;
+  const handleToggleWatched = () => {
+    if (isWatched) {
+      removeMovie.mutate(data.id);
+    } else {
+      addMovie.mutate({
+        tmdbId: data.id,
+        title: data.title,
+        posterPath: data.poster_path,
+      });
+    }
+  };
   const meta: HeroMetaItem[] = [
     {
       icon: (
@@ -119,7 +139,8 @@ function MovieView({ id }: { id: number }) {
         overview={data.overview}
         action={
           <ContainedButton
-            onClick={() => watched.toggleMovieWatched(data.id)}
+            onClick={handleToggleWatched}
+            disabled={actionPending}
             startIcon={isWatched ? <Check size={16} /> : undefined}
           >
             {isWatched ? "Watched" : "Add to watched"}
@@ -136,6 +157,11 @@ function TvView({ id }: { id: number }) {
   const theme = useTheme();
   const { data, isLoading, isError, refetch } = useTvDetails(id);
   const { data: similar } = useSimilarTv(id);
+  const watched: SeriesWatchedControls = useSeriesWatchedControls(id, {
+    name: data?.name ?? "",
+    posterPath: data?.poster_path ?? null,
+    totalEpisodes: data?.number_of_episodes ?? 0,
+  });
 
   if (isError) {
     return <ErrorState onRetry={refetch} />;
@@ -180,7 +206,7 @@ function TvView({ id }: { id: number }) {
         overview={data.overview}
       />
 
-      <SeasonsSection tvId={data.id} seasons={data.seasons} />
+      <SeasonsSection tvId={data.id} seasons={data.seasons} watched={watched} />
 
       <SectionCarousel title="You may also like" movies={[]} series={similar?.results ?? []} />
     </Box>

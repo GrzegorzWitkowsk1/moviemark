@@ -1,11 +1,15 @@
 import type {
+  AddMovieRequest,
   AuthErrorResponse,
   LoginRequest,
   LoginResponse,
+  MovieStatusResponse,
+  MarkEpisodesRequest,
   RefreshResponse,
   RegisterErrorResponse,
   RegisterRequest,
   RegisterResponse,
+  SeriesStatusResponse,
   UserResponse,
 } from "shared";
 import { config } from "./config";
@@ -173,4 +177,55 @@ export async function logoutUser(): Promise<void> {
 
 export async function getCurrentUser(): Promise<UserResponse> {
   return apiFetch<UserResponse>("/auth/me");
+}
+
+export async function getMovieCollectionStatus(
+  tmdbId: number
+): Promise<MovieStatusResponse> {
+  return apiFetch<MovieStatusResponse>(`/collection/movie/${tmdbId}`);
+}
+
+export async function addMovieToCollection(
+  payload: AddMovieRequest
+): Promise<MovieStatusResponse> {
+  return apiFetch<MovieStatusResponse>("/collection/movie", {
+    method: "POST",
+    body: payload,
+  });
+}
+
+export async function removeMovieFromCollection(
+  tmdbId: number
+): Promise<MovieStatusResponse> {
+  return apiFetch<MovieStatusResponse>(`/collection/movie/${tmdbId}`, {
+    method: "DELETE",
+  });
+}
+
+export async function getSeriesCollectionStatus(
+  tmdbId: number
+): Promise<SeriesStatusResponse> {
+  return apiFetch<SeriesStatusResponse>(`/collection/series/${tmdbId}`);
+}
+
+export async function checkSeriesEpisode(
+  payload: MarkEpisodesRequest
+): Promise<SeriesStatusResponse> {
+  return apiFetch<SeriesStatusResponse>("/collection/series/episode", {
+    method: "PUT",
+    body: payload,
+  });
+}
+
+export async function uncheckSeriesEpisode(
+  tmdbId: number,
+  season: number,
+  episode: number
+): Promise<SeriesStatusResponse> {
+  return apiFetch<SeriesStatusResponse>(
+    `/collection/series/${tmdbId}/episode?season=${season}&episode=${episode}`,
+    {
+      method: "DELETE",
+    }
+  );
 }
