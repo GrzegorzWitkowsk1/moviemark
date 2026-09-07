@@ -5,7 +5,6 @@ import {
   alpha,
   useTheme,
 } from "@mui/material";
-import { Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getPosterUrl } from "@/lib/poster";
 import type { WatchedSeriesResponse } from "shared";
@@ -103,26 +102,6 @@ export default function SeriesCollectionCard({
         >
           {series.name}
         </Typography>
-
-        {series.rating != null && (
-          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 0.5 }}>
-            <Star
-              size={14}
-              fill={theme.palette.warning.main}
-              color={theme.palette.warning.main}
-            />
-            <Typography
-              sx={{
-                fontSize: "0.85rem",
-                fontWeight: 600,
-                color: theme.palette.text.primary,
-              }}
-            >
-              {series.rating.toFixed(1)}
-            </Typography>
-          </Box>
-        )}
-
         <Typography
           sx={{
             mt: 0.5,
