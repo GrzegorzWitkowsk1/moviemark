@@ -29,4 +29,6 @@ export const config = {
   cookieName: Bun.env.COOKIE_NAME ?? "refreshToken",
   rateLimitMax: number("RATE_LIMIT_MAX", 100),
   isProduction: Bun.env.NODE_ENV === "production",
+  tmdbApiBase: Bun.env.TMDB_API_BASE ?? "https://api.themoviedb.org/3",
+  tmdbToken: Bun.env.TMDB_TOKEN ?? "",
 };

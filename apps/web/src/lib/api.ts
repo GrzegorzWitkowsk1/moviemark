@@ -1,6 +1,7 @@
 import type {
   AddMovieRequest,
   AuthErrorResponse,
+  CollectionResponse,
   LoginRequest,
   LoginResponse,
   MovieStatusResponse,
@@ -177,6 +178,10 @@ export async function logoutUser(): Promise<void> {
 
 export async function getCurrentUser(): Promise<UserResponse> {
   return apiFetch<UserResponse>("/auth/me");
+}
+
+export async function getCollection(): Promise<CollectionResponse> {
+  return apiFetch<CollectionResponse>("/collection");
 }
 
 export async function getMovieCollectionStatus(

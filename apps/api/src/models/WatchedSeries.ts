@@ -7,6 +7,7 @@ interface IWatchedSeries {
   name: string;
   posterPath: string | null;
   totalEpisodes: number;
+  rating: number | null;
   watchedEpisodes: { season: number; episode: number }[];
   watchedAt: Date;
 }
@@ -34,6 +35,10 @@ const WatchedSeriesSchema = new mongoose.Schema<IWatchedSeries>(
       type: Number,
       required: true,
       min: 0,
+    },
+    rating: {
+      type: Number,
+      default: null,
     },
     watchedEpisodes: {
       type: [

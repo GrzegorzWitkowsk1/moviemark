@@ -11,7 +11,7 @@ import Grid from "@mui/material/Grid";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { TmdbMediaType, TmdbMovie, TmdbTv } from "shared";
 import MovieCard, { type MovieCardData } from "@/shared/components/MovieCard";
-import MediaTypeToggle from "./MediaTypeToggle";
+import MediaTypeToggle from "@/shared/components/MediaTypeToggle";
 
 function toCardData(item: TmdbMovie | TmdbTv): MovieCardData {
   const isTv = "name" in item;

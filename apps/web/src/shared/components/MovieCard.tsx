@@ -19,9 +19,10 @@ export interface MovieCardData {
 
 interface MovieCardProps {
   movie: MovieCardData;
+  variant?: "full" | "light";
 }
 
-export default function MovieCard({ movie }: MovieCardProps) {
+export default function MovieCard({ movie, variant = "full" }: MovieCardProps) {
   const theme = useTheme();
   const navigate = useNavigate();
   const genres = useResolveGenres(movie.mediaType, movie.genreIds);
@@ -29,6 +30,7 @@ export default function MovieCard({ movie }: MovieCardProps) {
   const posterUrl = getPosterUrl(movie.posterPath);
   const year = movie.year ? movie.year.slice(0, 4) : null;
   const meta = [year, ...genres].filter(Boolean).join(" · ");
+  const isLight = variant === "light";
 
   const handleClick = () => {
     navigate(`/auth/movies?id=${movie.id}&type=${movie.mediaType}`);
@@ -77,75 +79,79 @@ export default function MovieCard({ movie }: MovieCardProps) {
           />
         )}
 
-        <Box
-          sx={{
-            position: "absolute",
-            top: 8,
-            left: 8,
-            display: "flex",
-            alignItems: "center",
-            gap: 0.4,
-            padding: "2px 8px",
-            borderRadius: "10px",
-            backgroundColor: alpha(theme.palette.common.black, 0.6),
-            backdropFilter: "blur(4px)",
-          }}
-        >
-          <Star
-            size={14}
-            fill={theme.palette.warning.main}
-            color={theme.palette.warning.main}
-          />
-          <Typography
+        {!isLight && (
+          <Box
             sx={{
-              fontSize: "0.8rem",
-              fontWeight: 700,
-              color: "#fff",
-              lineHeight: 1.2,
+              position: "absolute",
+              top: 8,
+              left: 8,
+              display: "flex",
+              alignItems: "center",
+              gap: 0.4,
+              padding: "2px 8px",
+              borderRadius: "10px",
+              backgroundColor: alpha(theme.palette.common.black, 0.6),
+              backdropFilter: "blur(4px)",
             }}
           >
-            {movie.rating.toFixed(1)}
-          </Typography>
-          <Typography
-            sx={{
-              fontSize: "0.8rem",
-              color: "#fff",
-              lineHeight: 1.2,
-            }}
-          >
-            {`(${movie.voteCount || 0})`}
-          </Typography>
-        </Box>
+            <Star
+              size={14}
+              fill={theme.palette.warning.main}
+              color={theme.palette.warning.main}
+            />
+            <Typography
+              sx={{
+                fontSize: "0.8rem",
+                fontWeight: 700,
+                color: "#fff",
+                lineHeight: 1.2,
+              }}
+            >
+              {movie.rating.toFixed(1)}
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: "0.8rem",
+                color: "#fff",
+                lineHeight: 1.2,
+              }}
+            >
+              {`(${movie.voteCount || 0})`}
+            </Typography>
+          </Box>
+        )}
 
-        <Box
-          className="card-description"
-          sx={{
-            position: "absolute",
-            inset: "auto 0 0 0",
-            padding: "12px",
-            background: `linear-gradient(to top, ${alpha(
-              theme.palette.common.black,
-              0.85
-            )}, ${alpha(theme.palette.common.black, 0.55)} 60%, transparent)`,
-            opacity: 0,
-            transform: "translateY(100%)",
-            transition: "opacity 0.3s ease, transform 0.3s ease",
-          }}
-        >
-          <Typography
+        {!isLight && (
+          <Box
+            className="card-description"
             sx={{
-              color: "#fff",
-              fontSize: "0.8rem",
-              lineHeight: 1.4,
-              display: "-webkit-box",
-              WebkitLineClamp: 4,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
+              position: "absolute",
+              inset: "auto 0 0 0",
+              padding: "12px",
+              background: `linear-gradient(to top, ${alpha(
+                theme.palette.common.black,
+                0.85
+              )}, ${alpha(theme.palette.common.black, 0.55)} 60%, transparent)`,
+              opacity: 0,
+              transform: "translateY(100%)",
+              transition: "opacity 0.3s ease, transform 0.3s ease",
             }}
           >
-            {movie.overview || "No description available."}
-          </Typography>
-        </Box>
+            <Typography
+              sx={{
+                color: "#fff",
+                fontSize: "0.8rem",
+                lineHeight: 1.4,
+                display: "-webkit-box",
+                WebkitLineClamp: 4,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+              }}
+            >
+              {movie.overview || "No description available."}
+            </Typography>
+          </Box>
+        )}
       </Box>
 
       <Typography

@@ -2,12 +2,15 @@ import type { FastifyInstance } from "fastify";
 import { Types } from "mongoose";
 import { WatchedMovie } from "../models/WatchedMovie";
 import { WatchedSeries } from "../models/WatchedSeries";
+import { getTmdbDetails } from "../lib/tmdb";
 import type {
   AddMovieRequest,
   CollectionResponse,
   MarkEpisodesRequest,
   MovieStatusResponse,
   SeriesStatusResponse,
+  WatchedMovieResponse,
+  WatchedSeriesResponse,
 } from "shared";
 
 interface EpisodeQueryParams {
@@ -19,12 +22,28 @@ interface TmdbIdParams {
   tmdbId: string;
 }
 
-function toMovieResponse(doc: { tmdbId: number; title: string; posterPath: string | null; watchedAt: Date }) {
+function toMovieResponse(doc: {
+  tmdbId: number;
+  title: string;
+  posterPath: string | null;
+  rating: number | null;
+  watchedAt: Date;
+}, enrichment?: { rating: number; voteCount: number; overview: string; year: string | null; genreIds: number[] } | null): WatchedMovieResponse {
   return {
     tmdbId: doc.tmdbId,
     title: doc.title,
     posterPath: doc.posterPath,
     watchedAt: doc.watchedAt.toISOString(),
+    mediaType: "movie",
+    rating: doc.rating ?? enrichment?.rating,
+    ...(enrichment
+      ? {
+          voteCount: enrichment.voteCount,
+          overview: enrichment.overview,
+          year: enrichment.year,
+          genreIds: enrichment.genreIds,
+        }
+      : {}),
   };
 }
 
@@ -38,8 +57,9 @@ function toSeriesResponse(doc: {
   posterPath: string | null;
   totalEpisodes: number;
   watchedEpisodes: { season: number; episode: number }[];
+  rating: number | null;
   watchedAt: Date;
-}) {
+}, enrichment?: { rating: number; voteCount: number; overview: string; year: string | null; genreIds: number[] } | null): WatchedSeriesResponse {
   return {
     tmdbId: doc.tmdbId,
     name: doc.name,
@@ -48,6 +68,16 @@ function toSeriesResponse(doc: {
     watchedCount: doc.watchedEpisodes.length,
     watchedEpisodes: toPlainEpisodes(doc.watchedEpisodes),
     watchedAt: doc.watchedAt.toISOString(),
+    mediaType: "tv",
+    rating: doc.rating ?? enrichment?.rating,
+    ...(enrichment
+      ? {
+          voteCount: enrichment.voteCount,
+          overview: enrichment.overview,
+          year: enrichment.year,
+          genreIds: enrichment.genreIds,
+        }
+      : {}),
   };
 }
 
@@ -107,12 +137,13 @@ export async function collectionRoutes(app: FastifyInstance) {
             tmdbId: { type: "number", minimum: 1 },
             title: { type: "string", minLength: 1 },
             posterPath: { type: ["string", "null"], default: null },
+            rating: { type: ["number", "null"], default: null },
           },
         },
       },
     },
     async (request, reply) => {
-      const { tmdbId, title, posterPath } = request.body;
+      const { tmdbId, title, posterPath, rating } = request.body;
       const existing = await WatchedMovie.findOne({
         userId: userId(request),
         tmdbId,
@@ -125,6 +156,7 @@ export async function collectionRoutes(app: FastifyInstance) {
         tmdbId,
         title,
         posterPath: posterPath ?? null,
+        rating: rating ?? null,
       });
       return { watched: true };
     }
@@ -197,12 +229,13 @@ export async function collectionRoutes(app: FastifyInstance) {
             name: { type: "string", minLength: 1 },
             posterPath: { type: ["string", "null"], default: null },
             totalEpisodes: { type: "number", minimum: 0 },
+            rating: { type: ["number", "null"], default: null },
           },
         },
       },
     },
     async (request) => {
-      const { tmdbId, season, episodes, name, posterPath, totalEpisodes } =
+      const { tmdbId, season, episodes, name, posterPath, totalEpisodes, rating } =
         request.body;
       const uid = userId(request);
 
@@ -215,6 +248,7 @@ export async function collectionRoutes(app: FastifyInstance) {
           name,
           posterPath: posterPath ?? null,
           totalEpisodes,
+          rating: rating ?? null,
           watchedEpisodes: episodes.map((episode) => ({ season, episode })),
         });
       } else {
@@ -227,6 +261,7 @@ export async function collectionRoutes(app: FastifyInstance) {
           }
         }
         doc.totalEpisodes = totalEpisodes;
+        doc.rating = rating ?? doc.rating;
         doc.watchedAt = new Date();
         doc = await doc.save();
       }
@@ -308,9 +343,21 @@ export async function collectionRoutes(app: FastifyInstance) {
         WatchedMovie.find({ userId: uid }),
         WatchedSeries.find({ userId: uid }),
       ]);
+
+      const movieEnrichments = await Promise.all(
+        movies.map((doc) => getTmdbDetails("movie", doc.tmdbId))
+      );
+      const seriesEnrichments = await Promise.all(
+        series.map((doc) => getTmdbDetails("tv", doc.tmdbId))
+      );
+
       return {
-        movies: movies.map(toMovieResponse),
-        series: series.map(toSeriesResponse),
+        movies: movies.map((doc, index) =>
+          toMovieResponse(doc, movieEnrichments[index])
+        ),
+        series: series.map((doc, index) =>
+          toSeriesResponse(doc, seriesEnrichments[index])
+        ),
       };
     }
   );

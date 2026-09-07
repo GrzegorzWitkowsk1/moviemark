@@ -6,6 +6,7 @@ interface IWatchedMovie {
   tmdbId: number;
   title: string;
   posterPath: string | null;
+  rating: number | null;
   watchedAt: Date;
 }
 
@@ -26,6 +27,10 @@ const WatchedMovieSchema = new mongoose.Schema<IWatchedMovie>(
     },
     posterPath: {
       type: String,
+      default: null,
+    },
+    rating: {
+      type: Number,
       default: null,
     },
     watchedAt: {

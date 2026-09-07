@@ -101,6 +101,7 @@ function MovieView({ id }: { id: number }) {
         tmdbId: data.id,
         title: data.title,
         posterPath: data.poster_path,
+        rating: data.vote_average,
       });
     }
   };
@@ -161,6 +162,7 @@ function TvView({ id }: { id: number }) {
     name: data?.name ?? "",
     posterPath: data?.poster_path ?? null,
     totalEpisodes: data?.number_of_episodes ?? 0,
+    rating: data?.vote_average,
   });
 
   if (isError) {

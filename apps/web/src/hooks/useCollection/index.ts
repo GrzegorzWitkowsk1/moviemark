@@ -7,12 +7,14 @@ import type {
 import {
   addMovieToCollection,
   checkSeriesEpisode,
+  getCollection,
   getMovieCollectionStatus,
   getSeriesCollectionStatus,
   removeMovieFromCollection,
   uncheckSeriesEpisode,
 } from "@/lib/api";
 
+export const collectionKey = ["collection"] as const;
 export const movieStatusKey = (tmdbId: number) => [
   "collection",
   "movie",
@@ -23,6 +25,13 @@ export const seriesStatusKey = (tmdbId: number) => [
   "series",
   tmdbId,
 ];
+
+export function useCollection() {
+  return useQuery({
+    queryKey: collectionKey,
+    queryFn: getCollection,
+  });
+}
 
 export function useMovieWatched(tmdbId: number) {
   return useQuery({
@@ -54,6 +63,7 @@ export function useAddMovie() {
     },
     onSettled: (_data, _error, { tmdbId }) => {
       queryClient.invalidateQueries({ queryKey: movieStatusKey(tmdbId) });
+      queryClient.invalidateQueries({ queryKey: collectionKey });
     },
   });
 }
@@ -72,6 +82,7 @@ export function useRemoveMovie() {
     },
     onSettled: (_data, _error, tmdbId) => {
       queryClient.invalidateQueries({ queryKey: movieStatusKey(tmdbId) });
+      queryClient.invalidateQueries({ queryKey: collectionKey }); 
     },
   });
 }
@@ -107,6 +118,7 @@ export function useCheckEpisode() {
     },
     onSettled: (_data, _error, { tmdbId }) => {
       queryClient.invalidateQueries({ queryKey: seriesStatusKey(tmdbId) });
+      queryClient.invalidateQueries({ queryKey: collectionKey }); 
     },
   });
 }
@@ -144,6 +156,7 @@ export function useUncheckEpisode() {
     },
     onSettled: (_data, _error, { tmdbId }) => {
       queryClient.invalidateQueries({ queryKey: seriesStatusKey(tmdbId) });
+      queryClient.invalidateQueries({ queryKey: collectionKey }); 
     },
   });
 }
@@ -152,6 +165,7 @@ export interface SeriesMeta {
   name: string;
   posterPath: string | null;
   totalEpisodes: number;
+  rating?: number;
 }
 
 export interface SeriesWatchedControls {
@@ -192,6 +206,7 @@ export function useSeriesWatchedControls(
       name: meta.name,
       posterPath: meta.posterPath,
       totalEpisodes: meta.totalEpisodes,
+      rating: meta.rating,
     };
     await checkEpisode.mutateAsync(payload);
   };

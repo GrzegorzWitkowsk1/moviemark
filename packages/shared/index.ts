@@ -165,6 +165,12 @@ export interface WatchedMovieResponse {
   title: string;
   posterPath: string | null;
   watchedAt: string;
+  mediaType: TmdbMediaType;
+  rating?: number;
+  voteCount?: number;
+  overview?: string;
+  year?: string | null;
+  genreIds?: number[];
 }
 
 export interface WatchedSeriesResponse {
@@ -175,6 +181,12 @@ export interface WatchedSeriesResponse {
   watchedCount: number;
   watchedEpisodes: WatchedEpisode[];
   watchedAt: string;
+  mediaType: TmdbMediaType;
+  rating?: number;
+  voteCount?: number;
+  overview?: string;
+  year?: string | null;
+  genreIds?: number[];
 }
 
 export interface CollectionResponse {
@@ -186,6 +198,7 @@ export interface AddMovieRequest {
   tmdbId: number;
   title: string;
   posterPath: string | null;
+  rating?: number;
 }
 
 export interface MarkEpisodesRequest {
@@ -195,6 +208,7 @@ export interface MarkEpisodesRequest {
   name: string;
   posterPath: string | null;
   totalEpisodes: number;
+  rating?: number;
 }
 
 export interface MovieStatusResponse {
