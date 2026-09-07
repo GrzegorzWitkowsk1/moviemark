@@ -218,7 +218,13 @@ export default function SettingsPage() {
 					onSubmit={passwordForm.handleSubmit(onPasswordSubmit)}
 					sx={{ display: "flex", flexDirection: "column", gap: 2 }}
 				>
-					<Box sx={{ display: "flex",flexDirection: { md:'row', xs:'column'}, gap: 2 }}>
+					<Box
+						sx={{
+							display: "flex",
+							flexDirection: { md: "row", xs: "column" },
+							gap: 2,
+						}}
+					>
 						<Box sx={{ flex: 1 }}>
 							<FieldLabel>New Password</FieldLabel>
 							<StyledTextField
@@ -258,7 +264,13 @@ export default function SettingsPage() {
 
 			<StyledCard>
 				<SectionHeader icon={<Palette size={20} />} title="Appearance" />
-				<Box sx={{ display: "flex",flexDirection:{lg:'row', xs:'column'}, gap: 2 }}>
+				<Box
+					sx={{
+						display: "flex",
+						flexDirection: { lg: "row", xs: "column" },
+						gap: 2,
+					}}
+				>
 					{THEME_OPTIONS.map((opt) => (
 						<Box
 							key={opt.value}
@@ -301,6 +313,11 @@ export default function SettingsPage() {
 					<StyledMenuItem value="en">English</StyledMenuItem>
 					<StyledMenuItem value="pl">Polski</StyledMenuItem>
 				</StyledSelect>
+			</StyledCard>
+			<StyledCard>
+				<Typography color="primary" variant="body2">
+					{`MovieMark v1.0. All rights reserved. ${new Date().getFullYear()} ® `}
+				</Typography>
 			</StyledCard>
 
 			<Box sx={{ py: 1, display: "flex", justifyContent: "flex-end" }}>
