@@ -9,10 +9,13 @@
     "@types/node": "^26.1.1",
     "eslint": "^10.6.0",
     "globals": "^17.7.0",
+    "mongodb-memory-server": "10.4.3",
     "typescript-eslint": "^8.62.0"
   },
   "scripts": {
     "dev": "bun --watch index.ts",
+    "test": "bun test --preload ./tests/preload.ts",
+    "test:watch": "bun test --preload ./tests/preload.ts --watch",
     "check-types": "tsc --noEmit",
     "lint": "eslint ."
   },
