@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Box, CircularProgress, InputAdornment, Typography, alpha, useTheme } from "@mui/material";
 import { Search } from "lucide-react";
 import {
@@ -12,6 +13,7 @@ import SectionCarousel from "./components/SectionCarousel";
 
 export default function HomePage() {
   const theme = useTheme();
+  const navigate = useNavigate();
   const [query, setQuery] = useState("");
 
   const newContent = useNewContent();
@@ -58,11 +60,18 @@ export default function HomePage() {
         </Typography>
 
         <Box
+          component="form"
           sx={{
             display: "flex",
             gap: 1,
             maxWidth: 520,
             margin: "0 auto",
+          }}
+          onSubmit={(e: React.FormEvent) => {
+            e.preventDefault();
+            if (query.trim()) {
+              navigate(`/auth/search?q=${encodeURIComponent(query.trim())}`);
+            }
           }}
         >
           <StyledTextField
@@ -90,6 +99,7 @@ export default function HomePage() {
             }}
           />
           <ContainedButton
+            type="submit"
             size="large"
             sx={{ px: 3, flexShrink: 0, height: 45 }}
           >

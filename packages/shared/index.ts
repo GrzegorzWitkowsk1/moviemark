@@ -207,3 +207,10 @@ export interface SeriesStatusResponse {
   totalEpisodes: number;
   watchedEpisodes: WatchedEpisode[];
 }
+
+export interface TmdbSearchResult {
+  page: number;
+  results: (TmdbMovie | TmdbTv)[];
+  total_pages: number;
+  total_results: number;
+}

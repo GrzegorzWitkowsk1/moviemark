@@ -5,6 +5,7 @@ import type {
   TmdbMediaType,
   TmdbMovie,
   TmdbMovieDetails,
+  TmdbSearchResult,
   TmdbSeasonDetails,
   TmdbTv,
   TmdbTvDetails,
@@ -92,6 +93,14 @@ export function getSimilarMovies(id: number): Promise<TmdbListResult<TmdbMovie>>
 
 export function getSimilarTv(id: number): Promise<TmdbListResult<TmdbTv>> {
   return fetchTmdbJson<TmdbListResult<TmdbTv>>(`/tv/${id}/similar?language=en-US`);
+}
+
+export function searchMulti(
+  query: string
+): Promise<TmdbSearchResult> {
+  return fetchTmdbJson<TmdbSearchResult>(
+    `/search/multi?query=${encodeURIComponent(query)}&language=en-US`
+  );
 }
 
 export async function getHomeContent(): Promise<HomeContent> {
