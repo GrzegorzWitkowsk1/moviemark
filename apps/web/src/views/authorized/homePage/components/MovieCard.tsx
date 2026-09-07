@@ -31,7 +31,7 @@ export default function MovieCard({ movie }: MovieCardProps) {
   const meta = [year, ...genres].filter(Boolean).join(" · ");
 
   const handleClick = () => {
-    navigate(`/auth/movies?id=${movie.id}`);
+    navigate(`/auth/movies?id=${movie.id}&type=${movie.mediaType}`);
   };
 
   return (
@@ -42,6 +42,8 @@ export default function MovieCard({ movie }: MovieCardProps) {
         flexDirection: "column",
         cursor: "pointer",
         width: "100%",
+        minWidth: 0,
+        overflow: "hidden",
       }}
     >
       <Box
@@ -147,11 +149,20 @@ export default function MovieCard({ movie }: MovieCardProps) {
       </Box>
 
       <Typography
-        noWrap
         sx={{
           mt: 1,
           alignSelf: "flex-start",
+          width: "100%",
+          minWidth: 0,
           fontSize: "0.9rem",
+          lineHeight: 1.4,
+          minHeight: "2.8em",
+          overflowWrap: "anywhere",
+          wordBreak: "break-word",
+          display: "-webkit-box",
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: "vertical",
+          overflow: "hidden",
           color: theme.palette.text.primary,
         }}
       >
@@ -162,6 +173,8 @@ export default function MovieCard({ movie }: MovieCardProps) {
         noWrap
         sx={{
           alignSelf: "flex-start",
+          width: "100%",
+          minWidth: 0,
           fontSize: "0.8rem",
           color: theme.palette.text.secondary,
         }}

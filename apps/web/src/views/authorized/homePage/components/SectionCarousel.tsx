@@ -53,9 +53,11 @@ export default function SectionCarousel({
 }: SectionCarouselProps) {
   const theme = useTheme();
   const perPage = usePerPage();
-  const hasSeriesToggle = !!series && series.length > 0;
+  const hasSeriesToggle = !!series && series.length > 0 && movies.length > 0;
 
-  const [viewMode, setViewMode] = useState<TmdbMediaType>("movie");
+  const [viewMode, setViewMode] = useState<TmdbMediaType>(
+    () => (movies.length > 0 ? "movie" : "tv")
+  );
   const [pageIndex, setPageIndex] = useState(0);
 
   const items = viewMode === "movie" ? movies : series ?? [];

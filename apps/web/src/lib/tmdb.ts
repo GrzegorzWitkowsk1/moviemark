@@ -4,7 +4,10 @@ import type {
   TmdbListResult,
   TmdbMediaType,
   TmdbMovie,
+  TmdbMovieDetails,
+  TmdbSeasonDetails,
   TmdbTv,
+  TmdbTvDetails,
 } from "shared";
 import { config } from "./config";
 
@@ -62,6 +65,33 @@ export function getGenres(
   return fetchTmdbJson<GenreListResponse>(
     `/genre/${mediaType}/list?language=en-US`
   );
+}
+
+export function getMovieDetails(id: number): Promise<TmdbMovieDetails> {
+  return fetchTmdbJson<TmdbMovieDetails>(`/movie/${id}?language=en-US`);
+}
+
+export function getTvDetails(id: number): Promise<TmdbTvDetails> {
+  return fetchTmdbJson<TmdbTvDetails>(`/tv/${id}?language=en-US`);
+}
+
+export function getTvSeason(
+  id: number,
+  seasonNumber: number
+): Promise<TmdbSeasonDetails> {
+  return fetchTmdbJson<TmdbSeasonDetails>(
+    `/tv/${id}/season/${seasonNumber}?language=en-US`
+  );
+}
+
+export function getSimilarMovies(id: number): Promise<TmdbListResult<TmdbMovie>> {
+  return fetchTmdbJson<TmdbListResult<TmdbMovie>>(
+    `/movie/${id}/similar?language=en-US`
+  );
+}
+
+export function getSimilarTv(id: number): Promise<TmdbListResult<TmdbTv>> {
+  return fetchTmdbJson<TmdbListResult<TmdbTv>>(`/tv/${id}/similar?language=en-US`);
 }
 
 export async function getHomeContent(): Promise<HomeContent> {

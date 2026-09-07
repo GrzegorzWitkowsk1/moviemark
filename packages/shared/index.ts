@@ -108,3 +108,49 @@ export interface HomeContent {
   };
   trending: HomeSection;
 }
+
+export interface TmdbMovieDetails extends TmdbMovie {
+  genres: TmdbGenre[];
+  runtime: number;
+  tagline: string | null;
+  status: string;
+}
+
+export interface TmdbSeasonSummary {
+  id: number;
+  name: string;
+  overview: string | null;
+  air_date: string | null;
+  poster_path: string | null;
+  season_number: number;
+  episode_count: number;
+}
+
+export interface TmdbTvDetails extends TmdbTv {
+  genres: TmdbGenre[];
+  status: string;
+  number_of_episodes: number;
+  number_of_seasons: number;
+  episode_run_time: number[];
+  seasons: TmdbSeasonSummary[];
+}
+
+export interface TmdbEpisode {
+  id: number;
+  name: string;
+  overview: string;
+  air_date: string | null;
+  episode_number: number;
+  season_number: number;
+  runtime: number | null;
+  still_path: string | null;
+  vote_average: number;
+}
+
+export interface TmdbSeasonDetails {
+  id: number;
+  name: string;
+  overview: string | null;
+  air_date: string | null;
+  episodes: TmdbEpisode[];
+}
