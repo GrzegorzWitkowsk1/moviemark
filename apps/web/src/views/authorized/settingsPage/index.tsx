@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Box, Typography, useTheme, alpha } from "@mui/material";
-import { User, Lock, Palette, Globe } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { Box, Typography, useTheme, alpha, InputAdornment, IconButton } from "@mui/material";
+import { User, Lock, Palette, Globe, Eye, EyeOff } from "lucide-react";
 import StyledCard from "@/shared/components/card";
 import StyledTextField from "@/shared/components/textField";
 import {StyledSelect, PaperStyles, StyledMenuItem} from "@/shared/components/select";
@@ -11,6 +13,8 @@ import { useSnackbar } from "@/contexts/snackbarContext";
 import { useThemeMode, type ThemeMode } from "@/contexts/themeContext";
 import { useLanguage, type Language } from "@/contexts/languageContext";
 import { useDialog } from "@/contexts/dialogContext";
+import { updateProfile, changePassword } from "@/lib/api";
+import { setAccessToken } from "@/lib/token";
 import {
   profileSchema,
   passwordSchema,
@@ -65,6 +69,7 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
 
 export default function SettingsPage() {
   const theme = useTheme();
+  const queryClient = useQueryClient();
   const { user } = useUser();
   const { open } = useSnackbar();
   const { mode, setMode } = useThemeMode();
@@ -85,16 +90,38 @@ export default function SettingsPage() {
     resolver: zodResolver(passwordSchema),
     mode: "onChange",
   });
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const onProfileSubmit = (data: ProfileFormValues) => {
-    console.log("Profile save:", data);
-    open("Profile updated!", "success");
+  const onProfileSubmit = async (data: ProfileFormValues) => {
+    try {
+      const result = await updateProfile({
+        name: data.name,
+        surname: data.surname,
+        email: data.email,
+      });
+      setAccessToken(result.accessToken);
+      queryClient.setQueryData(["user"], result.user);
+      open("Profile updated!", "success");
+    } catch (error) {
+      open(
+        error instanceof Error ? error.message : "Failed to update profile.",
+        "failure"
+      );
+    }
   };
 
-  const onPasswordSubmit = (data: PasswordFormValues) => {
-    console.log("Password change:", data);
-    open("Password changed!", "success");
-    passwordForm.reset();
+  const onPasswordSubmit = async (data: PasswordFormValues) => {
+    try {
+      await changePassword({ newPassword: data.newPassword });
+      open("Password changed!", "success");
+      passwordForm.reset();
+    } catch (error) {
+      open(
+        error instanceof Error ? error.message : "Failed to change password.",
+        "failure"
+      );
+    }
   };
 
   const handleDeleteAccount = () => {
@@ -202,7 +229,11 @@ export default function SettingsPage() {
 						/>
 					</Box>
 					<Box sx={{ display: "flex", justifyContent: "flex-start", mt: 1 }}>
-						<ContainedButton type="submit" sx={{ minWidth: 160 }}>
+						<ContainedButton
+							type="submit"
+							sx={{ minWidth: 160 }}
+							disabled={profileForm.formState.isSubmitting}
+						>
 							{profileForm.formState.isSubmitting
 								? "Saving..."
 								: "Save Changes"}
@@ -228,19 +259,36 @@ export default function SettingsPage() {
 						<Box sx={{ flex: 1 }}>
 							<FieldLabel>New Password</FieldLabel>
 							<StyledTextField
-								type="password"
+								type={showNewPassword ? "text" : "password"}
 								placeholder="Enter new password"
 								variant="outlined"
 								fullWidth
 								error={!!passwordForm.formState.errors.newPassword}
 								helperText={passwordForm.formState.errors.newPassword?.message}
+								slotProps={{
+									input: {
+										endAdornment: (
+											<InputAdornment position="end">
+												<IconButton
+													aria-label="toggle password visibility"
+													onClick={() => setShowNewPassword((s) => !s)}
+													onMouseDown={(e) => e.preventDefault()}
+													edge="end"
+													tabIndex={-1}
+												>
+													{showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+												</IconButton>
+											</InputAdornment>
+										),
+									},
+								}}
 								{...passwordForm.register("newPassword")}
 							/>
 						</Box>
 						<Box sx={{ flex: 1 }}>
 							<FieldLabel>Confirm New Password</FieldLabel>
 							<StyledTextField
-								type="password"
+								type={showConfirmPassword ? "text" : "password"}
 								placeholder="Confirm new password"
 								variant="outlined"
 								fullWidth
@@ -248,12 +296,33 @@ export default function SettingsPage() {
 								helperText={
 									passwordForm.formState.errors.confirmPassword?.message
 								}
+								slotProps={{
+									input: {
+										endAdornment: (
+											<InputAdornment position="end">
+												<IconButton
+													aria-label="toggle password visibility"
+													onClick={() => setShowConfirmPassword((s) => !s)}
+													onMouseDown={(e) => e.preventDefault()}
+													edge="end"
+													tabIndex={-1}
+												>
+													{showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+												</IconButton>
+											</InputAdornment>
+										),
+									},
+								}}
 								{...passwordForm.register("confirmPassword")}
 							/>
 						</Box>
 					</Box>
 					<Box sx={{ display: "flex", justifyContent: "flex-start", mt: 1 }}>
-						<ContainedButton type="submit" sx={{ minWidth: 160 }}>
+						<ContainedButton
+							type="submit"
+							sx={{ minWidth: 160 }}
+							disabled={passwordForm.formState.isSubmitting}
+						>
 							{passwordForm.formState.isSubmitting
 								? "Changing..."
 								: "Change Password"}

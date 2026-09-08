@@ -176,6 +176,7 @@ export interface SeriesWatchedControls {
     episodes: number[]
   ) => Promise<void>;
   unmarkEpisode: (season: number, episode: number) => Promise<void>;
+  isEpisodePending: boolean;
 }
 
 export function useSeriesWatchedControls(
@@ -220,5 +221,6 @@ export function useSeriesWatchedControls(
     countWatchedEpisodes,
     markEpisodesWatched,
     unmarkEpisode,
+    isEpisodePending: checkEpisode.isPending || uncheckEpisode.isPending,
   };
 }

@@ -29,6 +29,7 @@ export interface UserResponse {
 export interface LoginRequest {
   email: string;
   password: string;
+  remember?: boolean;
 }
 
 export interface LoginResponse {
@@ -42,6 +43,25 @@ export interface RefreshResponse {
 
 export interface AuthErrorResponse {
   error: string;
+}
+
+export interface UpdateProfileRequest {
+  name: string;
+  surname: string;
+  email: string;
+}
+
+export interface UpdateProfileResponse {
+  user: UserResponse;
+  accessToken: string;
+}
+
+export interface ChangePasswordRequest {
+  newPassword: string;
+}
+
+export interface ChangePasswordResponse {
+  message: string;
 }
 
 export type TmdbMediaType = "movie" | "tv";

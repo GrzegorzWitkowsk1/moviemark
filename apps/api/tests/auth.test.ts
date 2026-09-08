@@ -183,4 +183,159 @@ describe("auth routes", () => {
     expect(setCookie).toContain("refreshToken=");
     expect(/refreshToken=(?:;|$)/.test(setCookie)).toBe(true);
   });
+
+  it("updates the profile and returns a fresh token", async () => {
+    const user = await registerAndLogin(app, "profile@test.com");
+
+    const res = await app.inject({
+      method: "PUT",
+      url: "/auth/profile",
+      headers: authHeaders(user.accessToken),
+      payload: { name: "Anna", surname: "Nowak", email: "anna.new@test.com" },
+    });
+
+    expect(res.statusCode).toBe(200);
+    const body = res.json<{ user: { name: string; surname: string; email: string }; accessToken: string }>();
+    expect(body.user.name).toBe("Anna");
+    expect(body.user.surname).toBe("Nowak");
+    expect(body.user.email).toBe("anna.new@test.com");
+    expect(body.accessToken).toBeTruthy();
+
+    const meRes = await app.inject({
+      method: "GET",
+      url: "/auth/me",
+      headers: authHeaders(body.accessToken),
+    });
+    const me = meRes.json<{ name: string; email: string }>();
+    expect(me.name).toBe("Anna");
+    expect(me.email).toBe("anna.new@test.com");
+  });
+
+  it("rejects profile update without a token", async () => {
+    const res = await app.inject({
+      method: "PUT",
+      url: "/auth/profile",
+      payload: { name: "Anna", surname: "Nowak", email: "a@test.com" },
+    });
+    expect(res.statusCode).toBe(401);
+  });
+
+  it("rejects profile update when email is taken by another user", async () => {
+    await registerAndLogin(app, "taken@test.com");
+    const user = await registerAndLogin(app, "owner@test.com");
+
+    const res = await app.inject({
+      method: "PUT",
+      url: "/auth/profile",
+      headers: authHeaders(user.accessToken),
+      payload: { name: "Anna", surname: "Nowak", email: "taken@test.com" },
+    });
+
+    expect(res.statusCode).toBe(409);
+    expect(res.json<{ error: string }>().error).toBe("Email already registered");
+  });
+
+  it("rejects an invalid profile body", async () => {
+    const user = await registerAndLogin(app, "badprofile@test.com");
+
+    const res = await app.inject({
+      method: "PUT",
+      url: "/auth/profile",
+      headers: authHeaders(user.accessToken),
+      payload: { name: "", surname: "Nowak", email: "bad@test.com" },
+    });
+
+    expect(res.statusCode).toBe(400);
+  });
+
+  it("changes the password and allows login with the new password", async () => {
+    const user = await registerAndLogin(app, "pw@test.com");
+
+    const res = await app.inject({
+      method: "PUT",
+      url: "/auth/password",
+      headers: authHeaders(user.accessToken),
+      payload: { newPassword: "newpassword123" },
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.json<{ message: string }>().message).toBe(
+      "Password changed successfully"
+    );
+
+    const newLogin = await app.inject({
+      method: "POST",
+      url: "/auth/login",
+      payload: { email: user.email, password: "newpassword123" },
+    });
+    expect(newLogin.statusCode).toBe(200);
+
+    const oldLogin = await app.inject({
+      method: "POST",
+      url: "/auth/login",
+      payload: { email: user.email, password: "password123" },
+    });
+    expect(oldLogin.statusCode).toBe(401);
+  });
+
+  it("rejects password change without a token", async () => {
+    const res = await app.inject({
+      method: "PUT",
+      url: "/auth/password",
+      payload: { newPassword: "newpassword123" },
+    });
+    expect(res.statusCode).toBe(401);
+  });
+
+  it("rejects a short new password", async () => {
+    const user = await registerAndLogin(app, "shortpw@test.com");
+
+    const res = await app.inject({
+      method: "PUT",
+      url: "/auth/password",
+      headers: authHeaders(user.accessToken),
+      payload: { newPassword: "123" },
+    });
+
+    expect(res.statusCode).toBe(400);
+  });
+
+  async function maxAgeWithRemember(
+    email: string,
+    remember: boolean
+  ): Promise<string> {
+    await app.inject({
+      method: "POST",
+      url: "/auth/register",
+      payload: {
+        name: "Remember",
+        surname: "Test",
+        email,
+        password: "password123",
+      },
+    });
+    const loginRes = await app.inject({
+      method: "POST",
+      url: "/auth/login",
+      payload: { email, password: "password123", remember },
+    });
+    expect(loginRes.statusCode).toBe(200);
+    const rawSetCookie = loginRes.headers["set-cookie"];
+    const setCookie = Array.isArray(rawSetCookie)
+      ? rawSetCookie.join("; ")
+      : (rawSetCookie ?? "");
+    const maxAge = setCookie.split("; ").find((p) => p.startsWith("Max-Age="));
+    expect(maxAge).toBeTruthy();
+    return maxAge!;
+  }
+
+  it("sets a 7-day refresh cookie when remember is true", async () => {
+    const maxAge = await maxAgeWithRemember("remembertrue@test.com", true);
+    expect(maxAge).toBe("Max-Age=604800");
+  });
+
+  it("sets a 1-day refresh cookie when remember is false", async () => {
+    const maxAge = await maxAgeWithRemember("rememberfalse@test.com", false);
+    expect(maxAge).toBe("Max-Age=86400");
+  });
 });

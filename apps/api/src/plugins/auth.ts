@@ -7,7 +7,14 @@ import type { UserResponse } from "shared";
 
 declare module "@fastify/jwt" {
   interface FastifyJWT {
-    payload: { id?: string; userId?: string; name?: string; surname?: string; email?: string };
+    payload: {
+      id?: string;
+      userId?: string;
+      remember?: boolean;
+      name?: string;
+      surname?: string;
+      email?: string;
+    };
     user: UserResponse;
   }
 }
@@ -19,8 +26,12 @@ declare module "fastify" {
       reply: FastifyReply
     ) => Promise<void>;
     signAccessToken: (payload: UserResponse) => string;
-    signRefreshToken: (userId: string) => string;
-    setRefreshCookie: (reply: FastifyReply, token: string) => void;
+    signRefreshToken: (userId: string, remember?: boolean) => string;
+    setRefreshCookie: (
+      reply: FastifyReply,
+      token: string,
+      remember?: boolean
+    ) => void;
     clearRefreshCookie: (reply: FastifyReply) => void;
   }
 }
@@ -52,19 +63,25 @@ export default fp(
       app.jwt.sign(payload, { expiresIn: config.accessTokenTtl })
     );
 
-    app.decorate("signRefreshToken", (userId: string) =>
-      app.jwt.sign({ userId }, { expiresIn: config.refreshTokenTtl })
+    app.decorate("signRefreshToken", (userId: string, remember?: boolean) =>
+      app.jwt.sign(
+        { userId, remember },
+        { expiresIn: remember ? config.refreshTokenTtl : "1d" }
+      )
     );
 
-    app.decorate("setRefreshCookie", (reply: FastifyReply, token: string) => {
-      reply.setCookie(config.cookieName, token, {
-        httpOnly: true,
-        secure: config.isProduction,
-        sameSite: "lax",
-        path: "/",
-        maxAge: 60 * 60 * 24 * 7,
-      });
-    });
+    app.decorate(
+      "setRefreshCookie",
+      (reply: FastifyReply, token: string, remember?: boolean) => {
+        reply.setCookie(config.cookieName, token, {
+          httpOnly: true,
+          secure: config.isProduction,
+          sameSite: "lax",
+          path: "/",
+          maxAge: remember ? 60 * 60 * 24 * 7 : 60 * 60 * 24 * 1,
+        });
+      }
+    );
 
     app.decorate("clearRefreshCookie", (reply: FastifyReply) => {
       reply.clearCookie(config.cookieName, { path: "/" });

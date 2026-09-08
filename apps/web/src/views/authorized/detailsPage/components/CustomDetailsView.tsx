@@ -35,7 +35,7 @@ export default function CustomDetailsView({
   mediaType,
 }: CustomDetailsViewProps) {
   const theme = useTheme();
-  const { data, isLoading, isError, refetch } = useCustomItem(id, mediaType);
+  const { data, isLoading, isError, isRefetching, refetch } = useCustomItem(id, mediaType);
   const genreList = useResolveGenres(mediaType, data?.genreIds ?? []);
   const [expanded, setExpanded] = useState<number[]>([]);
 
@@ -79,7 +79,9 @@ export default function CustomDetailsView({
         <Typography sx={{ color: theme.palette.text.secondary, mb: 2 }}>
           Couldn&apos;t load this title.
         </Typography>
-        <ContainedButton onClick={() => refetch()}>Try again</ContainedButton>
+        <ContainedButton onClick={() => refetch()} disabled={isRefetching}>
+          {isRefetching ? "Loading..." : "Try again"}
+        </ContainedButton>
       </Box>
     );
   }

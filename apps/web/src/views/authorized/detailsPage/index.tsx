@@ -69,28 +69,36 @@ function LoadingState() {
   );
 }
 
-function ErrorState({ onRetry }: { onRetry: () => void }) {
+function ErrorState({
+  onRetry,
+  isRetrying,
+}: {
+  onRetry: () => void;
+  isRetrying?: boolean;
+}) {
   const theme = useTheme();
   return (
     <Box sx={{ py: 10, textAlign: "center" }}>
       <Typography sx={{ color: theme.palette.text.secondary, mb: 2 }}>
         Couldn&apos;t load this title. Please try again.
       </Typography>
-      <ContainedButton onClick={onRetry}>Try again</ContainedButton>
+      <ContainedButton onClick={onRetry} disabled={isRetrying}>
+        {isRetrying ? "Loading..." : "Try again"}
+      </ContainedButton>
     </Box>
   );
 }
 
 function MovieView({ id }: { id: number }) {
   const theme = useTheme();
-  const { data, isLoading, isError, refetch } = useMovieDetails(id);
+  const { data, isLoading, isError, isRefetching, refetch } = useMovieDetails(id);
   const { data: similar } = useSimilarMovies(id);
   const { data: watchedStatus } = useMovieWatched(id);
   const addMovie = useAddMovie();
   const removeMovie = useRemoveMovie();
 
   if (isError) {
-    return <ErrorState onRetry={refetch} />;
+    return <ErrorState onRetry={refetch} isRetrying={isRefetching} />;
   }
   if (isLoading || !data) {
     return <LoadingState />;
@@ -161,7 +169,7 @@ function MovieView({ id }: { id: number }) {
 
 function TvView({ id }: { id: number }) {
   const theme = useTheme();
-  const { data, isLoading, isError, refetch } = useTvDetails(id);
+  const { data, isLoading, isError, isRefetching, refetch } = useTvDetails(id);
   const { data: similar } = useSimilarTv(id);
   const watched: SeriesWatchedControls = useSeriesWatchedControls(id, {
     name: data?.name ?? "",
@@ -171,7 +179,7 @@ function TvView({ id }: { id: number }) {
   });
 
   if (isError) {
-    return <ErrorState onRetry={refetch} />;
+    return <ErrorState onRetry={refetch} isRetrying={isRefetching} />;
   }
   if (isLoading || !data) {
     return <LoadingState />;

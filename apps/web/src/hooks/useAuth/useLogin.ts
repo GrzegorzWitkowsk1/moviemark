@@ -6,8 +6,15 @@ export function useLogin() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ email, password }: { email: string; password: string }) =>
-      loginUser({ email, password }),
+    mutationFn: ({
+      email,
+      password,
+      remember,
+    }: {
+      email: string;
+      password: string;
+      remember?: boolean;
+    }) => loginUser({ email, password, remember }),
     onSuccess: (data) => {
       setAccessToken(data.accessToken);
       queryClient.setQueryData(["user"], data.user);

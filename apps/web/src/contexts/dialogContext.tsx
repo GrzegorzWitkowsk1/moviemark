@@ -27,6 +27,7 @@ const DialogContext = createContext<DialogContextValue | undefined>(undefined);
 
 export function DialogProvider({ children }: { children: ReactNode }) {
   const [config, setConfig] = useState<DialogConfig | null>(null);
+  const [pending, setPending] = useState(false);
 
   const openDialog = useCallback((newConfig: DialogConfig) => {
     setConfig(newConfig);
@@ -37,14 +38,25 @@ export function DialogProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const handleCancel = useCallback(() => {
+    if (pending) {
+      return;
+    }
     config?.onCancel?.();
     setConfig(null);
-  }, [config]);
+  }, [config, pending]);
 
-  const handleConfirm = useCallback(() => {
-    config?.onConfirm?.();
-    setConfig(null);
-  }, [config]);
+  const handleConfirm = useCallback(async () => {
+    if (pending) {
+      return;
+    }
+    setPending(true);
+    try {
+      await config?.onConfirm?.();
+    } finally {
+      setPending(false);
+      setConfig(null);
+    }
+  }, [config, pending]);
 
   const value = useMemo(
     () => ({ openDialog, closeDialog }),
@@ -63,6 +75,7 @@ export function DialogProvider({ children }: { children: ReactNode }) {
         variant={config?.variant}
         onConfirm={handleConfirm}
         onCancel={handleCancel}
+        confirmPending={pending}
       />
     </DialogContext.Provider>
   );

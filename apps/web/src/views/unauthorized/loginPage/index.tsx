@@ -1,6 +1,15 @@
-import { useForm } from "react-hook-form";
+import { useState } from "react";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Box, Typography, FormControl, FormControlLabel } from "@mui/material";
+import {
+  Box,
+  Typography,
+  FormControl,
+  FormControlLabel,
+  InputAdornment,
+  IconButton,
+} from "@mui/material";
+import { Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import StyledCard from "@/shared/components/card";
 import StyledTextField from "@/shared/components/textField";
@@ -16,19 +25,26 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const loginMutation = useLogin();
   const { open } = useSnackbar();
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors, isValid, isSubmitting },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     mode: "onChange",
+    defaultValues: { remember: false },
   });
 
   const onSubmit = async (data: LoginFormValues) => {
     try {
-      await loginMutation.mutateAsync({ email: data.email, password: data.password });
+      await loginMutation.mutateAsync({
+        email: data.email,
+        password: data.password,
+        remember: data.remember,
+      });
       open("Welcome back!", "success");
       navigate("/auth/home");
     } catch (err) {
@@ -110,51 +126,55 @@ export default function LoginPage() {
               alignItems: "flex-start",
             }}
           >
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                width: "100%",
-              }}
-            >
-              <Typography color='primary' variant="body2">Password</Typography>
-              <Typography
-                variant="body2"
-                component={"a"}
-                href="/"
-                sx={(theme) => ({
-                  color: theme.palette.primary.main,
-                  textDecoration: "none",
-                  transition: "color 0.2s ease",
-                  "&:hover": {
-                    color: theme.palette.primary.light,
-                  },
-                })}
-              >
-                Forgot password?
-              </Typography>
-            </Box>
+            <Typography color='primary' variant="body2">Password</Typography>
             <StyledTextField
-              type="password"
+              type={showPassword ? "text" : "password"}
               variant="outlined"
               fullWidth
               error={!!errors.password}
               helperText={errors.password?.message}
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={() => setShowPassword((s) => !s)}
+                        onMouseDown={(e) => e.preventDefault()}
+                        edge="end"
+                        tabIndex={-1}
+                      >
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                },
+              }}
               {...register("password")}
             />
           </Box>
           <FormControl>
-            <FormControlLabel
-              control={<StyledRadio />}
-              label={
-                <Typography
-                  sx={(theme) => ({ color: theme.palette.secondary.light })}
-                  variant="caption"
-                >
-                  Remember me
-                </Typography>
-              }
+            <Controller
+              name="remember"
+              control={control}
+              render={({ field }) => (
+                <FormControlLabel
+                  control={
+                    <StyledRadio
+                      checked={field.value}
+                      onClick={() => field.onChange(!field.value)}
+                    />
+                  }
+                  label={
+                    <Typography
+                      sx={(theme) => ({ color: theme.palette.secondary.light })}
+                      variant="caption"
+                    >
+                      Remember me
+                    </Typography>
+                  }
+                />
+              )}
             />
           </FormControl>
           <ContainedButton type="submit" disabled={!isValid || isSubmitting}>

@@ -16,6 +16,7 @@ export interface SharedDialogProps {
   variant?: "default" | "delete";
   onConfirm?: () => void;
   onCancel?: () => void;
+  confirmPending?: boolean;
 }
 
 export default function SharedDialog({
@@ -27,6 +28,7 @@ export default function SharedDialog({
   variant = "default",
   onConfirm,
   onCancel,
+  confirmPending = false,
 }: SharedDialogProps) {
   const theme = useTheme();
 
@@ -53,9 +55,15 @@ export default function SharedDialog({
         {content}
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2.5, gap: 1 }}>
-        <ContainedButton onClick={onCancel}>{cancelLabel}</ContainedButton>
-        <ContainedButton isDelete={variant === "delete"} onClick={onConfirm}>
-          {confirmLabel}
+        <ContainedButton onClick={onCancel} disabled={confirmPending}>
+          {cancelLabel}
+        </ContainedButton>
+        <ContainedButton
+          isDelete={variant === "delete"}
+          onClick={onConfirm}
+          disabled={confirmPending}
+        >
+          {confirmPending ? "Please wait..." : confirmLabel}
         </ContainedButton>
       </DialogActions>
     </Dialog>

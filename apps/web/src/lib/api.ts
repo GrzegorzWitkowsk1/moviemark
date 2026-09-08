@@ -1,6 +1,8 @@
 import type {
   AddMovieRequest,
   AuthErrorResponse,
+  ChangePasswordRequest,
+  ChangePasswordResponse,
   CollectionResponse,
   CustomItemResponse,
   CustomMovieRequest,
@@ -15,6 +17,8 @@ import type {
   RegisterResponse,
   SeriesStatusResponse,
   TmdbMediaType,
+  UpdateProfileRequest,
+  UpdateProfileResponse,
   UserResponse,
 } from "shared";
 import { config } from "./config";
@@ -182,6 +186,24 @@ export async function logoutUser(): Promise<void> {
 
 export async function getCurrentUser(): Promise<UserResponse> {
   return apiFetch<UserResponse>("/auth/me");
+}
+
+export async function updateProfile(
+  payload: UpdateProfileRequest
+): Promise<UpdateProfileResponse> {
+  return apiFetch<UpdateProfileResponse>("/auth/profile", {
+    method: "PUT",
+    body: payload,
+  });
+}
+
+export async function changePassword(
+  payload: ChangePasswordRequest
+): Promise<ChangePasswordResponse> {
+  return apiFetch<ChangePasswordResponse>("/auth/password", {
+    method: "PUT",
+    body: payload,
+  });
 }
 
 export async function getCollection(): Promise<CollectionResponse> {

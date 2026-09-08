@@ -324,7 +324,7 @@ export default function Header() {
 							Settings
 						</MenuItem>
 						<Divider flexItem />
-						<MenuItem onClick={handleLogout}>
+						<MenuItem disabled={logoutMutation.isPending} onClick={handleLogout}>
 							<LogOut size={18} style={{ marginRight: 10 }} />
 							Log Out
 						</MenuItem>

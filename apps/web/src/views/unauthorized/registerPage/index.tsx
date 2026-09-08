@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, InputAdornment, IconButton } from "@mui/material";
+import { Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import type { RegisterRequest } from "shared";
 import StyledCard from "@/shared/components/card";
@@ -18,6 +19,8 @@ export default function RegisterPage() {
   const { open } = useSnackbar();
   const registerMutation = useRegister();
   const [registered, setRegistered] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const {
     register,
@@ -165,11 +168,28 @@ export default function RegisterPage() {
           >
             <Typography color='primary' variant="body2">Password</Typography>
             <StyledTextField
-              type="password"
+              type={showPassword ? "text" : "password"}
               variant="outlined"
               fullWidth
               error={!!errors.password}
               helperText={errors.password?.message}
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={() => setShowPassword((s) => !s)}
+                        onMouseDown={(e) => e.preventDefault()}
+                        edge="end"
+                        tabIndex={-1}
+                      >
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                },
+              }}
               {...register("password")}
             />
           </Box>
@@ -183,11 +203,28 @@ export default function RegisterPage() {
           >
             <Typography color='primary' variant="body2">Repeat password</Typography>
             <StyledTextField
-              type="password"
+              type={showConfirmPassword ? "text" : "password"}
               variant="outlined"
               fullWidth
               error={!!errors.confirmPassword}
               helperText={errors.confirmPassword?.message}
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={() => setShowConfirmPassword((s) => !s)}
+                        onMouseDown={(e) => e.preventDefault()}
+                        edge="end"
+                        tabIndex={-1}
+                      >
+                        {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                },
+              }}
               {...register("confirmPassword")}
             />
           </Box>

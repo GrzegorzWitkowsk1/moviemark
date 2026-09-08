@@ -1,14 +1,19 @@
 import type { FastifyInstance } from "fastify";
 import rateLimit from "@fastify/rate-limit";
+import { Types } from "mongoose";
 import { User } from "../models/User";
 import type {
   AuthErrorResponse,
+  ChangePasswordRequest,
+  ChangePasswordResponse,
   LoginRequest,
   LoginResponse,
   RefreshResponse,
   RegisterErrorResponse,
   RegisterRequest,
   RegisterResponse,
+  UpdateProfileRequest,
+  UpdateProfileResponse,
   UserResponse,
 } from "shared";
 import { config } from "../config";
@@ -99,13 +104,14 @@ export async function authRoutes(app: FastifyInstance) {
           properties: {
             email: { type: "string", format: "email" },
             password: { type: "string", minLength: 1 },
+            remember: { type: "boolean" },
           },
         },
       },
     },
     async (request, reply) => {
       try {
-        const { email, password } = request.body;
+        const { email, password, remember } = request.body;
 
         const user = await User.findOne({ email: email.toLowerCase() });
         if (!user) {
@@ -119,8 +125,8 @@ export async function authRoutes(app: FastifyInstance) {
 
         const userData = toUserResponse(user);
         const accessToken = app.signAccessToken(userData);
-        const refreshToken = app.signRefreshToken(userData.id);
-        app.setRefreshCookie(reply, refreshToken);
+        const refreshToken = app.signRefreshToken(userData.id, remember);
+        app.setRefreshCookie(reply, refreshToken, remember);
 
         return reply.send({ user: userData, accessToken });
       } catch (error) {
@@ -171,6 +177,101 @@ export async function authRoutes(app: FastifyInstance) {
     { preHandler: app.authenticate },
     async (request) => {
       return request.user;
+    }
+  );
+
+  app.put<{
+    Body: UpdateProfileRequest;
+    Reply: UpdateProfileResponse | AuthErrorResponse;
+  }>(
+    "/auth/profile",
+    {
+      preHandler: app.authenticate,
+      schema: {
+        body: {
+          type: "object",
+          required: ["name", "surname", "email"],
+          properties: {
+            name: { type: "string", minLength: 1 },
+            surname: { type: "string", minLength: 1 },
+            email: { type: "string", format: "email" },
+          },
+        },
+      },
+    },
+    async (request, reply) => {
+      try {
+        const { name, surname, email } = request.body;
+        const uid = new Types.ObjectId(request.user.id);
+        const normalizedEmail = email.toLowerCase();
+
+        const existing = await User.findOne({
+          email: normalizedEmail,
+          _id: { $ne: uid },
+        });
+        if (existing) {
+          return reply.code(409).send({ error: "Email already registered" });
+        }
+
+        const user = await User.findByIdAndUpdate(
+          uid,
+          { name, surname, email: normalizedEmail },
+          { new: true }
+        );
+        if (!user) {
+          return reply.code(404).send({ error: "User not found" });
+        }
+
+        const userData = toUserResponse(user);
+        const accessToken = app.signAccessToken(userData);
+        return reply.send({ user: userData, accessToken });
+      } catch (error) {
+        request.log.error(error);
+        return reply.code(500).send({ error: "Internal server error" });
+      }
+    }
+  );
+
+  app.put<{
+    Body: ChangePasswordRequest;
+    Reply: ChangePasswordResponse | AuthErrorResponse;
+  }>(
+    "/auth/password",
+    {
+      preHandler: app.authenticate,
+      schema: {
+        body: {
+          type: "object",
+          required: ["newPassword"],
+          properties: {
+            newPassword: { type: "string", minLength: 8 },
+          },
+        },
+      },
+    },
+    async (request, reply) => {
+      try {
+        const { newPassword } = request.body;
+        const uid = new Types.ObjectId(request.user.id);
+
+        const passwordHash = await Bun.password.hash(newPassword, {
+          algorithm: "bcrypt",
+        });
+
+        const user = await User.findByIdAndUpdate(
+          uid,
+          { passwordHash },
+          { new: true }
+        );
+        if (!user) {
+          return reply.code(404).send({ error: "User not found" });
+        }
+
+        return reply.send({ message: "Password changed successfully" });
+      } catch (error) {
+        request.log.error(error);
+        return reply.code(500).send({ error: "Internal server error" });
+      }
     }
   );
 }

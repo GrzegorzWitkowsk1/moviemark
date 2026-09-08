@@ -276,6 +276,7 @@ function SeasonAccordion({
                     <Checkbox
                       checked={isWatched}
                       onChange={() => handleEpisodeClick(episode)}
+                      disabled={watched.isEpisodePending}
                       color="primary"
                       sx={{ p: 0.5 }}
                     />
@@ -350,10 +351,16 @@ function SeasonAccordion({
           />
         </DialogContent>
         <DialogActions sx={{ p: 2.5, gap: 1 }}>
-          <OutlinedButton onClick={() => closePending(false)}>
+          <OutlinedButton
+            onClick={() => closePending(false)}
+            disabled={watched.isEpisodePending}
+          >
             {`No, just EP${pending?.episode.episode_number ?? ""}`}
           </OutlinedButton>
-          <ContainedButton onClick={() => closePending(true)}>
+          <ContainedButton
+            onClick={() => closePending(true)}
+            disabled={watched.isEpisodePending}
+          >
             Yes
           </ContainedButton>
         </DialogActions>
