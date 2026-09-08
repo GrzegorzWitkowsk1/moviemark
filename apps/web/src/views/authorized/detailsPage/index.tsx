@@ -126,6 +126,7 @@ function MovieView({ id }: { id: number }) {
 
   const isWatched = watchedStatus?.watched ?? false;
   const actionPending = addMovie.isPending || removeMovie.isPending;
+
   const handleToggleWatched = () => {
     if (isWatched) {
       removeMovie.mutate(data.id);
@@ -147,6 +148,7 @@ function MovieView({ id }: { id: number }) {
       );
     }
   };
+
   const meta: HeroMetaItem[] = [
     {
       icon: (
@@ -175,30 +177,36 @@ function MovieView({ id }: { id: number }) {
   ];
 
   return (
-    <Box className="fade-in" sx={{ width: "100%" }}>
-      <DetailHero
-        backdropUrl={getBackdropUrl(data.backdrop_path)}
-        posterPath={data.poster_path}
-        title={data.title}
-        meta={meta}
-        overview={data.overview}
-        action={
-          <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
-            <ContainedButton
-              onClick={handleToggleWatched}
-              disabled={actionPending}
-              startIcon={isWatched ? <Check size={16} /> : undefined}
-            >
-              {isWatched ? t("details.watched") : t("details.addToWatched")}
-            </ContainedButton>
-<FutureToggleButton controls={futureControls} disabled={isWatched} />
-          </Box>
-        }
-      />
+		<Box className="fade-in" sx={{ width: "100%" }}>
+			<DetailHero
+				backdropUrl={getBackdropUrl(data.backdrop_path)}
+				posterPath={data.poster_path}
+				title={data.title}
+				meta={meta}
+				overview={data.overview}
+				action={
+					<Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
+						<ContainedButton
+							onClick={handleToggleWatched}
+							disabled={actionPending}
+							startIcon={isWatched ? <Check size={16} /> : undefined}
+						>
+							{isWatched ? t("details.watched") : t("details.addToWatched")}
+						</ContainedButton>
+						<FutureToggleButton
+							controls={futureControls}
+							disabled={isWatched}
+						/>
+					</Box>
+				}
+			/>
 
-      <SectionCarousel title={t("details.youMayAlsoLike")} movies={similar?.results ?? []} />
-    </Box>
-  );
+			<SectionCarousel
+				title={t("details.youMayAlsoLike")}
+				movies={similar?.results ?? []}
+			/>
+		</Box>
+	);
 }
 
 function TvView({ id }: { id: number }) {

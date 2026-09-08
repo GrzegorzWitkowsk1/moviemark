@@ -57,12 +57,20 @@ export default function SectionCarousel({
   const perPage = usePerPage();
   const hasSeriesToggle = !!series && series.length > 0 && movies.length > 0;
 
-  const [viewMode, setViewMode] = useState<TmdbMediaType>(
-    () => (movies.length > 0 ? "movie" : "tv")
+  const [selectedMode, setSelectedMode] = useState<TmdbMediaType>(() =>
+    movies.length > 0 ? "movie" : "tv"
   );
   const [pageIndex, setPageIndex] = useState(0);
 
+  const viewMode = hasSeriesToggle
+    ? selectedMode
+    : movies.length > 0
+      ? "movie"
+      : "tv";
   const items = viewMode === "movie" ? movies : series ?? [];
+  if (movies.length === 0 && (series?.length ?? 0) === 0) {
+    return null;
+  }
   const totalPages = Math.max(1, Math.ceil(items.length / perPage));
   const currentPage = Math.min(pageIndex, totalPages - 1);
   const visible = items.slice(
@@ -72,7 +80,7 @@ export default function SectionCarousel({
 
   const handleViewModeChange = (next: TmdbMediaType) => {
     if (next === viewMode) return;
-    setViewMode(next);
+    setSelectedMode(next);
     setPageIndex(0);
   };
 
