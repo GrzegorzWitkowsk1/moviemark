@@ -1,5 +1,6 @@
 import type { ComponentType } from "react";
 import { Navigate } from "react-router-dom";
+
 import { useUser } from "@/hooks/useAuth";
 
 export function withPublic<P extends object>(

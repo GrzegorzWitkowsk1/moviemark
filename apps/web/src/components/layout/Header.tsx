@@ -18,8 +18,9 @@ import {
   Divider,
 } from '@mui/material';
 import { Search, LogOut, Settings, LayoutGrid, Clock } from 'lucide-react';
-import { useUser, useLogout } from '@/hooks/useAuth';
 import { useTranslation } from 'react-i18next';
+
+import { useUser, useLogout } from '@/hooks/useAuth';
 import logo from '@/assets/logo_clean.png';
 import StyledTextField from '@/shared/components/textField';
 import LanguageSwitcher from '@/shared/components/LanguageSwitcher';

@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
 import type {
   MarkEpisodesRequest,
   MovieStatusResponse,
@@ -14,6 +15,7 @@ import {
   uncheckSeriesEpisode,
 } from "@/lib/api";
 
+// ------- KEYS -------
 export const collectionKey = ["collection"] as const;
 export const movieStatusKey = (tmdbId: number) => [
   "collection",

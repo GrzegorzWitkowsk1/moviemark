@@ -6,6 +6,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+
 import SharedDialog from "@/shared/components/dialog";
 
 interface DialogConfig {
