@@ -75,10 +75,7 @@ export default function Header() {
 			position="sticky"
 			elevation={0}
 			sx={{
-				backgroundColor:
-					theme.palette.mode === "dark"
-						? alpha(theme.palette.secondary.darker, 0.9)
-						: alpha(theme.palette.primary.dark, 0.9),
+				backgroundColor: alpha(theme.palette.primary.dark, 0.9),
 				borderBottom: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
 			}}
 		>

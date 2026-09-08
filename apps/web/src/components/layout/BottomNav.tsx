@@ -46,9 +46,7 @@ export default function BottomNav() {
         onChange={(_, newValue) => navigate(NAV_ITEMS[newValue].path)}
         sx={{
           height: 64,
-          backgroundColor:					theme.palette.mode === "dark"
-						? alpha(theme.palette.secondary.darker, 0.9)
-						: alpha(theme.palette.primary.dark, 0.9),
+          backgroundColor: alpha(theme.palette.primary.dark, 0.9),
           borderTop: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
           color: theme.palette.mode === "dark" ? theme.palette.grey[500] : theme.palette.grey[700],
           '& .MuiBottomNavigationAction-root': {
