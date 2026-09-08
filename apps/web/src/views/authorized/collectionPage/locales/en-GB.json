@@ -1,0 +1,9 @@
+{
+  "collection": {
+    "title": "My collection",
+    "description": "Your personal shelf of watched films and shows.",
+    "sortRecent": "Recently watched",
+    "empty": "Your collection is empty.",
+    "watchedProgress": "Watched {{watched}}/{{total}}"
+  }
+}

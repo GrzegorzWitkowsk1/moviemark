@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Box, Typography, alpha, useTheme } from "@mui/material";
+import { useTranslation } from "react-i18next";
 import { getPosterUrl } from "@/lib/poster";
 
 export interface HeroMetaItem {
@@ -25,6 +26,7 @@ export default function DetailHero({
   action,
 }: DetailHeroProps) {
   const theme = useTheme();
+  const { t } = useTranslation();
   const posterUrl = getPosterUrl(posterPath);
 
   return (
@@ -152,7 +154,7 @@ export default function DetailHero({
                 mb: 2.5,
               }}
             >
-              {overview || "No description available."}
+              {overview || t("common.noDescription")}
             </Typography>
 
             {action && (

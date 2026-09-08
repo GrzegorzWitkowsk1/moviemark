@@ -1,0 +1,9 @@
+{
+  "collection": {
+    "title": "Moja kolekcja",
+    "description": "Twoja osobista półka obejrzanych filmów i seriali.",
+    "sortRecent": "Ostatnio obejrzane",
+    "empty": "Twoja kolekcja jest pusta.",
+    "watchedProgress": "Obejrzane {{watched}}/{{total}} "
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "search": {
+    "placeholder": "Search movies, series, genres....",
+    "searching": "Searching...",
+    "resultsFound_one": "{{count}} result found",
+    "resultsFound_other": "{{count}} results found",
+    "noResults": "No results found",
+    "addCustom": "Add movie/series"
+  },
+  "addCustom": {
+    "title": "Add your own movie / series",
+    "seriesNameRequired": "Series name *",
+    "seriesNamePlaceholder": "Series name",
+    "movieNameRequired": "Movie name *",
+    "movieNamePlaceholder": "Movie name",
+    "year": "Year",
+    "genre": "Genre",
+    "selectGenres": "Select genres",
+    "seasons": "Seasons",
+    "addSeason": "Add season",
+    "addEpisode": "Add episode",
+    "noSeasons": "No seasons yet. Add a season to start adding episodes.",
+    "durationMinutes": "Duration (minutes)",
+    "durationExample": "e.g. 120",
+    "addToCollection": "Add to collection",
+    "movieAdded": "Movie added to your collection!",
+    "seriesAdded": "Series added to your collection!",
+    "movieNameError": "Movie name is required.",
+    "seriesNameError": "Series name is required.",
+    "atLeastOneSeason": "Add at least one season.",
+    "everySeasonEpisode": "Every season must have at least one episode.",
+    "episodePrefix": "EP {{number}}",
+    "removeSeason": "Remove season",
+    "removeEpisode": "Remove episode"
+  }
+}

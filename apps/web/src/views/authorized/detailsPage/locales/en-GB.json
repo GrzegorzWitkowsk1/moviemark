@@ -1,0 +1,24 @@
+{
+  "details": {
+    "unknown": "Unknown",
+    "movieRuntime": "{{minutes}} min.",
+    "episodeRuntime": "{{minutes}} min",
+    "minPerEpisode": "~ {{minutes}} min/ep",
+    "seasons": "Seasons",
+    "youMayAlsoLike": "You may also like",
+    "seasonLoadError": "Couldn't load episodes for this season.",
+    "episodeName": "Episode {{number}}",
+    "watched": "Watched",
+    "addToWatched": "Add to watched",
+    "inList": "In list",
+    "watchInFuture": "Watch in future",
+    "loadError": "Couldn't load this title. Please try again.",
+    "loadErrorShort": "Couldn't load this title.",
+    "missingId": "Missing or invalid movie/series id.",
+    "addedByYou": "Added by you to your personal collection.",
+    "markAsWatchedTitle": "Mark as watched?",
+    "markAsWatchedBody": "You're marking EP{{episode}} as watched, but {{earlier}} aren't. Did you watch them too?",
+    "dontAskAgain": "Don't ask again for this series",
+    "noJustEpisode": "No, just EP{{number}}"
+  }
+}

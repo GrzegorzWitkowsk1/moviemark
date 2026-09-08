@@ -26,6 +26,7 @@ import type {
   UserResponse,
 } from "shared";
 import { config } from "./config";
+import i18n from "@/i18n";
 import {
   clearAccessToken,
   getAccessToken,
@@ -43,9 +44,13 @@ function extractErrorMessage(body: ApiErrorBody | unknown): string {
     "error" in body &&
     typeof (body as { error: unknown }).error === "string"
   ) {
-    return (body as { error: string }).error;
+    const code = (body as { error: string }).error;
+    if (code.startsWith("error.") && i18n.exists(code)) {
+      return i18n.t(code);
+    }
+    return code;
   }
-  return "Something went wrong. Please try again.";
+  return i18n.t("error.generic");
 }
 
 async function parseBody(res: Response): Promise<unknown> {
@@ -125,7 +130,7 @@ async function rawFetch(
       body: body !== undefined ? JSON.stringify(body) : undefined,
     });
   } catch {
-    throw new Error("Network error. Please try again later.");
+    throw new Error(i18n.t("common.networkError"));
   }
 }
 

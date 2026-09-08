@@ -1,0 +1,7 @@
+{
+  "wantToWatch": {
+    "description": "Your list of films and shows to watch in the future.",
+    "sortRecent": "Recently added",
+    "empty": "Your want to watch list is empty."
+  }
+}

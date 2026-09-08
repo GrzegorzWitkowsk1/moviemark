@@ -1,0 +1,109 @@
+{
+  "common": {
+    "search": "Search",
+    "searchPlaceholder": "Search movies & series...",
+    "movies": "Movies",
+    "series": "Series",
+    "noDescription": "No description available.",
+    "saveChanges": "Save Changes",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "pleaseWait": "Please wait...",
+    "yes": "Yes",
+    "no": "No",
+    "loading": "Loading...",
+    "tryAgain": "Try again",
+    "somethingWentWrong": "Something went wrong. Please try again.",
+    "networkError": "Network error. Please try again later.",
+    "genericError": "Something went wrong. Please try again.",
+    "togglePasswordVisibility": "toggle password visibility",
+    "seasonHeader": "Season {{number}}",
+    "ratingVotes": "({{count}})",
+    "emailPlaceholder": "you@example.com",
+    "form": {
+      "name": "Name",
+      "surname": "Surname",
+      "email": "Email",
+      "password": "Password"
+    },
+    "mediaType": {
+      "movies": "Movies",
+      "series": "Series"
+    },
+    "sort": {
+      "alphabetical": "Alphabetical",
+      "highestRated": "Highest rated"
+    }
+  },
+  "nav": {
+    "home": "Home",
+    "collection": "Collection",
+    "wantToWatch": "Want to watch",
+    "search": "Search",
+    "settings": "Settings",
+    "myCollection": "My collection",
+    "logOut": "Log Out",
+    "accountMenu": "Account menu"
+  },
+  "auth": {
+    "title": "Welcome in MovieMark.",
+    "subtitle": "Complete your movie and series diary",
+    "signIn": "Sign in",
+    "signingIn": "Signing in...",
+    "rememberMe": "Remember me",
+    "noAccount": "Don't have an account? Create it!",
+    "welcomeBack": "Welcome back!",
+    "register": "Register",
+    "registering": "Registering...",
+    "repeatPassword": "Repeat password",
+    "alreadyHaveAccount": "Already have an account?",
+    "registrationSuccess": "Registration successful, you will be redirected to the login page",
+    "namePlaceholder": "John",
+    "surnamePlaceholder": "Doe"
+  },
+  "validation": {
+    "nameRequired": "Name is required",
+    "surnameRequired": "Surname is required",
+    "emailInvalid": "Invalid email address",
+    "passwordRequired": "Password is required",
+    "passwordMin": "Password must be at least 8 characters",
+    "passwordCapital": "Password must contain at least one capital letter",
+    "passwordNumber": "Password must contain at least one number",
+    "passwordsDontMatch": "Passwords do not match"
+  },
+  "error": {
+    "generic": "Something went wrong. Please try again.",
+    "unauthorized": "Unauthorized",
+    "internal": "Internal server error",
+    "invalidRequest": "Invalid request",
+    "requestFailed": "Request failed",
+    "invalidTmdbId": "Invalid tmdbId",
+    "invalidMediaType": "Invalid media type",
+    "auth": {
+      "login": {
+        "invalidCredentials": "Invalid email or password"
+      },
+      "register": {
+        "emailTaken": "Email already registered"
+      },
+      "profile": {
+        "emailTaken": "Email already registered"
+      },
+      "userNotFound": "User not found"
+    },
+    "collection": {
+      "movieAlreadyAdded": "Movie already in collection",
+      "invalidEpisodeQuery": "Invalid episode query"
+    },
+    "custom": {
+      "invalidId": "Invalid custom id",
+      "movieNotFound": "Custom movie not found",
+      "seriesNotFound": "Custom series not found"
+    },
+    "future": {
+      "movieAlreadyAdded": "Movie already in want to watch list",
+      "seriesAlreadyAdded": "Series already in want to watch list"
+    }
+  }
+}

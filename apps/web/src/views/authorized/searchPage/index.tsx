@@ -10,6 +10,7 @@ import {
   useTheme,
 } from "@mui/material";
 import { Search, Film } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useSearch } from "@/hooks/useSearch";
 import StyledTextField from "@/shared/components/textField";
@@ -35,6 +36,7 @@ function toCardData(item: TmdbMovie | TmdbTv): MovieCardData {
 
 export default function SearchPage() {
   const theme = useTheme();
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const initialQuery = searchParams.get("q") ?? "";
@@ -66,7 +68,7 @@ export default function SearchPage() {
           mb: 3,
         }}
       >
-        Search
+        {t("nav.search")}
       </Typography>
 
       <StyledTextField
@@ -74,7 +76,7 @@ export default function SearchPage() {
         variant="outlined"
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
-        placeholder="Search movies, series, genres...."
+        placeholder={t("search.placeholder")}
         slotProps={{
           input: {
             startAdornment: (
@@ -105,8 +107,8 @@ export default function SearchPage() {
           }}
         >
           {isLoading
-            ? "Searching..."
-            : `${results?.length ?? 0} result${(results?.length ?? 0) !== 1 ? "s" : ""} found`}
+            ? t("search.searching")
+            : t("search.resultsFound", { count: results?.length ?? 0 })}
         </Typography>
       )}
 
@@ -142,14 +144,14 @@ export default function SearchPage() {
               color: theme.palette.text.secondary,
             }}
           >
-            No results found
+            {t("search.noResults")}
           </Typography>
           <ContainedButton
             size="large"
             sx={{ mt: 1 }}
             onClick={() => setCustomOpen(true)}
           >
-            Add movie/series
+            {t("search.addCustom")}
           </ContainedButton>
         </Box>
       ) : null}

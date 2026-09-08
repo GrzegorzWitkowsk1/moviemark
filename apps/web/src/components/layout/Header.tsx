@@ -19,20 +19,23 @@ import {
 } from '@mui/material';
 import { Search, LogOut, Settings, LayoutGrid, Clock } from 'lucide-react';
 import { useUser, useLogout } from '@/hooks/useAuth';
+import { useTranslation } from 'react-i18next';
 import logo from '@/assets/logo_clean.png';
 import StyledTextField from '@/shared/components/textField';
+import LanguageSwitcher from '@/shared/components/LanguageSwitcher';
 
 const NAV_ITEMS = [
-  { label: 'Home', path: '/auth/home' },
-  { label: 'Collection', path: '/auth/collections' },
-  { label: 'Want to watch', path: '/auth/want-to-watch' },
-  { label: 'Settings', path: '/auth/settings' },
+  { labelKey: 'nav.home', path: '/auth/home' },
+  { labelKey: 'nav.collection', path: '/auth/collections' },
+  { labelKey: 'nav.wantToWatch', path: '/auth/want-to-watch' },
+  { labelKey: 'nav.settings', path: '/auth/settings' },
 ] as const;
 
 export default function Header() {
   const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
   const { user } = useUser();
   const logoutMutation = useLogout();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -186,7 +189,7 @@ export default function Header() {
 							}}
 						>
 							{NAV_ITEMS.map((item) => (
-								<Tab key={item.path} label={item.label} />
+								<Tab key={item.path} label={t(item.labelKey)} />
 							))}
 						</Tabs>
 					)}
@@ -211,7 +214,7 @@ export default function Header() {
 						<form onSubmit={handleSearchSubmit}>
 							<StyledTextField
 								variant="outlined"
-								placeholder="Search movies & series..."
+								placeholder={t('common.searchPlaceholder')}
 								onClick={() => navigate("/auth/search")}
 								sx={{
 									width: 250,
@@ -248,7 +251,13 @@ export default function Header() {
 						</form>
 					)}
 
-					<IconButton onClick={handleAvatarClick} size="small">
+					<LanguageSwitcher />
+
+					<IconButton
+						onClick={handleAvatarClick}
+						size="small"
+						aria-label={t('nav.accountMenu')}
+					>
 						<Avatar
 							sx={{
 								width: 32,
@@ -313,7 +322,7 @@ export default function Header() {
 							}}
 						>
 							<LayoutGrid size={18} style={{ marginRight: 10 }} />
-							My collection
+							{t('nav.myCollection')}
 						</MenuItem>
 						<MenuItem
 							onClick={() => {
@@ -322,7 +331,7 @@ export default function Header() {
 							}}
 						>
 							<Clock size={18} style={{ marginRight: 10 }} />
-							Want to watch
+							{t('nav.wantToWatch')}
 						</MenuItem>
 						<MenuItem
 							onClick={() => {
@@ -331,12 +340,12 @@ export default function Header() {
 							}}
 						>
 							<Settings size={18} style={{ marginRight: 10 }} />
-							Settings
+							{t('nav.settings')}
 						</MenuItem>
 						<Divider flexItem />
 						<MenuItem disabled={logoutMutation.isPending} onClick={handleLogout}>
 							<LogOut size={18} style={{ marginRight: 10 }} />
-							Log Out
+							{t('nav.logOut')}
 						</MenuItem>
 					</Menu>
 				</Box>

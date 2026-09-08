@@ -1,0 +1,37 @@
+{
+  "settings": {
+    "subtitle": "Dostosuj MovieMark, aby czuł się jak Twój.",
+    "accountSettings": "Ustawienia konta",
+    "namePlaceholder": "Twoje imię",
+    "surnamePlaceholder": "Twoje nazwisko",
+    "changePassword": "Zmień hasło",
+    "changing": "Zmienianie...",
+    "newPassword": "Nowe hasło",
+    "newPasswordPlaceholder": "Wpisz nowe hasło",
+    "confirmNewPassword": "Potwierdź nowe hasło",
+    "confirmPasswordPlaceholder": "Potwierdź nowe hasło",
+    "appearance": "Wygląd",
+    "theme": {
+      "light": "Jasny",
+      "lightSub": "jasny motyw",
+      "dark": "Ciemny",
+      "darkSub": "ciemny motyw",
+      "system": "System",
+      "systemSub": "Dopasuj do systemu"
+    },
+    "language": "Język",
+    "languageOptions": {
+      "english": "English",
+      "polish": "Polski"
+    },
+    "profileUpdated": "Profil zaktualizowany!",
+    "passwordChanged": "Hasło zmienione!",
+    "failedProfileUpdate": "Nie udało się zaktualizować profilu.",
+    "failedPasswordChange": "Nie udało się zmienić hasła.",
+    "accountDeletionRequested": "Zażądano usunięcia konta",
+    "deleteAccount": "Usuń konto",
+    "deleteDialogTitle": "Jesteś pewien?",
+    "deleteDialogContent": "Tej operacji nie można cofnąć. Wszystkie Twoje dane zostaną trwale usunięte.",
+    "footer": "MovieMark v1.0. Wszelkie prawa zastrzeżone. {{year}} \u00AE "
+  }
+}

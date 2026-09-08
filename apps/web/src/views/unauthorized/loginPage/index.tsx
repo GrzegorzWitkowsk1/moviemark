@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslation } from "react-i18next";
 import {
   Box,
   Typography,
@@ -18,14 +19,16 @@ import OutlinedButton from "@/shared/components/buttons/outlinedButton";
 import StyledRadio from "@/shared/components/buttons/radio";
 import { useLogin } from "@/hooks/useAuth";
 import { useSnackbar } from "@/contexts/snackbarContext";
-import { loginSchema, type LoginFormValues } from "./schema";
+import { createLoginSchema, type LoginFormValues } from "./schema";
 import logo from "@/assets/logo2.png";
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const loginMutation = useLogin();
   const { open } = useSnackbar();
+  const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
+  const [formSchema] = useState(() => createLoginSchema(t));
 
   const {
     register,
@@ -33,7 +36,7 @@ export default function LoginPage() {
     control,
     formState: { errors, isValid, isSubmitting },
   } = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(formSchema),
     mode: "onChange",
     defaultValues: { remember: false },
   });
@@ -45,13 +48,13 @@ export default function LoginPage() {
         password: data.password,
         remember: data.remember,
       });
-      open("Welcome back!", "success");
+      open(t("auth.welcomeBack"), "success");
       navigate("/auth/home");
     } catch (err) {
       open(
         err instanceof Error
           ? err.message
-          : "Something went wrong. Please try again.",
+          : t("common.somethingWentWrong"),
         "failure"
       );
     }
@@ -79,10 +82,10 @@ export default function LoginPage() {
         alt="movie-mark-logotype"
       />
       <Typography color='primary' variant="h5">
-        Welcome in MovieMark.
+        {t("auth.title")}
       </Typography>
       <Typography color='primary' variant="body1">
-        Complete your movie and series diary
+        {t("auth.subtitle")}
       </Typography>
       <StyledCard
         sx={{
@@ -107,9 +110,9 @@ export default function LoginPage() {
               alignItems: "flex-start",
             }}
           >
-            <Typography color='primary' variant="body2">Email</Typography>
+            <Typography color='primary' variant="body2">{t("common.form.email")}</Typography>
             <StyledTextField
-              placeholder="you@example.com"
+              placeholder={t("common.emailPlaceholder")}
               variant="outlined"
               fullWidth
               error={!!errors.email}
@@ -126,7 +129,7 @@ export default function LoginPage() {
               alignItems: "flex-start",
             }}
           >
-            <Typography color='primary' variant="body2">Password</Typography>
+            <Typography color='primary' variant="body2">{t("common.form.password")}</Typography>
             <StyledTextField
               type={showPassword ? "text" : "password"}
               variant="outlined"
@@ -138,7 +141,7 @@ export default function LoginPage() {
                   endAdornment: (
                     <InputAdornment position="end">
                       <IconButton
-                        aria-label="toggle password visibility"
+                        aria-label={t("common.togglePasswordVisibility")}
                         onClick={() => setShowPassword((s) => !s)}
                         onMouseDown={(e) => e.preventDefault()}
                         edge="end"
@@ -170,7 +173,7 @@ export default function LoginPage() {
                       sx={(theme) => ({ color: theme.palette.secondary.light })}
                       variant="caption"
                     >
-                      Remember me
+                      {t("auth.rememberMe")}
                     </Typography>
                   }
                 />
@@ -178,10 +181,10 @@ export default function LoginPage() {
             />
           </FormControl>
           <ContainedButton type="submit" disabled={!isValid || isSubmitting}>
-            {isSubmitting ? "Signing in..." : "Sign in"}
+            {isSubmitting ? t("auth.signingIn") : t("auth.signIn")}
           </ContainedButton>
           <OutlinedButton type="button" onClick={() => navigate("/register")}>
-            Don&apos;t have an account? Create it!
+            {t("auth.noAccount")}
           </OutlinedButton>
         </Box>
       </StyledCard>

@@ -7,6 +7,7 @@ import {
   useTheme,
 } from "@mui/material";
 import { useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Calendar, Check, Clock, Star } from "lucide-react";
 import type { TmdbMediaType } from "shared";
 import { getBackdropUrl } from "@/lib/poster";
@@ -62,10 +63,11 @@ export default function DetailsPage() {
 
 function MissingId() {
   const theme = useTheme();
+  const { t } = useTranslation();
   return (
     <Box sx={{ py: 10, textAlign: "center" }}>
       <Typography sx={{ color: theme.palette.text.secondary }}>
-        Missing or invalid movie/series id.
+        {t("details.missingId")}
       </Typography>
     </Box>
   );
@@ -87,13 +89,14 @@ function ErrorState({
   isRetrying?: boolean;
 }) {
   const theme = useTheme();
+  const { t } = useTranslation();
   return (
     <Box sx={{ py: 10, textAlign: "center" }}>
       <Typography sx={{ color: theme.palette.text.secondary, mb: 2 }}>
-        Couldn&apos;t load this title. Please try again.
+        {t("details.loadError")}
       </Typography>
       <ContainedButton onClick={onRetry} disabled={isRetrying}>
-        {isRetrying ? "Loading..." : "Try again"}
+        {isRetrying ? t("common.loading") : t("common.tryAgain")}
       </ContainedButton>
     </Box>
   );
@@ -101,6 +104,7 @@ function ErrorState({
 
 function MovieView({ id }: { id: number }) {
   const theme = useTheme();
+  const { t } = useTranslation();
   const { data, isLoading, isError, isRefetching, refetch } = useMovieDetails(id);
   const { data: similar } = useSimilarMovies(id);
   const { data: watchedStatus } = useMovieWatched(id);
@@ -158,13 +162,15 @@ function MovieView({ id }: { id: number }) {
       icon: (
         <Calendar size={18} style={{ color: alpha("#fff", 0.85) }} />
       ),
-      label: data.release_date || "Unknown",
+      label: data.release_date || t("details.unknown"),
     },
     {
       icon: (
         <Clock size={18} style={{ color: alpha("#fff", 0.85) }} />
       ),
-      label: data.runtime ? `${data.runtime} min.` : "-",
+      label: data.runtime
+        ? t("details.movieRuntime", { minutes: data.runtime })
+        : "-",
     },
   ];
 
@@ -183,20 +189,21 @@ function MovieView({ id }: { id: number }) {
               disabled={actionPending}
               startIcon={isWatched ? <Check size={16} /> : undefined}
             >
-              {isWatched ? "Watched" : "Add to watched"}
+              {isWatched ? t("details.watched") : t("details.addToWatched")}
             </ContainedButton>
 <FutureToggleButton controls={futureControls} disabled={isWatched} />
           </Box>
         }
       />
 
-      <SectionCarousel title="You may also like" movies={similar?.results ?? []} />
+      <SectionCarousel title={t("details.youMayAlsoLike")} movies={similar?.results ?? []} />
     </Box>
   );
 }
 
 function TvView({ id }: { id: number }) {
   const theme = useTheme();
+  const { t } = useTranslation();
   const { data, isLoading, isError, isRefetching, refetch } = useTvDetails(id);
   const { data: similar } = useSimilarTv(id);
   const watched: SeriesWatchedControls = useSeriesWatchedControls(id, {
@@ -250,13 +257,15 @@ function TvView({ id }: { id: number }) {
       icon: (
         <Calendar size={18} style={{ color: alpha("#fff", 0.85) }} />
       ),
-      label: data.first_air_date || "Unknown",
+      label: data.first_air_date || t("details.unknown"),
     },
     {
       icon: (
         <Clock size={18} style={{ color: alpha("#fff", 0.85) }} />
       ),
-      label: episodeMinutes ? `~ ${episodeMinutes} min/ep` : "Unknown",
+      label: episodeMinutes
+        ? t("details.minPerEpisode", { minutes: episodeMinutes })
+        : t("details.unknown"),
     },
   ];
 
@@ -273,7 +282,7 @@ function TvView({ id }: { id: number }) {
 
       <SeasonsSection tvId={data.id} seasons={data.seasons} watched={watched} />
 
-      <SectionCarousel title="You may also like" movies={[]} series={similar?.results ?? []} />
+      <SectionCarousel title={t("details.youMayAlsoLike")} movies={[]} series={similar?.results ?? []} />
     </Box>
   );
 }

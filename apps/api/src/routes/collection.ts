@@ -98,7 +98,11 @@ function toSeriesStatusResponse(doc: {
 function parseTmdbId(raw: string): number {
   const id = Number(raw);
   if (!Number.isFinite(id) || id === 0) {
-    throw new Error("Invalid tmdbId");
+    const err = new Error("error.invalidTmdbId") as Error & {
+      statusCode: number;
+    };
+    err.statusCode = 400;
+    throw err;
   }
   return id;
 }
@@ -151,7 +155,7 @@ export async function collectionRoutes(app: FastifyInstance) {
         tmdbId,
       });
       if (existing) {
-        return reply.code(409).send({ error: "Movie already in collection" });
+        return reply.code(409).send({ error: "error.collection.movieAlreadyAdded" });
       }
       await WatchedMovie.create({
         userId: userId(request),
@@ -284,7 +288,7 @@ export async function collectionRoutes(app: FastifyInstance) {
       const season = Number(request.query.season);
       const episode = Number(request.query.episode);
       if (!Number.isFinite(season) || !Number.isFinite(episode)) {
-        return reply.code(400).send({ error: "Invalid episode query" });
+        return reply.code(400).send({ error: "error.collection.invalidEpisodeQuery" });
       }
       const uid = userId(request);
 

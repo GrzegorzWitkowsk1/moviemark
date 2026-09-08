@@ -1,25 +1,32 @@
 import { z } from "zod";
+import type { TFunction } from "i18next";
 
-export const profileSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  surname: z.string().min(1, "Surname is required"),
-  email: z.email("Invalid email address"),
-});
-
-export type ProfileFormValues = z.infer<typeof profileSchema>;
-
-export const passwordSchema = z
-  .object({
-    newPassword: z
-      .string()
-      .min(8, "Password must be at least 8 characters")
-      .regex(/[A-Z]/, "Password must contain at least one capital letter")
-      .regex(/\d/, "Password must contain at least one number"),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.newPassword === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
+export function createProfileSchema(t: TFunction) {
+  return z.object({
+    name: z.string().min(1, t("validation.nameRequired")),
+    surname: z.string().min(1, t("validation.surnameRequired")),
+    email: z.email(t("validation.emailInvalid")),
   });
+}
 
-export type PasswordFormValues = z.infer<typeof passwordSchema>;
+export type ProfileFormValues = z.infer<ReturnType<typeof createProfileSchema>>;
+
+export function createPasswordSchema(t: TFunction) {
+  return z
+    .object({
+      newPassword: z
+        .string()
+        .min(8, t("validation.passwordMin"))
+        .regex(/[A-Z]/, t("validation.passwordCapital"))
+        .regex(/\d/, t("validation.passwordNumber")),
+      confirmPassword: z.string(),
+    })
+    .refine((data) => data.newPassword === data.confirmPassword, {
+      message: t("validation.passwordsDontMatch"),
+      path: ["confirmPassword"],
+    });
+}
+
+export type PasswordFormValues = z.infer<
+  ReturnType<typeof createPasswordSchema>
+>;

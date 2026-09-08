@@ -10,7 +10,12 @@ import type {
   TmdbTv,
   TmdbTvDetails,
 } from "shared";
+import i18n from "@/i18n";
 import { config } from "./config";
+
+export function tmdbLanguage(): string {
+  return i18n.language === "pl" ? "pl-PL" : "en-US";
+}
 
 async function fetchTmdbJson<T>(path: string): Promise<T> {
   if (!config.tmdbToken) {
@@ -37,17 +42,19 @@ async function fetchTmdbJson<T>(path: string): Promise<T> {
 
 export function getNowPlayingMovies(): Promise<TmdbListResult<TmdbMovie>> {
   return fetchTmdbJson<TmdbListResult<TmdbMovie>>(
-    "/movie/now_playing?language=en-US"
+    `/movie/now_playing?language=${tmdbLanguage()}`
   );
 }
 
 export function getOnTheAirTv(): Promise<TmdbListResult<TmdbTv>> {
-  return fetchTmdbJson<TmdbListResult<TmdbTv>>("/tv/on_the_air?language=en-US");
+  return fetchTmdbJson<TmdbListResult<TmdbTv>>(
+    `/tv/on_the_air?language=${tmdbLanguage()}`
+  );
 }
 
 export function getUpcomingMovies(): Promise<TmdbListResult<TmdbMovie>> {
   return fetchTmdbJson<TmdbListResult<TmdbMovie>>(
-    "/movie/upcoming?language=en-US"
+    `/movie/upcoming?language=${tmdbLanguage()}`
   );
 }
 
@@ -56,7 +63,7 @@ export function getTrending(
   timeWindow: "day" | "week"
 ): Promise<TmdbListResult<TmdbMovie | TmdbTv>> {
   return fetchTmdbJson<TmdbListResult<TmdbMovie | TmdbTv>>(
-    `/trending/${mediaType}/${timeWindow}?language=en-US`
+    `/trending/${mediaType}/${timeWindow}?language=${tmdbLanguage()}`
   );
 }
 
@@ -64,16 +71,22 @@ export function getGenres(
   mediaType: TmdbMediaType
 ): Promise<GenreListResponse> {
   return fetchTmdbJson<GenreListResponse>(
-    `/genre/${mediaType}/list?language=en-US`
+    `/genre/${mediaType}/list?language=${tmdbLanguage()}`
   );
 }
 
-export function getMovieDetails(id: number): Promise<TmdbMovieDetails> {
-  return fetchTmdbJson<TmdbMovieDetails>(`/movie/${id}?language=en-US`);
+export function getMovieDetails(
+  id: number,
+  lang: string = tmdbLanguage()
+): Promise<TmdbMovieDetails> {
+  return fetchTmdbJson<TmdbMovieDetails>(`/movie/${id}?language=${lang}`);
 }
 
-export function getTvDetails(id: number): Promise<TmdbTvDetails> {
-  return fetchTmdbJson<TmdbTvDetails>(`/tv/${id}?language=en-US`);
+export function getTvDetails(
+  id: number,
+  lang: string = tmdbLanguage()
+): Promise<TmdbTvDetails> {
+  return fetchTmdbJson<TmdbTvDetails>(`/tv/${id}?language=${lang}`);
 }
 
 export function getTvSeason(
@@ -81,25 +94,27 @@ export function getTvSeason(
   seasonNumber: number
 ): Promise<TmdbSeasonDetails> {
   return fetchTmdbJson<TmdbSeasonDetails>(
-    `/tv/${id}/season/${seasonNumber}?language=en-US`
+    `/tv/${id}/season/${seasonNumber}?language=${tmdbLanguage()}`
   );
 }
 
 export function getSimilarMovies(id: number): Promise<TmdbListResult<TmdbMovie>> {
   return fetchTmdbJson<TmdbListResult<TmdbMovie>>(
-    `/movie/${id}/similar?language=en-US`
+    `/movie/${id}/similar?language=${tmdbLanguage()}`
   );
 }
 
 export function getSimilarTv(id: number): Promise<TmdbListResult<TmdbTv>> {
-  return fetchTmdbJson<TmdbListResult<TmdbTv>>(`/tv/${id}/similar?language=en-US`);
+  return fetchTmdbJson<TmdbListResult<TmdbTv>>(
+    `/tv/${id}/similar?language=${tmdbLanguage()}`
+  );
 }
 
 export function searchMulti(
   query: string
 ): Promise<TmdbSearchResult> {
   return fetchTmdbJson<TmdbSearchResult>(
-    `/search/multi?query=${encodeURIComponent(query)}&language=en-US`
+    `/search/multi?query=${encodeURIComponent(query)}&language=${tmdbLanguage()}`
   );
 }
 

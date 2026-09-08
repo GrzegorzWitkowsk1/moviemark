@@ -1,0 +1,37 @@
+{
+  "settings": {
+    "subtitle": "Tune MovieMark to feel like yours.",
+    "accountSettings": "Account Settings",
+    "namePlaceholder": "Your name",
+    "surnamePlaceholder": "Your surname",
+    "changePassword": "Change Password",
+    "changing": "Changing...",
+    "newPassword": "New Password",
+    "newPasswordPlaceholder": "Enter new password",
+    "confirmNewPassword": "Confirm New Password",
+    "confirmPasswordPlaceholder": "Confirm new password",
+    "appearance": "Appearance",
+    "theme": {
+      "light": "Light",
+      "lightSub": "light theme",
+      "dark": "Dark",
+      "darkSub": "dark theme",
+      "system": "System",
+      "systemSub": "Match your OS"
+    },
+    "language": "Language",
+    "languageOptions": {
+      "english": "English",
+      "polish": "Polski"
+    },
+    "profileUpdated": "Profile updated!",
+    "passwordChanged": "Password changed!",
+    "failedProfileUpdate": "Failed to update profile.",
+    "failedPasswordChange": "Failed to change password.",
+    "accountDeletionRequested": "Account deletion requested",
+    "deleteAccount": "Delete Account",
+    "deleteDialogTitle": "Are you sure?",
+    "deleteDialogContent": "This action cannot be undone. All your data will be permanently deleted.",
+    "footer": "MovieMark v1.0. All rights reserved. {{year}} \u00AE "
+  }
+}

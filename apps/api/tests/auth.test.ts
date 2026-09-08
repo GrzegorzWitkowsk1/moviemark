@@ -73,7 +73,7 @@ describe("auth routes", () => {
 
     expect(res.statusCode).toBe(409);
     expect(res.json<{ error: string }>()).toEqual({
-      error: "Email already registered",
+      error: "error.auth.register.emailTaken",
     });
   });
 
@@ -232,7 +232,7 @@ describe("auth routes", () => {
     });
 
     expect(res.statusCode).toBe(409);
-    expect(res.json<{ error: string }>().error).toBe("Email already registered");
+    expect(res.json<{ error: string }>().error).toBe("error.auth.profile.emailTaken");
   });
 
   it("rejects an invalid profile body", async () => {

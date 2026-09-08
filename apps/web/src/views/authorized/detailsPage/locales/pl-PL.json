@@ -1,0 +1,24 @@
+{
+  "details": {
+    "unknown": "Nieznane",
+    "movieRuntime": "{{minutes}} min.",
+    "episodeRuntime": "{{minutes}} min",
+    "minPerEpisode": "~ {{minutes}} min/odc.",
+    "seasons": "Sezony",
+    "youMayAlsoLike": "Może Ci się spodobać",
+    "seasonLoadError": "Nie udało się wczytać odcinków tego sezonu.",
+    "episodeName": "Odcinek {{number}}",
+    "watched": "Obejrzane",
+    "addToWatched": "Dodaj do obejrzanych",
+    "inList": "Na liście",
+    "watchInFuture": "Obejrzyj w przyszłości",
+    "loadError": "Nie udało się wczytać tego tytułu. Spróbuj ponownie.",
+    "loadErrorShort": "Nie udało się wczytać tego tytułu.",
+    "missingId": "Brakujący lub nieprawidłowy identyfikator filmu/serialu.",
+    "addedByYou": "Dodane przez Ciebie do Twojej osobistej kolekcji.",
+    "markAsWatchedTitle": "Oznaczyć jako obejrzane?",
+    "markAsWatchedBody": "Oznaczasz EP{{episode}} jako obejrzany, ale {{earlier}} nie są. Czy obejrzałeś je też?",
+    "dontAskAgain": "Nie pytaj ponownie dla tego serialu",
+    "noJustEpisode": "Nie, tylko EP{{number}}"
+  }
+}

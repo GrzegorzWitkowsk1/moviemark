@@ -1,20 +1,23 @@
 import { z } from "zod";
+import type { TFunction } from "i18next";
 
-export const registerSchema = z
-  .object({
-    name: z.string().min(1, "Name is required"),
-    surname: z.string().min(1, "Surname is required"),
-    email: z.email("Invalid email address"),
-    password: z
-      .string()
-      .min(8, "Password must be at least 8 characters")
-      .regex(/[A-Z]/, "Password must contain at least one capital letter")
-      .regex(/\d/, "Password must contain at least one number"),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
+export function createRegisterSchema(t: TFunction) {
+  return z
+    .object({
+      name: z.string().min(1, t("validation.nameRequired")),
+      surname: z.string().min(1, t("validation.surnameRequired")),
+      email: z.email(t("validation.emailInvalid")),
+      password: z
+        .string()
+        .min(8, t("validation.passwordMin"))
+        .regex(/[A-Z]/, t("validation.passwordCapital"))
+        .regex(/\d/, t("validation.passwordNumber")),
+      confirmPassword: z.string(),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: t("validation.passwordsDontMatch"),
+      path: ["confirmPassword"],
+    });
+}
 
-export type RegisterFormValues = z.infer<typeof registerSchema>;
+export type RegisterFormValues = z.infer<ReturnType<typeof createRegisterSchema>>;

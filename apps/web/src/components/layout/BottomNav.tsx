@@ -8,18 +8,20 @@ import {
   useMediaQuery,
 } from '@mui/material';
 import { Home, LayoutGrid, Search, Settings } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const NAV_ITEMS = [
-  { label: 'Home', path: '/auth/home', icon: <Home size={22} /> },
-  { label: 'Collection', path: '/auth/collections', icon: <LayoutGrid size={22} /> },
-  { label: 'Search', path: '/auth/search', icon: <Search size={22} /> },
-  { label: 'Settings', path: '/auth/settings', icon: <Settings size={22} /> },
+  { labelKey: 'nav.home', path: '/auth/home', icon: <Home size={22} /> },
+  { labelKey: 'nav.collection', path: '/auth/collections', icon: <LayoutGrid size={22} /> },
+  { labelKey: 'nav.search', path: '/auth/search', icon: <Search size={22} /> },
+  { labelKey: 'nav.settings', path: '/auth/settings', icon: <Settings size={22} /> },
 ] as const;
 
 export default function BottomNav() {
   const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   if (!isMobile) return null;
@@ -72,7 +74,7 @@ export default function BottomNav() {
         {NAV_ITEMS.map((item) => (
           <BottomNavigationAction
             key={item.path}
-            label={item.label}
+            label={t(item.labelKey)}
             icon={item.icon}
           />
         ))}

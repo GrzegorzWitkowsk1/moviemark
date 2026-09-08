@@ -12,6 +12,7 @@ import type {
   WatchedMovieResponse,
   WatchedSeriesResponse,
 } from "shared";
+import { useTranslation } from "react-i18next";
 import { useCollection } from "@/hooks/useCollection";
 import { StyledSelect, StyledMenuItem, PaperStyles } from "@/shared/components/select";
 import MediaTypeToggle from "@/shared/components/MediaTypeToggle";
@@ -22,10 +23,10 @@ type SortOrder = "recent" | "rating" | "alphabetical";
 
 type CollectionItem = WatchedMovieResponse | WatchedSeriesResponse;
 
-const SORT_OPTIONS: { value: SortOrder; label: string }[] = [
-  { value: "recent", label: "Recently watched" },
-  { value: "rating", label: "Highest rated" },
-  { value: "alphabetical", label: "Alphabetical" },
+const SORT_OPTIONS: { value: SortOrder; labelKey: string }[] = [
+  { value: "recent", labelKey: "collection.sortRecent" },
+  { value: "rating", labelKey: "common.sort.highestRated" },
+  { value: "alphabetical", labelKey: "common.sort.alphabetical" },
 ];
 
 function toCardData(item: CollectionItem): MovieCardData {
@@ -67,6 +68,7 @@ function monthLabel(key: string): string {
 
 export default function CollectionPage() {
   const theme = useTheme();
+  const { t } = useTranslation();
   const [mediaType, setMediaType] = useState<TmdbMediaType>("movie");
   const [sortOrder, setSortOrder] = useState<SortOrder>("recent");
 
@@ -130,7 +132,7 @@ export default function CollectionPage() {
 					textAlign: "left",
 				}}
 			>
-				My collection
+				{t("collection.title")}
 			</Typography>
 
 			<Box
@@ -151,7 +153,7 @@ export default function CollectionPage() {
 						textAlign: "left",
 					}}
 				>
-					Your personal shelf of watched films and shows.
+					{t("collection.description")}
 				</Typography>
 
 				<StyledSelect
@@ -171,7 +173,7 @@ export default function CollectionPage() {
 				>
 					{SORT_OPTIONS.map((option) => (
 						<StyledMenuItem key={option.value} value={option.value}>
-							{option.label}
+							{t(option.labelKey)}
 						</StyledMenuItem>
 					))}
 				</StyledSelect>
@@ -199,7 +201,7 @@ export default function CollectionPage() {
 							color: theme.palette.text.secondary,
 						}}
 					>
-						Your collection is empty.
+						{t("collection.empty")}
 					</Typography>
 				</Box>
 			) : (

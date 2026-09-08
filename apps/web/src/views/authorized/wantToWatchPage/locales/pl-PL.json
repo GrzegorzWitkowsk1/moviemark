@@ -1,0 +1,7 @@
+{
+  "wantToWatch": {
+    "description": "Twoja lista filmów i seriali do obejrzenia w przyszłości.",
+    "sortRecent": "Ostatnio dodane",
+    "empty": "Twoja lista do obejrzenia jest pusta."
+  }
+}

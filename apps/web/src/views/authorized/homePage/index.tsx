@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Box, CircularProgress, InputAdornment, Typography, alpha, useTheme } from "@mui/material";
 import { Search } from "lucide-react";
 import {
@@ -14,6 +15,7 @@ import SectionCarousel from "./components/SectionCarousel";
 export default function HomePage() {
   const theme = useTheme();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [query, setQuery] = useState("");
 
   const newContent = useNewContent();
@@ -44,7 +46,7 @@ export default function HomePage() {
             mb: 1.5,
           }}
         >
-          Your calm little cinema log.
+          {t("home.heroTitle")}
         </Typography>
 
         <Typography
@@ -55,8 +57,7 @@ export default function HomePage() {
             mb: 3,
           }}
         >
-          Browse, rate and remember the movies and shows you love — in a space
-          that feels like a favorite café.
+          {t("home.heroSubtitle")}
         </Typography>
 
         <Box
@@ -79,7 +80,7 @@ export default function HomePage() {
             variant="outlined"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search movies & series..."
+            placeholder={t("common.searchPlaceholder")}
             slotProps={{
               input: {
                 startAdornment: (
@@ -103,7 +104,7 @@ export default function HomePage() {
             size="large"
             sx={{ px: 3, flexShrink: 0, height: 45 }}
           >
-            Search
+            {t("common.search")}
           </ContainedButton>
         </Box>
       </Box>
@@ -115,18 +116,18 @@ export default function HomePage() {
       ) : (
         <Box sx={{ display: "flex", flexDirection: "column", gap: 5 }}>
           <SectionCarousel
-            title="New Releases"
+            title={t("home.newReleases")}
             movies={newContent.data?.movies ?? []}
             series={newContent.data?.series ?? []}
           />
 
           <SectionCarousel
-            title="Upcoming"
+            title={t("home.upcoming")}
             movies={upcoming.data ?? []}
           />
 
           <SectionCarousel
-            title="Trending"
+            title={t("home.trending")}
             movies={trending.data?.movies ?? []}
             series={trending.data?.series ?? []}
           />

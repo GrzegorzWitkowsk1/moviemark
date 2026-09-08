@@ -32,7 +32,11 @@ async function allocateCustomId(uid: Types.ObjectId): Promise<number> {
     { new: true }
   );
   if (!user) {
-    throw new Error("User not found");
+    const err = new Error("error.auth.userNotFound") as Error & {
+      statusCode: number;
+    };
+    err.statusCode = 404;
+    throw err;
   }
   const customId = -(user.nextCustomId - 1);
   if (customId >= 0) {
@@ -191,7 +195,7 @@ export async function customRoutes(app: FastifyInstance) {
     async (request, reply) => {
       const rawId = Number(request.params.id);
       if (!Number.isFinite(rawId) || rawId >= 0) {
-        return reply.code(400).send({ error: "Invalid custom id" });
+        return reply.code(400).send({ error: "error.custom.invalidId" });
       }
       const uid = userId(request);
       const type = request.query.type;
@@ -199,7 +203,7 @@ export async function customRoutes(app: FastifyInstance) {
       if (type === "movie") {
         const doc = await CustomMovie.findOne({ userId: uid, customId: rawId });
         if (!doc) {
-          return reply.code(404).send({ error: "Custom movie not found" });
+          return reply.code(404).send({ error: "error.custom.movieNotFound" });
         }
         return {
           customId: doc.customId,
@@ -215,7 +219,7 @@ export async function customRoutes(app: FastifyInstance) {
       if (type === "tv") {
         const doc = await CustomSeries.findOne({ userId: uid, customId: rawId });
         if (!doc) {
-          return reply.code(404).send({ error: "Custom series not found" });
+          return reply.code(404).send({ error: "error.custom.seriesNotFound" });
         }
         return {
           customId: doc.customId,
@@ -232,7 +236,7 @@ export async function customRoutes(app: FastifyInstance) {
         };
       }
 
-      return reply.code(400).send({ error: "Invalid media type" });
+      return reply.code(400).send({ error: "error.invalidMediaType" });
     }
   );
 }

@@ -5,6 +5,7 @@ import {
   DialogActions,
   useTheme,
 } from "@mui/material";
+import { useTranslation } from "react-i18next";
 import ContainedButton from "./buttons/containedButton";
 
 export interface SharedDialogProps {
@@ -23,14 +24,17 @@ export default function SharedDialog({
   open,
   title,
   content,
-  confirmLabel = "Confirm",
-  cancelLabel = "Cancel",
+  confirmLabel,
+  cancelLabel,
   variant = "default",
   onConfirm,
   onCancel,
   confirmPending = false,
 }: SharedDialogProps) {
   const theme = useTheme();
+  const { t } = useTranslation();
+  const resolvedConfirmLabel = confirmLabel ?? t("common.confirm");
+  const resolvedCancelLabel = cancelLabel ?? t("common.cancel");
 
   return (
     <Dialog
@@ -56,14 +60,14 @@ export default function SharedDialog({
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2.5, gap: 1 }}>
         <ContainedButton onClick={onCancel} disabled={confirmPending}>
-          {cancelLabel}
+          {resolvedCancelLabel}
         </ContainedButton>
         <ContainedButton
           isDelete={variant === "delete"}
           onClick={onConfirm}
           disabled={confirmPending}
         >
-          {confirmPending ? "Please wait..." : confirmLabel}
+          {confirmPending ? t("common.pleaseWait") : resolvedConfirmLabel}
         </ContainedButton>
       </DialogActions>
     </Dialog>

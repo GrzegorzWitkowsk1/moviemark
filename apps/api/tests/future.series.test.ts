@@ -96,7 +96,7 @@ describe("future series routes", () => {
 
     expect(res.statusCode).toBe(409);
     expect(res.json<{ error: string }>()).toEqual({
-      error: "Series already in want to watch list",
+      error: "error.future.seriesAlreadyAdded",
     });
   });
 

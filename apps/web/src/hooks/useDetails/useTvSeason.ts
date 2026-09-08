@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import type { TmdbSeasonDetails } from "shared";
-import { getTvSeason } from "@/lib/tmdb";
+import { getTvSeason, tmdbLanguage } from "@/lib/tmdb";
 
 export function useTvSeason(
   id: number,
@@ -8,7 +8,7 @@ export function useTvSeason(
   options: { enabled?: boolean } = {}
 ) {
   return useQuery({
-    queryKey: ["tmdb", "tv", id, "season", seasonNumber],
+    queryKey: ["tmdb", "tv", tmdbLanguage(), id, "season", seasonNumber],
     queryFn: () => getTvSeason(id, seasonNumber),
     enabled: options.enabled !== false && Number.isFinite(id) && seasonNumber > 0,
   });

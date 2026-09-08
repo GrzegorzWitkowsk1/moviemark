@@ -2,10 +2,12 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
 } from "react";
+import i18n, { STORAGE_KEY } from "@/i18n";
 
 export type Language = "en" | "pl";
 
@@ -14,15 +16,15 @@ interface LanguageContextValue {
   setLanguage: (lang: Language) => void;
 }
 
-const STORAGE_KEY = "moviemark-language";
-
 function getInitialLanguage(): Language {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored === "en" || stored === "pl") {
       return stored;
     }
-  } catch {}
+  } catch {
+    // ignore storage availability errors
+  }
   return "en";
 }
 
@@ -33,11 +35,17 @@ const LanguageContext = createContext<LanguageContextValue | undefined>(
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>(getInitialLanguage);
 
+  useEffect(() => {
+    void i18n.changeLanguage(language);
+  }, [language]);
+
   const setLanguage = useCallback((newLang: Language) => {
     setLanguageState(newLang);
     try {
       localStorage.setItem(STORAGE_KEY, newLang);
-    } catch {}
+    } catch {
+      // ignore storage availability errors
+    }
   }, []);
 
   const value = useMemo(

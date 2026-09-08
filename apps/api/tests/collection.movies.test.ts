@@ -91,7 +91,7 @@ describe("collection movie routes", () => {
 
     expect(res.statusCode).toBe(409);
     expect(res.json<{ error: string }>()).toEqual({
-      error: "Movie already in collection",
+      error: "error.collection.movieAlreadyAdded",
     });
   });
 

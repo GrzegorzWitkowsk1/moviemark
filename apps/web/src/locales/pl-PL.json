@@ -1,0 +1,109 @@
+{
+  "common": {
+    "search": "Szukaj",
+    "searchPlaceholder": "Szukaj filmów i seriali...",
+    "movies": "Filmy",
+    "series": "Seriale",
+    "noDescription": "Brak dostępnego opisu.",
+    "saveChanges": "Zapisz zmiany",
+    "saving": "Zapisywanie...",
+    "cancel": "Anuluj",
+    "confirm": "Potwierdź",
+    "pleaseWait": "Proszę czekać...",
+    "yes": "Tak",
+    "no": "Nie",
+    "loading": "Wczytywanie...",
+    "tryAgain": "Spróbuj ponownie",
+    "somethingWentWrong": "Coś poszło nie tak. Spróbuj ponownie.",
+    "networkError": "Błąd sieci. Spróbuj ponownie później.",
+    "genericError": "Coś poszło nie tak. Spróbuj ponownie.",
+    "togglePasswordVisibility": "przełącz widoczność hasła",
+    "seasonHeader": "Sezon {{number}}",
+    "ratingVotes": "({{count}})",
+    "emailPlaceholder": "ty@przyklad.pl",
+    "form": {
+      "name": "Imię",
+      "surname": "Nazwisko",
+      "email": "E-mail",
+      "password": "Hasło"
+    },
+    "mediaType": {
+      "movies": "Filmy",
+      "series": "Seriale"
+    },
+    "sort": {
+      "alphabetical": "Alfabetycznie",
+      "highestRated": "Najwyżej oceniane"
+    }
+  },
+  "nav": {
+    "home": "Strona główna",
+    "collection": "Kolekcja",
+    "wantToWatch": "Do obejrzenia",
+    "search": "Szukaj",
+    "settings": "Ustawienia",
+    "myCollection": "Moja kolekcja",
+    "logOut": "Wyloguj się",
+    "accountMenu": "Menu konta"
+  },
+  "auth": {
+    "title": "Witaj w MovieMark.",
+    "subtitle": "Uzupełnij swój dziennik filmów i seriali",
+    "signIn": "Zaloguj się",
+    "signingIn": "Logowanie...",
+    "rememberMe": "Zapamiętaj mnie",
+    "noAccount": "Nie masz konta? Załóż je!",
+    "welcomeBack": "Witaj ponownie!",
+    "register": "Zarejestruj się",
+    "registering": "Rejestracja...",
+    "repeatPassword": "Powtórz hasło",
+    "alreadyHaveAccount": "Masz już konto?",
+    "registrationSuccess": "Rejestracja zakończona sukcesem, nastąpi przekierowanie do strony logowania",
+    "namePlaceholder": "Jan",
+    "surnamePlaceholder": "Kowalski"
+  },
+  "validation": {
+    "nameRequired": "Imię jest wymagane",
+    "surnameRequired": "Nazwisko jest wymagane",
+    "emailInvalid": "Nieprawidłowy adres e-mail",
+    "passwordRequired": "Hasło jest wymagane",
+    "passwordMin": "Hasło musi mieć co najmniej 8 znaków",
+    "passwordCapital": "Hasło musi zawierać co najmniej jedną wielką literę",
+    "passwordNumber": "Hasło musi zawierać co najmniej jedną cyfrę",
+    "passwordsDontMatch": "Hasła nie są zgodne"
+  },
+  "error": {
+    "generic": "Coś poszło nie tak. Spróbuj ponownie.",
+    "unauthorized": "Brak autoryzacji",
+    "internal": "Wewnętrzny błąd serwera",
+    "invalidRequest": "Nieprawidłowe żądanie",
+    "requestFailed": "Żądanie nie powiodło się",
+    "invalidTmdbId": "Nieprawidłowe tmdbId",
+    "invalidMediaType": "Nieprawidłowy typ multimediów",
+    "auth": {
+      "login": {
+        "invalidCredentials": "Nieprawidłowy e-mail lub hasło"
+      },
+      "register": {
+        "emailTaken": "Ten e-mail jest już zarejestrowany"
+      },
+      "profile": {
+        "emailTaken": "Ten e-mail jest już zarejestrowany"
+      },
+      "userNotFound": "Nie znaleziono użytkownika"
+    },
+    "collection": {
+      "movieAlreadyAdded": "Film jest już w kolekcji",
+      "invalidEpisodeQuery": "Nieprawidłowe zapytanie o odcinek"
+    },
+    "custom": {
+      "invalidId": "Nieprawidłowe id niestandardowe",
+      "movieNotFound": "Nie znaleziono niestandardowego filmu",
+      "seriesNotFound": "Nie znaleziono niestandardowego serialu"
+    },
+    "future": {
+      "movieAlreadyAdded": "Film jest już na liście do obejrzenia",
+      "seriesAlreadyAdded": "Serial jest już na liście do obejrzenia"
+    }
+  }
+}

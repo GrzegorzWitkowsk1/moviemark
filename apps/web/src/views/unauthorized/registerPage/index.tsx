@@ -4,12 +4,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Typography, InputAdornment, IconButton } from "@mui/material";
 import { Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import type { RegisterRequest } from "shared";
 import StyledCard from "@/shared/components/card";
 import StyledTextField from "@/shared/components/textField";
 import ContainedButton from "@/shared/components/buttons/containedButton";
 import OutlinedButton from "@/shared/components/buttons/outlinedButton";
-import { registerSchema, type RegisterFormValues } from "./schema";
+import { createRegisterSchema, type RegisterFormValues } from "./schema";
 import { useRegister } from "@/hooks/useAuth";
 import { useSnackbar } from "@/contexts/snackbarContext";
 import logo from "@/assets/logo2.png";
@@ -18,16 +19,18 @@ export default function RegisterPage() {
   const navigate = useNavigate();
   const { open } = useSnackbar();
   const registerMutation = useRegister();
+  const { t } = useTranslation();
   const [registered, setRegistered] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [formSchema] = useState(() => createRegisterSchema(t));
 
   const {
     register,
     handleSubmit,
     formState: { errors, isValid, isSubmitting },
   } = useForm<RegisterFormValues>({
-    resolver: zodResolver(registerSchema),
+    resolver: zodResolver(formSchema),
     mode: "onChange",
   });
 
@@ -47,16 +50,13 @@ export default function RegisterPage() {
 
     try {
       await registerMutation.mutateAsync(payload);
-      open(
-        "Registration successful, you will be redirected to the login page",
-        "success"
-      );
+      open(t("auth.registrationSuccess"), "success");
       setRegistered(true);
     } catch (err) {
       open(
         err instanceof Error
           ? err.message
-          : "Something went wrong. Please try again.",
+          : t("common.somethingWentWrong"),
         "failure"
       );
     }
@@ -84,10 +84,10 @@ export default function RegisterPage() {
         alt="movie-mark-logotype"
       />
       <Typography color='primary' variant="h5">
-        Welcome in MovieMark.
+        {t("auth.title")}
       </Typography>
       <Typography color='primary' variant="body1">
-        Complete your movie and series diary
+        {t("auth.subtitle")}
       </Typography>
       <StyledCard
         sx={{
@@ -112,9 +112,9 @@ export default function RegisterPage() {
               alignItems: "flex-start",
             }}
           >
-            <Typography color='primary' variant="body2">Name</Typography>
+            <Typography color='primary' variant="body2">{t("common.form.name")}</Typography>
             <StyledTextField
-              placeholder="John"
+              placeholder={t("auth.namePlaceholder")}
               variant="outlined"
               fullWidth
               error={!!errors.name}
@@ -130,9 +130,9 @@ export default function RegisterPage() {
               alignItems: "flex-start",
             }}
           >
-            <Typography color='primary' variant="body2">Surname</Typography>
+            <Typography color='primary' variant="body2">{t("common.form.surname")}</Typography>
             <StyledTextField
-              placeholder="Doe"
+              placeholder={t("auth.surnamePlaceholder")}
               variant="outlined"
               fullWidth
               error={!!errors.surname}
@@ -148,9 +148,9 @@ export default function RegisterPage() {
               alignItems: "flex-start",
             }}
           >
-            <Typography color='primary' variant="body2">Email</Typography>
+            <Typography color='primary' variant="body2">{t("common.form.email")}</Typography>
             <StyledTextField
-              placeholder="you@example.com"
+              placeholder={t("common.emailPlaceholder")}
               variant="outlined"
               fullWidth
               error={!!errors.email}
@@ -166,7 +166,7 @@ export default function RegisterPage() {
               alignItems: "flex-start",
             }}
           >
-            <Typography color='primary' variant="body2">Password</Typography>
+            <Typography color='primary' variant="body2">{t("common.form.password")}</Typography>
             <StyledTextField
               type={showPassword ? "text" : "password"}
               variant="outlined"
@@ -178,7 +178,7 @@ export default function RegisterPage() {
                   endAdornment: (
                     <InputAdornment position="end">
                       <IconButton
-                        aria-label="toggle password visibility"
+                        aria-label={t("common.togglePasswordVisibility")}
                         onClick={() => setShowPassword((s) => !s)}
                         onMouseDown={(e) => e.preventDefault()}
                         edge="end"
@@ -201,7 +201,7 @@ export default function RegisterPage() {
               alignItems: "flex-start",
             }}
           >
-            <Typography color='primary' variant="body2">Repeat password</Typography>
+            <Typography color='primary' variant="body2">{t("auth.repeatPassword")}</Typography>
             <StyledTextField
               type={showConfirmPassword ? "text" : "password"}
               variant="outlined"
@@ -213,7 +213,7 @@ export default function RegisterPage() {
                   endAdornment: (
                     <InputAdornment position="end">
                       <IconButton
-                        aria-label="toggle password visibility"
+                        aria-label={t("common.togglePasswordVisibility")}
                         onClick={() => setShowConfirmPassword((s) => !s)}
                         onMouseDown={(e) => e.preventDefault()}
                         edge="end"
@@ -229,10 +229,10 @@ export default function RegisterPage() {
             />
           </Box>
           <ContainedButton type="submit" disabled={!isValid || isSubmitting}>
-            {isSubmitting ? "Registering..." : "Register"}
+            {isSubmitting ? t("auth.registering") : t("auth.register")}
           </ContainedButton>
           <OutlinedButton type="button" onClick={() => navigate("/login")}>
-            Already have an account?
+            {t("auth.alreadyHaveAccount")}
           </OutlinedButton>
         </Box>
       </StyledCard>

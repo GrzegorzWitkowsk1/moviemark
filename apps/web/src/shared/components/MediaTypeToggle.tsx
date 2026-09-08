@@ -1,4 +1,5 @@
 import { Box, alpha, useTheme } from "@mui/material";
+import { useTranslation } from "react-i18next";
 import type { TmdbMediaType } from "shared";
 
 interface MediaTypeToggleProps {
@@ -6,9 +7,9 @@ interface MediaTypeToggleProps {
   onChange: (value: TmdbMediaType) => void;
 }
 
-const OPTIONS: { value: TmdbMediaType; label: string }[] = [
-  { value: "movie", label: "Movies" },
-  { value: "tv", label: "Series" },
+const OPTIONS: { value: TmdbMediaType; labelKey: string }[] = [
+  { value: "movie", labelKey: "common.mediaType.movies" },
+  { value: "tv", labelKey: "common.mediaType.series" },
 ];
 
 export default function MediaTypeToggle({
@@ -16,6 +17,7 @@ export default function MediaTypeToggle({
   onChange,
 }: MediaTypeToggleProps) {
   const theme = useTheme();
+  const { t } = useTranslation();
 
   return (
     <Box
@@ -54,7 +56,7 @@ export default function MediaTypeToggle({
               ),
             }}
           >
-            {option.label}
+            {t(option.labelKey)}
           </Box>
         );
       })}

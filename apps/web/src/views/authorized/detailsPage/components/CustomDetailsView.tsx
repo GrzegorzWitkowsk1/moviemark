@@ -11,6 +11,7 @@ import {
   AccordionDetails,
 } from "@mui/material";
 import { Calendar, Clock, ChevronDown, Tag, Check } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import type { TmdbMediaType } from "shared";
 import { useCustomItem } from "@/hooks/useCustom";
 import {
@@ -35,6 +36,7 @@ export default function CustomDetailsView({
   mediaType,
 }: CustomDetailsViewProps) {
   const theme = useTheme();
+  const { t } = useTranslation();
   const { data, isLoading, isError, isRefetching, refetch } = useCustomItem(id, mediaType);
   const genreList = useResolveGenres(mediaType, data?.genreIds ?? []);
   const [expanded, setExpanded] = useState<number[]>([]);
@@ -77,10 +79,10 @@ export default function CustomDetailsView({
     return (
       <Box sx={{ py: 10, textAlign: "center" }}>
         <Typography sx={{ color: theme.palette.text.secondary, mb: 2 }}>
-          Couldn&apos;t load this title.
+          {t("details.loadErrorShort")}
         </Typography>
         <ContainedButton onClick={() => refetch()} disabled={isRefetching}>
-          {isRefetching ? "Loading..." : "Try again"}
+          {isRefetching ? t("common.loading") : t("common.tryAgain")}
         </ContainedButton>
       </Box>
     );
@@ -109,7 +111,7 @@ export default function CustomDetailsView({
   if (data.mediaType === "movie" && data.runtimeMinutes) {
     meta.push({
       icon: <Clock size={18} style={{ color: alpha("#fff", 0.85) }} />,
-      label: `${data.runtimeMinutes} min.`,
+      label: t("details.movieRuntime", { minutes: data.runtimeMinutes }),
     });
   }
 
@@ -140,7 +142,7 @@ export default function CustomDetailsView({
         posterPath={null}
         title={data.name}
         meta={meta}
-        overview="Added by you to your personal collection."
+        overview={t("details.addedByYou")}
         action={
           data.mediaType === "movie" ? (
             <ContainedButton
@@ -148,7 +150,7 @@ export default function CustomDetailsView({
               disabled={movieActionPending}
               startIcon={movieWatched ? <Check size={16} /> : undefined}
             >
-              {movieWatched ? "Watched" : "Add to watched"}
+              {movieWatched ? t("details.watched") : t("details.addToWatched")}
             </ContainedButton>
           ) : undefined
         }
@@ -164,9 +166,9 @@ export default function CustomDetailsView({
               letterSpacing: "-0.02em",
               mb: 2,
             }}
-          >
-            Seasons
-          </Typography>
+>
+              {t("details.seasons")}
+            </Typography>
 
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
             {data.seasons.map((season) => {
@@ -200,7 +202,7 @@ export default function CustomDetailsView({
                         color: theme.palette.text.primary,
                       }}
                     >
-                      {`Season ${season.seasonNumber}`}
+                      {t("common.seasonHeader", { number: season.seasonNumber })}
                     </Typography>
                   </AccordionSummary>
                   <AccordionDetails sx={{ px: 2.5, pb: 2.5 }}>
@@ -265,7 +267,7 @@ export default function CustomDetailsView({
                                 minWidth: 0,
                               }}
                             >
-                              {episode.name || `EP ${episode.episode}`}
+                              {episode.name || t("addCustom.episodePrefix", { number: episode.episode })}
                             </Typography>
                           </Box>
                         </Box>

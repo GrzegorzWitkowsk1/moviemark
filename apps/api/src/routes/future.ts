@@ -87,7 +87,11 @@ function toSeriesResponse(
 function parseTmdbId(raw: string): number {
   const id = Number(raw);
   if (!Number.isFinite(id) || id === 0) {
-    throw new Error("Invalid tmdbId");
+    const err = new Error("error.invalidTmdbId") as Error & {
+      statusCode: number;
+    };
+    err.statusCode = 400;
+    throw err;
   }
   return id;
 }
@@ -142,7 +146,7 @@ export async function futureRoutes(app: FastifyInstance) {
       if (existing) {
         return reply
           .code(409)
-          .send({ error: "Movie already in want to watch list" });
+          .send({ error: "error.future.movieAlreadyAdded" });
       }
       await FutureMovie.create({
         userId: userId(request),
@@ -216,7 +220,7 @@ export async function futureRoutes(app: FastifyInstance) {
       if (existing) {
         return reply
           .code(409)
-          .send({ error: "Series already in want to watch list" });
+          .send({ error: "error.future.seriesAlreadyAdded" });
       }
       await FutureSeries.create({
         userId: userId(request),

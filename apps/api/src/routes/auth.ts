@@ -65,7 +65,7 @@ export async function authRoutes(app: FastifyInstance) {
         if (existing) {
           return reply
             .code(409)
-            .send({ error: "Email already registered" });
+            .send({ error: "error.auth.register.emailTaken" });
         }
 
         const passwordHash = await Bun.password.hash(password, {
@@ -86,7 +86,7 @@ export async function authRoutes(app: FastifyInstance) {
         request.log.error(error);
         return reply
           .code(500)
-          .send({ error: "Internal server error" });
+          .send({ error: "error.internal" });
       }
     }
   );
@@ -115,12 +115,16 @@ export async function authRoutes(app: FastifyInstance) {
 
         const user = await User.findOne({ email: email.toLowerCase() });
         if (!user) {
-          return reply.code(401).send({ error: "Invalid email or password" });
+          return reply
+            .code(401)
+            .send({ error: "error.auth.login.invalidCredentials" });
         }
 
         const valid = await Bun.password.verify(password, user.passwordHash);
         if (!valid) {
-          return reply.code(401).send({ error: "Invalid email or password" });
+          return reply
+            .code(401)
+            .send({ error: "error.auth.login.invalidCredentials" });
         }
 
         const userData = toUserResponse(user);
@@ -131,7 +135,7 @@ export async function authRoutes(app: FastifyInstance) {
         return reply.send({ user: userData, accessToken });
       } catch (error) {
         request.log.error(error);
-        return reply.code(500).send({ error: "Internal server error" });
+        return reply.code(500).send({ error: "error.internal" });
       }
     }
   );
@@ -143,14 +147,14 @@ export async function authRoutes(app: FastifyInstance) {
     async (request, reply) => {
       const token = request.cookies[config.cookieName];
       if (!token) {
-        return reply.code(401).send({ error: "Unauthorized" });
+        return reply.code(401).send({ error: "error.unauthorized" });
       }
 
       try {
         const payload = app.jwt.verify<{ userId: string }>(token);
         const user = await User.findById(payload.userId);
         if (!user) {
-          return reply.code(401).send({ error: "Unauthorized" });
+          return reply.code(401).send({ error: "error.unauthorized" });
         }
 
         const userData = toUserResponse(user);
@@ -158,7 +162,7 @@ export async function authRoutes(app: FastifyInstance) {
         return reply.send({ accessToken });
       } catch (error) {
         request.log.error(error);
-        return reply.code(401).send({ error: "Unauthorized" });
+        return reply.code(401).send({ error: "error.unauthorized" });
       }
     }
   );
@@ -210,7 +214,7 @@ export async function authRoutes(app: FastifyInstance) {
           _id: { $ne: uid },
         });
         if (existing) {
-          return reply.code(409).send({ error: "Email already registered" });
+          return reply.code(409).send({ error: "error.auth.profile.emailTaken" });
         }
 
         const user = await User.findByIdAndUpdate(
@@ -219,7 +223,7 @@ export async function authRoutes(app: FastifyInstance) {
           { new: true }
         );
         if (!user) {
-          return reply.code(404).send({ error: "User not found" });
+          return reply.code(404).send({ error: "error.auth.userNotFound" });
         }
 
         const userData = toUserResponse(user);
@@ -227,7 +231,7 @@ export async function authRoutes(app: FastifyInstance) {
         return reply.send({ user: userData, accessToken });
       } catch (error) {
         request.log.error(error);
-        return reply.code(500).send({ error: "Internal server error" });
+        return reply.code(500).send({ error: "error.internal" });
       }
     }
   );
@@ -264,13 +268,13 @@ export async function authRoutes(app: FastifyInstance) {
           { new: true }
         );
         if (!user) {
-          return reply.code(404).send({ error: "User not found" });
+          return reply.code(404).send({ error: "error.auth.userNotFound" });
         }
 
         return reply.send({ message: "Password changed successfully" });
       } catch (error) {
         request.log.error(error);
-        return reply.code(500).send({ error: "Internal server error" });
+        return reply.code(500).send({ error: "error.internal" });
       }
     }
   );

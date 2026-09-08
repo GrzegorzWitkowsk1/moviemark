@@ -11,6 +11,7 @@ import type {
   FutureSeriesResponse,
   TmdbMediaType,
 } from "shared";
+import { useTranslation } from "react-i18next";
 import { useFutureList } from "@/hooks/useFuture";
 import {
   StyledSelect,
@@ -24,10 +25,10 @@ type SortOrder = "recent" | "rating" | "alphabetical";
 
 type FutureItem = FutureMovieResponse | FutureSeriesResponse;
 
-const SORT_OPTIONS: { value: SortOrder; label: string }[] = [
-  { value: "recent", label: "Recently added" },
-  { value: "rating", label: "Highest rated" },
-  { value: "alphabetical", label: "Alphabetical" },
+const SORT_OPTIONS: { value: SortOrder; labelKey: string }[] = [
+  { value: "recent", labelKey: "wantToWatch.sortRecent" },
+  { value: "rating", labelKey: "common.sort.highestRated" },
+  { value: "alphabetical", labelKey: "common.sort.alphabetical" },
 ];
 
 function toCardData(item: FutureItem): MovieCardData {
@@ -59,6 +60,7 @@ function itemRating(item: FutureItem): number {
 
 export default function WantToWatchPage() {
   const theme = useTheme();
+  const { t } = useTranslation();
   const [mediaType, setMediaType] = useState<TmdbMediaType>("movie");
   const [sortOrder, setSortOrder] = useState<SortOrder>("recent");
 
@@ -105,7 +107,7 @@ export default function WantToWatchPage() {
           textAlign: "left",
         }}
       >
-        Want to watch
+        {t("nav.wantToWatch")}
       </Typography>
 
       <Box
@@ -126,7 +128,7 @@ export default function WantToWatchPage() {
             textAlign: "left",
           }}
         >
-          Your list of films and shows to watch in the future.
+          {t("wantToWatch.description")}
         </Typography>
 
         <StyledSelect
@@ -146,7 +148,7 @@ export default function WantToWatchPage() {
         >
           {SORT_OPTIONS.map((option) => (
             <StyledMenuItem key={option.value} value={option.value}>
-              {option.label}
+              {t(option.labelKey)}
             </StyledMenuItem>
           ))}
         </StyledSelect>
@@ -168,7 +170,7 @@ export default function WantToWatchPage() {
               color: theme.palette.text.secondary,
             }}
           >
-            Your want to watch list is empty.
+            {t("wantToWatch.empty")}
           </Typography>
         </Box>
       ) : (

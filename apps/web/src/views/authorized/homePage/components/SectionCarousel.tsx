@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import type { TmdbMediaType, TmdbMovie, TmdbTv } from "shared";
 import MovieCard, { type MovieCardData } from "@/shared/components/MovieCard";
 import MediaTypeToggle from "@/shared/components/MediaTypeToggle";
@@ -52,6 +53,7 @@ export default function SectionCarousel({
   series,
 }: SectionCarouselProps) {
   const theme = useTheme();
+  const { t } = useTranslation();
   const perPage = usePerPage();
   const hasSeriesToggle = !!series && series.length > 0 && movies.length > 0;
 
@@ -109,6 +111,7 @@ export default function SectionCarousel({
 							size="small"
 							disabled={currentPage === 0}
 							onClick={() => setPageIndex(currentPage - 1)}
+							aria-label={t("home.previous")}
 							sx={{
 								color: theme.palette.text.secondary,
 								border: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
@@ -125,6 +128,7 @@ export default function SectionCarousel({
 							size="small"
 							disabled={currentPage >= totalPages - 1}
 							onClick={() => setPageIndex(currentPage + 1)}
+							aria-label={t("home.next")}
 							sx={{
 								color: theme.palette.text.secondary,
 								border: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,

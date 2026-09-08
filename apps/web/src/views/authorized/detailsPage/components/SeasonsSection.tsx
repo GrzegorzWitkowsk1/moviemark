@@ -19,6 +19,7 @@ import {
   useTheme,
 } from "@mui/material";
 import { ChevronDown, Clock } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import type { TmdbEpisode, TmdbSeasonSummary } from "shared";
 import { useTvSeason } from "@/hooks/useDetails";
 import type { SeriesWatchedControls } from "@/hooks/useCollection";
@@ -38,6 +39,7 @@ export default function SeasonsSection({
   watched,
 }: SeasonsSectionProps) {
   const theme = useTheme();
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState<number[]>(() =>
     seasons.length > 0 ? [seasons[0].season_number] : []
   );
@@ -66,7 +68,7 @@ export default function SeasonsSection({
           mb: 2,
         }}
       >
-        Seasons
+        {t("details.seasons")}
       </Typography>
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
@@ -106,6 +108,7 @@ function SeasonAccordion({
   onToggle,
 }: SeasonAccordionProps) {
   const theme = useTheme();
+  const { t } = useTranslation();
   const prompt = useWatchedPrompt();
   const { data, isLoading } = useTvSeason(tvId, season.season_number, {
     enabled: expanded,
@@ -214,7 +217,7 @@ function SeasonAccordion({
                 color: theme.palette.text.primary,
               }}
             >
-              {`Season ${season.season_number}${seasonLabel}`}
+              {t("common.seasonHeader", { number: season.season_number })}{seasonLabel}
             </Typography>
             <Typography
               sx={{
@@ -251,7 +254,7 @@ function SeasonAccordion({
           <Typography
             sx={{ color: theme.palette.text.secondary, fontSize: "0.9rem" }}
           >
-            Couldn&apos;t load episodes for this season.
+            {t("details.seasonLoadError")}
           </Typography>
         ) : (
           <Box>
@@ -302,7 +305,7 @@ function SeasonAccordion({
                           : theme.palette.text.primary,
                       }}
                     >
-                      {episode.name || `Episode ${episode.episode_number}`}
+                      {episode.name || t("details.episodeName", { number: episode.episode_number })}
                     </Typography>
                     {episode.runtime ? (
                       <Typography
@@ -317,7 +320,7 @@ function SeasonAccordion({
                         }}
                       >
                         <Clock size={15} />
-                        {`${episode.runtime} min`}
+                        {t("details.episodeRuntime", { minutes: episode.runtime })}
                       </Typography>
                     ) : null}
                   </Box>
@@ -329,13 +332,14 @@ function SeasonAccordion({
       </AccordionDetails>
 
       <Dialog open={pending !== null} onClose={() => closePending(false)}>
-        <DialogTitle>Mark as watched?</DialogTitle>
+        <DialogTitle>{t("details.markAsWatchedTitle")}</DialogTitle>
         <DialogContent>
           <DialogContentText>
             {pending
-              ? `You're marking EP${pending.episode.episode_number} as watched, but ${earlierNumbers
-                  .map((n) => `EP${n}`)
-                  .join(", ")} aren't. Did you watch them too?`
+              ? t("details.markAsWatchedBody", {
+                  episode: pending.episode.episode_number,
+                  earlier: earlierNumbers.map((n) => `EP${n}`).join(", "),
+                })
               : ""}
           </DialogContentText>
           <FormControlLabel
@@ -346,7 +350,7 @@ function SeasonAccordion({
                 color="primary"
               />
             }
-            label="Don't ask again for this series"
+            label={t("details.dontAskAgain")}
             sx={{ mt: 2 }}
           />
         </DialogContent>
@@ -355,13 +359,13 @@ function SeasonAccordion({
             onClick={() => closePending(false)}
             disabled={watched.isEpisodePending}
           >
-            {`No, just EP${pending?.episode.episode_number ?? ""}`}
+            {t("details.noJustEpisode", { number: pending?.episode.episode_number ?? "" })}
           </OutlinedButton>
           <ContainedButton
             onClick={() => closePending(true)}
             disabled={watched.isEpisodePending}
           >
-            Yes
+            {t("common.yes")}
           </ContainedButton>
         </DialogActions>
       </Dialog>

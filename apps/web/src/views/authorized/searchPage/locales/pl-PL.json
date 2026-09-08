@@ -1,0 +1,38 @@
+{
+  "search": {
+    "placeholder": "Szukaj filmów, seriali, gatunków...",
+    "searching": "Szukanie...",
+    "resultsFound_one": "Znaleziono {{count}} wynik",
+    "resultsFound_few": "Znaleziono {{count}} wyniki",
+    "resultsFound_many": "Znaleziono {{count}} wyników",
+    "resultsFound_other": "Znaleziono {{count}} wyniki",
+    "noResults": "Nie znaleziono wyników",
+    "addCustom": "Dodaj film/serial"
+  },
+  "addCustom": {
+    "title": "Dodaj własny film / serial",
+    "seriesNameRequired": "Nazwa serialu *",
+    "seriesNamePlaceholder": "Nazwa serialu",
+    "movieNameRequired": "Nazwa filmu *",
+    "movieNamePlaceholder": "Nazwa filmu",
+    "year": "Rok",
+    "genre": "Gatunek",
+    "selectGenres": "Wybierz gatunki",
+    "seasons": "Sezony",
+    "addSeason": "Dodaj sezon",
+    "addEpisode": "Dodaj odcinek",
+    "noSeasons": "Brak sezonów. Dodaj sezon, aby zacząć dodawać odcinki.",
+    "durationMinutes": "Czas trwania (minuty)",
+    "durationExample": "np. 120",
+    "addToCollection": "Dodaj do kolekcji",
+    "movieAdded": "Film dodany do Twojej kolekcji!",
+    "seriesAdded": "Serial dodany do Twojej kolekcji!",
+    "movieNameError": "Nazwa filmu jest wymagana.",
+    "seriesNameError": "Nazwa serialu jest wymagana.",
+    "atLeastOneSeason": "Dodaj co najmniej jeden sezon.",
+    "everySeasonEpisode": "Każdy sezon musi mieć co najmniej jeden odcinek.",
+    "episodePrefix": "EP {{number}}",
+    "removeSeason": "Usuń sezon",
+    "removeEpisode": "Usuń odcinek"
+  }
+}

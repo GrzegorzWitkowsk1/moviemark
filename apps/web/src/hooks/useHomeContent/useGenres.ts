@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getGenres } from "@/lib/tmdb";
+import { getGenres, tmdbLanguage } from "@/lib/tmdb";
 
 export interface GenreMaps {
   movie: Record<number, string>;
@@ -30,7 +30,7 @@ async function fetchAllGenres(): Promise<GenreMaps> {
 
 export function useGenres() {
   return useQuery({
-    queryKey: ["genres"],
+    queryKey: ["genres", tmdbLanguage()],
     queryFn: fetchAllGenres,
     staleTime: GENRES_STALE_TIME,
   });

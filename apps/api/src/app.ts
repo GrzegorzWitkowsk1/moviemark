@@ -21,16 +21,19 @@ export async function buildApp(options: { logger?: boolean } = {}) {
     };
     if (err.validation) {
       return reply.code(400).send({
-        error: err.validation[0]?.message ?? "Invalid request",
+        error: "error.invalidRequest",
       });
     }
     if (typeof err.statusCode === "number") {
+      if (err.statusCode === 401) {
+        return reply.code(401).send({ error: "error.unauthorized" });
+      }
       return reply
         .code(err.statusCode)
-        .send({ error: err.message || "Request failed" });
+        .send({ error: err.message || "error.requestFailed" });
     }
     request.log.error(error);
-    return reply.code(500).send({ error: "Internal server error" });
+    return reply.code(500).send({ error: "error.internal" });
   });
 
   await app.register(cors, {

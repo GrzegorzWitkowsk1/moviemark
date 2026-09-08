@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { Box, Typography, useTheme, alpha, InputAdornment, IconButton } from "@mui/material";
 import { User, Lock, Palette, Globe, Eye, EyeOff } from "lucide-react";
 import StyledCard from "@/shared/components/card";
@@ -16,16 +17,32 @@ import { useDialog } from "@/contexts/dialogContext";
 import { updateProfile, changePassword } from "@/lib/api";
 import { setAccessToken } from "@/lib/token";
 import {
-  profileSchema,
-  passwordSchema,
+  createProfileSchema,
+  createPasswordSchema,
   type ProfileFormValues,
   type PasswordFormValues,
 } from "./schema";
 
-const THEME_OPTIONS: { value: ThemeMode; label: string; sublabel: string }[] = [
-  { value: "light", label: "Light", sublabel: "light theme" },
-  { value: "dark", label: "Dark", sublabel: "dark theme" },
-  { value: "system", label: "System", sublabel: "Match your OS" },
+const THEME_OPTIONS: {
+  value: ThemeMode;
+  labelKey: string;
+  sublabelKey: string;
+}[] = [
+  {
+    value: "light",
+    labelKey: "settings.theme.light",
+    sublabelKey: "settings.theme.lightSub",
+  },
+  {
+    value: "dark",
+    labelKey: "settings.theme.dark",
+    sublabelKey: "settings.theme.darkSub",
+  },
+  {
+    value: "system",
+    labelKey: "settings.theme.system",
+    sublabelKey: "settings.theme.systemSub",
+  },
 ];
 
 function SectionHeader({
@@ -70,6 +87,7 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
 export default function SettingsPage() {
   const theme = useTheme();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   const { user } = useUser();
   const { open } = useSnackbar();
   const { mode, setMode } = useThemeMode();
@@ -77,7 +95,7 @@ export default function SettingsPage() {
   const { openDialog } = useDialog();
 
   const profileForm = useForm<ProfileFormValues>({
-    resolver: zodResolver(profileSchema),
+    resolver: zodResolver(createProfileSchema(t)),
     mode: "onChange",
     defaultValues: {
       name: user?.name ?? "",
@@ -87,7 +105,7 @@ export default function SettingsPage() {
   });
 
   const passwordForm = useForm<PasswordFormValues>({
-    resolver: zodResolver(passwordSchema),
+    resolver: zodResolver(createPasswordSchema(t)),
     mode: "onChange",
   });
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -102,10 +120,10 @@ export default function SettingsPage() {
       });
       setAccessToken(result.accessToken);
       queryClient.setQueryData(["user"], result.user);
-      open("Profile updated!", "success");
+      open(t("settings.profileUpdated"), "success");
     } catch (error) {
       open(
-        error instanceof Error ? error.message : "Failed to update profile.",
+        error instanceof Error ? error.message : t("settings.failedProfileUpdate"),
         "failure"
       );
     }
@@ -114,11 +132,11 @@ export default function SettingsPage() {
   const onPasswordSubmit = async (data: PasswordFormValues) => {
     try {
       await changePassword({ newPassword: data.newPassword });
-      open("Password changed!", "success");
+      open(t("settings.passwordChanged"), "success");
       passwordForm.reset();
     } catch (error) {
       open(
-        error instanceof Error ? error.message : "Failed to change password.",
+        error instanceof Error ? error.message : t("settings.failedPasswordChange"),
         "failure"
       );
     }
@@ -126,7 +144,7 @@ export default function SettingsPage() {
 
   const handleDeleteAccount = () => {
     console.log("Account deletion requested");
-    open("Account deletion requested", "info");
+    open(t("settings.accountDeletionRequested"), "info");
   };
 
   const optionButtonStyles = (isActive: boolean) => ({
@@ -170,18 +188,18 @@ export default function SettingsPage() {
 					variant="h4"
 					sx={{ fontWeight: 700, mb: 0.5 }}
 				>
-					Settings
+					{t("nav.settings")}
 				</Typography>
 				<Typography
 					variant="body2"
 					sx={(theme) => ({ color: theme.palette.secondary.light })}
 				>
-					Tune MovieMark to feel like yours.
+					{t("settings.subtitle")}
 				</Typography>
 			</Box>
 
 			<StyledCard>
-				<SectionHeader icon={<User size={20} />} title="Account Settings" />
+				<SectionHeader icon={<User size={20} />} title={t("settings.accountSettings")} />
 				<Box
 					component="form"
 					onSubmit={profileForm.handleSubmit(onProfileSubmit)}
@@ -195,9 +213,9 @@ export default function SettingsPage() {
 						}}
 					>
 						<Box sx={{ flex: 1 }}>
-							<FieldLabel>Name</FieldLabel>
+							<FieldLabel>{t("common.form.name")}</FieldLabel>
 							<StyledTextField
-								placeholder="Your name"
+								placeholder={t("settings.namePlaceholder")}
 								variant="outlined"
 								fullWidth
 								error={!!profileForm.formState.errors.name}
@@ -206,9 +224,9 @@ export default function SettingsPage() {
 							/>
 						</Box>
 						<Box sx={{ flex: 1 }}>
-							<FieldLabel>Surname</FieldLabel>
+							<FieldLabel>{t("common.form.surname")}</FieldLabel>
 							<StyledTextField
-								placeholder="Your surname"
+								placeholder={t("settings.surnamePlaceholder")}
 								variant="outlined"
 								fullWidth
 								error={!!profileForm.formState.errors.surname}
@@ -218,9 +236,9 @@ export default function SettingsPage() {
 						</Box>
 					</Box>
 					<Box>
-						<FieldLabel>Email</FieldLabel>
+						<FieldLabel>{t("common.form.email")}</FieldLabel>
 						<StyledTextField
-							placeholder="you@example.com"
+							placeholder={t("common.emailPlaceholder")}
 							variant="outlined"
 							fullWidth
 							error={!!profileForm.formState.errors.email}
@@ -235,15 +253,15 @@ export default function SettingsPage() {
 							disabled={profileForm.formState.isSubmitting}
 						>
 							{profileForm.formState.isSubmitting
-								? "Saving..."
-								: "Save Changes"}
+								? t("common.saving")
+								: t("common.saveChanges")}
 						</ContainedButton>
 					</Box>
 				</Box>
 			</StyledCard>
 
 			<StyledCard>
-				<SectionHeader icon={<Lock size={20} />} title="Change Password" />
+				<SectionHeader icon={<Lock size={20} />} title={t("settings.changePassword")} />
 				<Box
 					component="form"
 					onSubmit={passwordForm.handleSubmit(onPasswordSubmit)}
@@ -257,10 +275,10 @@ export default function SettingsPage() {
 						}}
 					>
 						<Box sx={{ flex: 1 }}>
-							<FieldLabel>New Password</FieldLabel>
+							<FieldLabel>{t("settings.newPassword")}</FieldLabel>
 							<StyledTextField
 								type={showNewPassword ? "text" : "password"}
-								placeholder="Enter new password"
+								placeholder={t("settings.newPasswordPlaceholder")}
 								variant="outlined"
 								fullWidth
 								error={!!passwordForm.formState.errors.newPassword}
@@ -270,7 +288,7 @@ export default function SettingsPage() {
 										endAdornment: (
 											<InputAdornment position="end">
 												<IconButton
-													aria-label="toggle password visibility"
+													aria-label={t("common.togglePasswordVisibility")}
 													onClick={() => setShowNewPassword((s) => !s)}
 													onMouseDown={(e) => e.preventDefault()}
 													edge="end"
@@ -286,10 +304,10 @@ export default function SettingsPage() {
 							/>
 						</Box>
 						<Box sx={{ flex: 1 }}>
-							<FieldLabel>Confirm New Password</FieldLabel>
+							<FieldLabel>{t("settings.confirmNewPassword")}</FieldLabel>
 							<StyledTextField
 								type={showConfirmPassword ? "text" : "password"}
-								placeholder="Confirm new password"
+								placeholder={t("settings.confirmPasswordPlaceholder")}
 								variant="outlined"
 								fullWidth
 								error={!!passwordForm.formState.errors.confirmPassword}
@@ -301,7 +319,7 @@ export default function SettingsPage() {
 										endAdornment: (
 											<InputAdornment position="end">
 												<IconButton
-													aria-label="toggle password visibility"
+													aria-label={t("common.togglePasswordVisibility")}
 													onClick={() => setShowConfirmPassword((s) => !s)}
 													onMouseDown={(e) => e.preventDefault()}
 													edge="end"
@@ -324,15 +342,15 @@ export default function SettingsPage() {
 							disabled={passwordForm.formState.isSubmitting}
 						>
 							{passwordForm.formState.isSubmitting
-								? "Changing..."
-								: "Change Password"}
+								? t("settings.changing")
+								: t("settings.changePassword")}
 						</ContainedButton>
 					</Box>
 				</Box>
 			</StyledCard>
 
 			<StyledCard>
-				<SectionHeader icon={<Palette size={20} />} title="Appearance" />
+				<SectionHeader icon={<Palette size={20} />} title={t("settings.appearance")} />
 				<Box
 					sx={{
 						display: "flex",
@@ -350,13 +368,13 @@ export default function SettingsPage() {
 								color="primary"
 								sx={{ fontWeight: 600, fontSize: "0.85rem", mb: 0.25 }}
 							>
-								{opt.label}
+								{t(opt.labelKey)}
 							</Typography>
 							<Typography
 								variant="caption"
 								sx={{ color: "primary.light", fontSize: "0.7rem" }}
 							>
-								{opt.sublabel}
+								{t(opt.sublabelKey)}
 							</Typography>
 						</Box>
 					))}
@@ -364,7 +382,7 @@ export default function SettingsPage() {
 			</StyledCard>
 
 			<StyledCard>
-				<SectionHeader icon={<Globe size={20} />} title="Language" />
+				<SectionHeader icon={<Globe size={20} />} title={t("settings.language")} />
 				<StyledSelect
 					MenuProps={{
 						slotProps: {
@@ -379,13 +397,13 @@ export default function SettingsPage() {
 					sx={{ minWidth: 200 }}
 					onChange={(e) => setLanguage(e.target.value as Language)}
 				>
-					<StyledMenuItem value="en">English</StyledMenuItem>
-					<StyledMenuItem value="pl">Polski</StyledMenuItem>
+					<StyledMenuItem value="en">{t("settings.languageOptions.english")}</StyledMenuItem>
+					<StyledMenuItem value="pl">{t("settings.languageOptions.polish")}</StyledMenuItem>
 				</StyledSelect>
 			</StyledCard>
 			<StyledCard>
 				<Typography color="primary" variant="body2">
-					{`MovieMark v1.0. All rights reserved. ${new Date().getFullYear()} ® `}
+					{t("settings.footer", { year: new Date().getFullYear() })}
 				</Typography>
 			</StyledCard>
 
@@ -394,17 +412,16 @@ export default function SettingsPage() {
 					isDelete
 					onClick={() =>
 						openDialog({
-							title: "Are you sure?",
-							content:
-								"This action cannot be undone. All your data will be permanently deleted.",
-							confirmLabel: "Yes",
-							cancelLabel: "No",
+							title: t("settings.deleteDialogTitle"),
+							content: t("settings.deleteDialogContent"),
+							confirmLabel: t("common.yes"),
+							cancelLabel: t("common.no"),
 							variant: "delete",
 							onConfirm: handleDeleteAccount,
 						})
 					}
 				>
-					Delete Account
+					{t("settings.deleteAccount")}
 				</ContainedButton>
 			</Box>
 		</Box>

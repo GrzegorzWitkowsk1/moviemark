@@ -11,6 +11,7 @@ import {
   useTheme,
 } from "@mui/material";
 import { Plus, ChevronDown, Trash2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import type { TmdbMediaType } from "shared";
 import { useGenres } from "@/hooks/useHomeContent";
 import { useCreateCustomItem } from "@/hooks/useCustom";
@@ -65,6 +66,7 @@ export default function AddCustomDialog({
   onClose,
 }: AddCustomDialogProps) {
   const theme = useTheme();
+  const { t } = useTranslation();
   const { data: genres } = useGenres();
   const { open: snackbar } = useSnackbar();
   const createCustom = useCreateCustomItem();
@@ -123,7 +125,13 @@ export default function AddCustomDialog({
         : 1;
     const newSeason: CustomSeason = {
       seasonNumber: nextNumber,
-      episodes: [{ season: nextNumber, episode: 1, name: "EP 1" }],
+      episodes: [
+        {
+          season: nextNumber,
+          episode: 1,
+          name: t("addCustom.episodePrefix", { number: 1 }),
+        },
+      ],
     };
     setSeries((prev) => ({
       ...prev,
@@ -163,7 +171,7 @@ export default function AddCustomDialog({
             {
               season: s.seasonNumber,
               episode: nextEpisode,
-              name: `EP ${nextEpisode}`,
+              name: t("addCustom.episodePrefix", { number: nextEpisode }),
             },
           ],
         };
@@ -216,7 +224,7 @@ export default function AddCustomDialog({
     try {
       if (mediaType === "movie") {
         if (!movieName.trim()) {
-          setError("Movie name is required.");
+          setError(t("addCustom.movieNameError"));
           setSubmitting(false);
           return;
         }
@@ -231,20 +239,20 @@ export default function AddCustomDialog({
               : null,
           },
         });
-        snackbar("Movie added to your collection!", "success");
+        snackbar(t("addCustom.movieAdded"), "success");
       } else {
         if (!series.name.trim()) {
-          setError("Series name is required.");
+          setError(t("addCustom.seriesNameError"));
           setSubmitting(false);
           return;
         }
         if (series.seasons.length === 0) {
-          setError("Add at least one season.");
+          setError(t("addCustom.atLeastOneSeason"));
           setSubmitting(false);
           return;
         }
         if (series.seasons.some((s) => s.episodes.length === 0)) {
-          setError("Every season must have at least one episode.");
+          setError(t("addCustom.everySeasonEpisode"));
           setSubmitting(false);
           return;
         }
@@ -259,12 +267,12 @@ export default function AddCustomDialog({
             seasons: series.seasons,
           },
         });
-        snackbar("Series added to your collection!", "success");
+        snackbar(t("addCustom.seriesAdded"), "success");
       }
       reset();
       onClose();
     } catch {
-      setError("Something went wrong. Please try again.");
+      setError(t("common.somethingWentWrong"));
     } finally {
       setSubmitting(false);
     }
@@ -290,7 +298,7 @@ export default function AddCustomDialog({
       }}
     >
       <DialogTitle sx={{ fontWeight: 700, color: "primary.light" }}>
-        Add your own movie / series
+        {t("addCustom.title")}
       </DialogTitle>
       <DialogContent sx={{ color: "text.secondary" }}>
         <Box sx={{ display: "flex", justifyContent: "flex-start", mb: 2.5 }}>
@@ -300,11 +308,11 @@ export default function AddCustomDialog({
         {isSeries ? (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             <Box>
-              <FieldLabel>Series name *</FieldLabel>
+              <FieldLabel>{t("addCustom.seriesNameRequired")}</FieldLabel>
               <StyledTextField
                 fullWidth
                 variant="outlined"
-                placeholder="Series name"
+                placeholder={t("addCustom.seriesNamePlaceholder")}
                 value={series.name}
                 onChange={(e) =>
                   setSeries((prev) => ({ ...prev, name: e.target.value }))
@@ -320,7 +328,7 @@ export default function AddCustomDialog({
               }}
             >
               <Box sx={{ flex: 1 }}>
-                <FieldLabel>Year</FieldLabel>
+                <FieldLabel>{t("addCustom.year")}</FieldLabel>
                 <StyledTextField
                   fullWidth
                   variant="outlined"
@@ -338,7 +346,7 @@ export default function AddCustomDialog({
                 />
               </Box>
               <Box sx={{ flex: 1 }}>
-                <FieldLabel>Genre</FieldLabel>
+                <FieldLabel>{t("addCustom.genre")}</FieldLabel>
                 <StyledSelect
                   fullWidth
                   multiple
@@ -352,7 +360,7 @@ export default function AddCustomDialog({
                   renderValue={(selected) => {
                     const ids = selected as number[];
                     if (ids.length === 0) {
-                      return <span>Select genres</span>;
+                      return <span>{t("addCustom.selectGenres")}</span>;
                     }
                     const names = ids
                       .map((id) => genreOptions.find((g) => g.id === id)?.name)
@@ -383,13 +391,13 @@ export default function AddCustomDialog({
                   mb: 1,
                 }}
               >
-                <FieldLabel>Seasons</FieldLabel>
+                <FieldLabel>{t("addCustom.seasons")}</FieldLabel>
                 <OutlinedButton
                   size="small"
                   startIcon={<Plus size={15} />}
                   onClick={addSeason}
                 >
-                  Add season
+                  {t("addCustom.addSeason")}
                 </OutlinedButton>
               </Box>
 
@@ -397,7 +405,7 @@ export default function AddCustomDialog({
                 <Typography
                   sx={{ fontSize: "0.85rem", color: theme.palette.text.secondary }}
                 >
-                  No seasons yet. Add a season to start adding episodes.
+                  {t("addCustom.noSeasons")}
                 </Typography>
               ) : (
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
@@ -430,11 +438,11 @@ export default function AddCustomDialog({
         ) : (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             <Box>
-              <FieldLabel>Movie name *</FieldLabel>
+              <FieldLabel>{t("addCustom.movieNameRequired")}</FieldLabel>
               <StyledTextField
                 fullWidth
                 variant="outlined"
-                placeholder="Movie name"
+                placeholder={t("addCustom.movieNamePlaceholder")}
                 value={movieName}
                 onChange={(e) => setMovieName(e.target.value)}
               />
@@ -448,7 +456,7 @@ export default function AddCustomDialog({
               }}
             >
               <Box sx={{ flex: 1 }}>
-                <FieldLabel>Year</FieldLabel>
+                <FieldLabel>{t("addCustom.year")}</FieldLabel>
                 <StyledTextField
                   fullWidth
                   variant="outlined"
@@ -461,12 +469,12 @@ export default function AddCustomDialog({
                 />
               </Box>
               <Box sx={{ flex: 1 }}>
-                <FieldLabel>Duration (minutes)</FieldLabel>
+                <FieldLabel>{t("addCustom.durationMinutes")}</FieldLabel>
                 <StyledTextField
                   fullWidth
                   variant="outlined"
                   type="number"
-                  placeholder="e.g. 120"
+                  placeholder={t("addCustom.durationExample")}
                   value={movieRuntime}
                   onChange={(e) => setMovieRuntime(e.target.value)}
                 />
@@ -474,7 +482,7 @@ export default function AddCustomDialog({
             </Box>
 
             <Box>
-              <FieldLabel>Genre</FieldLabel>
+              <FieldLabel>{t("addCustom.genre")}</FieldLabel>
               <StyledSelect
                 fullWidth
                 multiple
@@ -483,7 +491,7 @@ export default function AddCustomDialog({
                 renderValue={(selected) => {
                   const ids = selected as number[];
                   if (ids.length === 0) {
-                    return <span>Select genres</span>;
+                    return <span>{t("addCustom.selectGenres")}</span>;
                   }
                   const names = ids
                     .map((id) => genreOptions.find((g) => g.id === id)?.name)
@@ -514,10 +522,10 @@ export default function AddCustomDialog({
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2.5, gap: 1 }}>
         <OutlinedButton onClick={handleClose} disabled={submitting}>
-          Cancel
+          {t("common.cancel")}
         </OutlinedButton>
         <ContainedButton onClick={handleSubmit} disabled={submitting}>
-          {submitting ? "Saving..." : "Add to collection"}
+          {submitting ? t("common.saving") : t("addCustom.addToCollection")}
         </ContainedButton>
       </DialogActions>
     </Dialog>
@@ -544,6 +552,7 @@ function SeasonEditor({
   onRenameEpisode,
 }: SeasonEditorProps) {
   const theme = useTheme();
+  const { t } = useTranslation();
 
   return (
     <Box
@@ -583,7 +592,7 @@ function SeasonEditor({
             color: theme.palette.text.primary,
           }}
         >
-          {`Season ${season.seasonNumber}`}
+          {t("common.seasonHeader", { number: season.seasonNumber })}
         </Typography>
         <Box
           onClick={(e) => {
@@ -601,6 +610,8 @@ function SeasonEditor({
             color: theme.palette.text.secondary,
             "&:hover": { color: theme.palette.error.main },
           }}
+          role="button"
+          aria-label={t("addCustom.removeSeason")}
         >
           <Trash2 size={15} />
         </Box>
@@ -653,6 +664,8 @@ function SeasonEditor({
                   flexShrink: 0,
                   "&:hover": { color: theme.palette.error.main },
                 }}
+                role="button"
+                aria-label={t("addCustom.removeEpisode")}
               >
                 <Trash2 size={15} />
               </Box>
@@ -665,7 +678,7 @@ function SeasonEditor({
               startIcon={<Plus size={15} />}
               onClick={onAddEpisode}
             >
-              Add episode
+              {t("addCustom.addEpisode")}
             </OutlinedButton>
           </Box>
         </Box>

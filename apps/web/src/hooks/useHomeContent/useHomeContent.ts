@@ -1,12 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import { getHomeContent } from "@/lib/tmdb";
+import { getHomeContent, tmdbLanguage } from "@/lib/tmdb";
 import type { HomeContent } from "shared";
 
-const HOME_CONTENT_KEY = ["homeContent"] as const;
+const homeContentKey = () => ["homeContent", tmdbLanguage()] as const;
 
 export function useHomeContent() {
   return useQuery({
-    queryKey: HOME_CONTENT_KEY,
+    queryKey: homeContentKey(),
     queryFn: getHomeContent,
   });
 }
@@ -17,7 +17,7 @@ const selectUpcoming = (data: HomeContent) => data.upcoming.movies;
 
 export function useNewContent() {
   return useQuery({
-    queryKey: HOME_CONTENT_KEY,
+    queryKey: homeContentKey(),
     queryFn: getHomeContent,
     select: selectNew,
   });
@@ -25,7 +25,7 @@ export function useNewContent() {
 
 export function useTrendingContent() {
   return useQuery({
-    queryKey: HOME_CONTENT_KEY,
+    queryKey: homeContentKey(),
     queryFn: getHomeContent,
     select: selectTrending,
   });
@@ -33,7 +33,7 @@ export function useTrendingContent() {
 
 export function useUpcomingMovies() {
   return useQuery({
-    queryKey: HOME_CONTENT_KEY,
+    queryKey: homeContentKey(),
     queryFn: getHomeContent,
     select: selectUpcoming,
   });

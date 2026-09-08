@@ -1,5 +1,6 @@
 import { Box, Typography, alpha, useTheme } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Star } from "lucide-react";
 import type { TmdbMediaType } from "shared";
 import { useResolveGenres } from "@/hooks/useHomeContent";
@@ -25,6 +26,7 @@ interface MovieCardProps {
 export default function MovieCard({ movie, variant = "full" }: MovieCardProps) {
   const theme = useTheme();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const genres = useResolveGenres(movie.mediaType, movie.genreIds);
 
   const posterUrl = getPosterUrl(movie.posterPath);
@@ -116,7 +118,7 @@ export default function MovieCard({ movie, variant = "full" }: MovieCardProps) {
                 lineHeight: 1.2,
               }}
             >
-              {`(${movie.voteCount || 0})`}
+              {t("common.ratingVotes", { count: movie.voteCount || 0 })}
             </Typography>
           </Box>
         )}
@@ -148,7 +150,7 @@ export default function MovieCard({ movie, variant = "full" }: MovieCardProps) {
                 overflow: "hidden",
               }}
             >
-              {movie.overview || "No description available."}
+              {movie.overview || t("common.noDescription")}
             </Typography>
           </Box>
         )}

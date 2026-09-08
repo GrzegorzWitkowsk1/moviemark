@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { searchMulti } from "@/lib/tmdb";
+import { searchMulti, tmdbLanguage } from "@/lib/tmdb";
 import type { TmdbMovie, TmdbTv, TmdbSearchResult } from "shared";
 
 function filterResults(data: TmdbSearchResult): (TmdbMovie | TmdbTv)[] {
@@ -11,7 +11,7 @@ function filterResults(data: TmdbSearchResult): (TmdbMovie | TmdbTv)[] {
 
 export function useSearch(query: string) {
   return useQuery({
-    queryKey: ["search", query],
+    queryKey: ["search", tmdbLanguage(), query],
     queryFn: () => searchMulti(query),
     select: filterResults,
     enabled: query.trim().length > 0,

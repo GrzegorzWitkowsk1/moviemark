@@ -8,6 +8,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { getPosterUrl } from "@/lib/poster";
 import type { WatchedSeriesResponse } from "shared";
+import { useTranslation } from "react-i18next";
 
 interface SeriesCollectionCardProps {
   series: WatchedSeriesResponse;
@@ -18,6 +19,7 @@ export default function SeriesCollectionCard({
 }: SeriesCollectionCardProps) {
   const theme = useTheme();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const posterUrl = getPosterUrl(series.posterPath);
   const percent =
@@ -109,7 +111,10 @@ export default function SeriesCollectionCard({
             color: theme.palette.text.secondary,
           }}
         >
-          {`${series.watchedCount}/${series.totalEpisodes} episodes watched`}
+          {t("collection.watchedProgress", {
+            watched: series.watchedCount,
+            total: series.totalEpisodes,
+          })}
         </Typography>
 
         <Box sx={{ mt: "auto", pt: 1.5 }}>
