@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import {
   Box,
   CircularProgress,
@@ -13,9 +14,17 @@ import {
   useAddMovie,
   useMovieWatched,
   useRemoveMovie,
+  useSeriesWatched,
   useSeriesWatchedControls,
   type SeriesWatchedControls,
 } from "@/hooks/useCollection";
+import {
+  useFutureMovieControls,
+  useFutureSeriesControls,
+  useRemoveFutureMovie,
+  useRemoveFutureSeries,
+  useSeriesFutureStatus,
+} from "@/hooks/useFuture";
 import {
   useMovieDetails,
   useSimilarMovies,
@@ -27,6 +36,7 @@ import SectionCarousel from "@/views/authorized/homePage/components/SectionCarou
 import DetailHero, { type HeroMetaItem } from "./components/DetailHero";
 import SeasonsSection from "./components/SeasonsSection";
 import CustomDetailsView from "./components/CustomDetailsView";
+import FutureToggleButton from "./components/FutureToggleButton";
 
 export default function DetailsPage() {
   const [params] = useSearchParams();
@@ -96,6 +106,12 @@ function MovieView({ id }: { id: number }) {
   const { data: watchedStatus } = useMovieWatched(id);
   const addMovie = useAddMovie();
   const removeMovie = useRemoveMovie();
+  const futureControls = useFutureMovieControls(id, {
+    title: data?.title ?? "",
+    posterPath: data?.poster_path ?? null,
+    rating: data?.vote_average,
+  });
+  const removeFuture = useRemoveFutureMovie();
 
   if (isError) {
     return <ErrorState onRetry={refetch} isRetrying={isRefetching} />;
@@ -110,12 +126,21 @@ function MovieView({ id }: { id: number }) {
     if (isWatched) {
       removeMovie.mutate(data.id);
     } else {
-      addMovie.mutate({
-        tmdbId: data.id,
-        title: data.title,
-        posterPath: data.poster_path,
-        rating: data.vote_average,
-      });
+      addMovie.mutate(
+        {
+          tmdbId: data.id,
+          title: data.title,
+          posterPath: data.poster_path,
+          rating: data.vote_average,
+        },
+        {
+          onSuccess: () => {
+            if (futureControls.wanted) {
+              removeFuture.mutate(data.id);
+            }
+          },
+        }
+      );
     }
   };
   const meta: HeroMetaItem[] = [
@@ -152,13 +177,16 @@ function MovieView({ id }: { id: number }) {
         meta={meta}
         overview={data.overview}
         action={
-          <ContainedButton
-            onClick={handleToggleWatched}
-            disabled={actionPending}
-            startIcon={isWatched ? <Check size={16} /> : undefined}
-          >
-            {isWatched ? "Watched" : "Add to watched"}
-          </ContainedButton>
+          <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
+            <ContainedButton
+              onClick={handleToggleWatched}
+              disabled={actionPending}
+              startIcon={isWatched ? <Check size={16} /> : undefined}
+            >
+              {isWatched ? "Watched" : "Add to watched"}
+            </ContainedButton>
+<FutureToggleButton controls={futureControls} disabled={isWatched} />
+          </Box>
         }
       />
 
@@ -177,6 +205,27 @@ function TvView({ id }: { id: number }) {
     totalEpisodes: data?.number_of_episodes ?? 0,
     rating: data?.vote_average,
   });
+  const futureControls = useFutureSeriesControls(id, {
+    name: data?.name ?? "",
+    posterPath: data?.poster_path ?? null,
+    rating: data?.vote_average,
+  });
+  const { data: watchedStatus } = useSeriesWatched(id);
+  const { data: futureStatus } = useSeriesFutureStatus(id);
+  const removeFutureSeries = useRemoveFutureSeries();
+
+  const totalEpisodes = data?.number_of_episodes ?? 0;
+  const watchedCount = watchedStatus?.watchedCount ?? 0;
+  const fullyWatched = totalEpisodes > 0 && watchedCount >= totalEpisodes;
+  const futureWanted = futureStatus?.wanted ?? false;
+
+  const prevFullyWatched = useRef(fullyWatched);
+  useEffect(() => {
+    if (fullyWatched && !prevFullyWatched.current && futureWanted) {
+      removeFutureSeries.mutate(id);
+    }
+    prevFullyWatched.current = fullyWatched;
+  }, [fullyWatched, futureWanted, id, removeFutureSeries]);
 
   if (isError) {
     return <ErrorState onRetry={refetch} isRetrying={isRefetching} />;
@@ -219,6 +268,7 @@ function TvView({ id }: { id: number }) {
         title={data.name}
         meta={meta}
         overview={data.overview}
+        action={<FutureToggleButton controls={futureControls} />}
       />
 
       <SeasonsSection tvId={data.id} seasons={data.seasons} watched={watched} />

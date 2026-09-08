@@ -17,7 +17,7 @@ import {
   useMediaQuery,
   Divider,
 } from '@mui/material';
-import { Search, LogOut, Settings, LayoutGrid } from 'lucide-react';
+import { Search, LogOut, Settings, LayoutGrid, Clock } from 'lucide-react';
 import { useUser, useLogout } from '@/hooks/useAuth';
 import logo from '@/assets/logo_clean.png';
 import StyledTextField from '@/shared/components/textField';
@@ -25,6 +25,7 @@ import StyledTextField from '@/shared/components/textField';
 const NAV_ITEMS = [
   { label: 'Home', path: '/auth/home' },
   { label: 'Collection', path: '/auth/collections' },
+  { label: 'Want to watch', path: '/auth/want-to-watch' },
   { label: 'Settings', path: '/auth/settings' },
 ] as const;
 
@@ -313,6 +314,15 @@ export default function Header() {
 						>
 							<LayoutGrid size={18} style={{ marginRight: 10 }} />
 							My collection
+						</MenuItem>
+						<MenuItem
+							onClick={() => {
+								handleMenuClose();
+								navigate("/auth/want-to-watch");
+							}}
+						>
+							<Clock size={18} style={{ marginRight: 10 }} />
+							Want to watch
 						</MenuItem>
 						<MenuItem
 							onClick={() => {

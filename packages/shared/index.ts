@@ -242,6 +242,55 @@ export interface SeriesStatusResponse {
   watchedEpisodes: WatchedEpisode[];
 }
 
+export interface FutureMovieResponse {
+  tmdbId: number;
+  title: string;
+  posterPath: string | null;
+  addedAt: string;
+  mediaType: TmdbMediaType;
+  rating?: number;
+  voteCount?: number;
+  overview?: string;
+  year?: string | null;
+  genreIds?: number[];
+}
+
+export interface FutureSeriesResponse {
+  tmdbId: number;
+  name: string;
+  posterPath: string | null;
+  addedAt: string;
+  mediaType: TmdbMediaType;
+  rating?: number;
+  voteCount?: number;
+  overview?: string;
+  year?: string | null;
+  genreIds?: number[];
+}
+
+export interface FutureListResponse {
+  movies: FutureMovieResponse[];
+  series: FutureSeriesResponse[];
+}
+
+export interface AddFutureMovieRequest {
+  tmdbId: number;
+  title: string;
+  posterPath: string | null;
+  rating?: number;
+}
+
+export interface AddFutureSeriesRequest {
+  tmdbId: number;
+  name: string;
+  posterPath: string | null;
+  rating?: number;
+}
+
+export interface FutureStatusResponse {
+  wanted: boolean;
+}
+
 export interface TmdbSearchResult {
   page: number;
   results: (TmdbMovie | TmdbTv)[];

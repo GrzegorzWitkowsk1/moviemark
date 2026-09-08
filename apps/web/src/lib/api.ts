@@ -1,5 +1,7 @@
 import type {
   AddMovieRequest,
+  AddFutureMovieRequest,
+  AddFutureSeriesRequest,
   AuthErrorResponse,
   ChangePasswordRequest,
   ChangePasswordResponse,
@@ -7,6 +9,8 @@ import type {
   CustomItemResponse,
   CustomMovieRequest,
   CustomSeriesRequest,
+  FutureListResponse,
+  FutureStatusResponse,
   LoginRequest,
   LoginResponse,
   MovieStatusResponse,
@@ -284,4 +288,54 @@ export async function getCustomItem(
   type: TmdbMediaType
 ): Promise<CustomItemResponse> {
   return apiFetch<CustomItemResponse>(`/custom/${id}?type=${type}`);
+}
+
+export async function getFutureList(): Promise<FutureListResponse> {
+  return apiFetch<FutureListResponse>("/future");
+}
+
+export async function getFutureMovieStatus(
+  tmdbId: number
+): Promise<FutureStatusResponse> {
+  return apiFetch<FutureStatusResponse>(`/future/movie/${tmdbId}`);
+}
+
+export async function addFutureMovie(
+  payload: AddFutureMovieRequest
+): Promise<FutureStatusResponse> {
+  return apiFetch<FutureStatusResponse>("/future/movie", {
+    method: "POST",
+    body: payload,
+  });
+}
+
+export async function removeFutureMovie(
+  tmdbId: number
+): Promise<FutureStatusResponse> {
+  return apiFetch<FutureStatusResponse>(`/future/movie/${tmdbId}`, {
+    method: "DELETE",
+  });
+}
+
+export async function getFutureSeriesStatus(
+  tmdbId: number
+): Promise<FutureStatusResponse> {
+  return apiFetch<FutureStatusResponse>(`/future/series/${tmdbId}`);
+}
+
+export async function addFutureSeries(
+  payload: AddFutureSeriesRequest
+): Promise<FutureStatusResponse> {
+  return apiFetch<FutureStatusResponse>("/future/series", {
+    method: "POST",
+    body: payload,
+  });
+}
+
+export async function removeFutureSeries(
+  tmdbId: number
+): Promise<FutureStatusResponse> {
+  return apiFetch<FutureStatusResponse>(`/future/series/${tmdbId}`, {
+    method: "DELETE",
+  });
 }

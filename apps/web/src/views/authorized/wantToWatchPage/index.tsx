@@ -1,0 +1,188 @@
+import { useMemo, useState } from "react";
+import {
+  Box,
+  CircularProgress,
+  Grid,
+  Typography,
+  useTheme,
+} from "@mui/material";
+import type {
+  FutureMovieResponse,
+  FutureSeriesResponse,
+  TmdbMediaType,
+} from "shared";
+import { useFutureList } from "@/hooks/useFuture";
+import {
+  StyledSelect,
+  StyledMenuItem,
+  PaperStyles,
+} from "@/shared/components/select";
+import MediaTypeToggle from "@/shared/components/MediaTypeToggle";
+import MovieCard, { type MovieCardData } from "@/shared/components/MovieCard";
+
+type SortOrder = "recent" | "rating" | "alphabetical";
+
+type FutureItem = FutureMovieResponse | FutureSeriesResponse;
+
+const SORT_OPTIONS: { value: SortOrder; label: string }[] = [
+  { value: "recent", label: "Recently added" },
+  { value: "rating", label: "Highest rated" },
+  { value: "alphabetical", label: "Alphabetical" },
+];
+
+function toCardData(item: FutureItem): MovieCardData {
+  const movieItem = item as FutureMovieResponse;
+  const seriesItem = item as FutureSeriesResponse;
+  const isTv = item.mediaType === "tv";
+  return {
+    mediaType: item.mediaType,
+    id: item.tmdbId,
+    title: isTv ? seriesItem.name : movieItem.title,
+    year: item.year ?? null,
+    overview: item.overview ?? "",
+    voteCount: item.voteCount ?? 0,
+    posterPath: item.posterPath,
+    rating: item.rating ?? 0,
+    genreIds: item.genreIds ?? [],
+  };
+}
+
+function itemTitle(item: FutureItem): string {
+  const movieItem = item as FutureMovieResponse;
+  const seriesItem = item as FutureSeriesResponse;
+  return item.mediaType === "tv" ? seriesItem.name : movieItem.title;
+}
+
+function itemRating(item: FutureItem): number {
+  return item.rating ?? -1;
+}
+
+export default function WantToWatchPage() {
+  const theme = useTheme();
+  const [mediaType, setMediaType] = useState<TmdbMediaType>("movie");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("recent");
+
+  const { data, isLoading } = useFutureList();
+
+  const items = useMemo<FutureItem[]>(() => {
+    const all = data
+      ? (data.movies as FutureItem[]).concat(data.series as FutureItem[])
+      : [];
+    return all.filter((item) => item.mediaType === mediaType);
+  }, [data, mediaType]);
+
+  const sorted = useMemo(() => {
+    const copy = [...items];
+    switch (sortOrder) {
+      case "recent":
+        copy.sort(
+          (a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime()
+        );
+        break;
+      case "rating":
+        copy.sort((a, b) => itemRating(b) - itemRating(a));
+        break;
+      case "alphabetical":
+        copy.sort((a, b) =>
+          itemTitle(a).localeCompare(itemTitle(b), undefined, {
+            sensitivity: "base",
+          })
+        );
+        break;
+    }
+    return copy;
+  }, [items, sortOrder]);
+
+  return (
+    <Box className="fade-in" sx={{ width: "100%", maxWidth: 900, mx: "auto" }}>
+      <Typography
+        variant="h4"
+        sx={{
+          fontWeight: 800,
+          fontSize: { xs: "1.75rem", md: "2.25rem" },
+          letterSpacing: "-0.03em",
+          color: theme.palette.text.primary,
+          textAlign: "left",
+        }}
+      >
+        Want to watch
+      </Typography>
+
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: 1.5,
+          mt: 0.5,
+          mb: 2,
+        }}
+      >
+        <Typography
+          sx={{
+            fontSize: "0.95rem",
+            color: theme.palette.text.secondary,
+            textAlign: "left",
+          }}
+        >
+          Your list of films and shows to watch in the future.
+        </Typography>
+
+        <StyledSelect
+          value={sortOrder}
+          MenuProps={{
+            slotProps: {
+              paper: {
+                sx: {
+                  ...PaperStyles(theme),
+                },
+              },
+            },
+          }}
+          onChange={(e) => setSortOrder(e.target.value as SortOrder)}
+          displayEmpty
+          sx={{ minWidth: 190 }}
+        >
+          {SORT_OPTIONS.map((option) => (
+            <StyledMenuItem key={option.value} value={option.value}>
+              {option.label}
+            </StyledMenuItem>
+          ))}
+        </StyledSelect>
+      </Box>
+
+      <Box sx={{ mb: 3, display: "flex" }}>
+        <MediaTypeToggle value={mediaType} onChange={setMediaType} />
+      </Box>
+
+      {isLoading ? (
+        <Box sx={{ display: "flex", justifyContent: "center", py: 10 }}>
+          <CircularProgress />
+        </Box>
+      ) : sorted.length === 0 ? (
+        <Box sx={{ display: "flex", justifyContent: "center", py: 10 }}>
+          <Typography
+            sx={{
+              fontSize: "1.1rem",
+              color: theme.palette.text.secondary,
+            }}
+          >
+            Your want to watch list is empty.
+          </Typography>
+        </Box>
+      ) : (
+        <Grid container spacing={2}>
+          {sorted.map((item) => (
+            <Grid
+              key={`${item.mediaType}-${item.tmdbId}`}
+              size={{ xs: 6, sm: 4, md: 3, lg: 2 }}
+            >
+              <MovieCard movie={toCardData(item)} variant="light" />
+            </Grid>
+          ))}
+        </Grid>
+      )}
+    </Box>
+  );
+}
