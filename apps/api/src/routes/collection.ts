@@ -2,6 +2,8 @@ import type { FastifyInstance } from "fastify";
 import { Types } from "mongoose";
 import { WatchedMovie } from "../models/WatchedMovie";
 import { WatchedSeries } from "../models/WatchedSeries";
+import { CustomMovie } from "../models/CustomMovie";
+import { CustomSeries } from "../models/CustomSeries";
 import { getTmdbDetails } from "../lib/tmdb";
 import type {
   AddMovieRequest,
@@ -95,7 +97,7 @@ function toSeriesStatusResponse(doc: {
 
 function parseTmdbId(raw: string): number {
   const id = Number(raw);
-  if (!Number.isFinite(id) || id <= 0) {
+  if (!Number.isFinite(id) || id === 0) {
     throw new Error("Invalid tmdbId");
   }
   return id;
@@ -134,7 +136,7 @@ export async function collectionRoutes(app: FastifyInstance) {
           type: "object",
           required: ["tmdbId", "title"],
           properties: {
-            tmdbId: { type: "number", minimum: 1 },
+            tmdbId: { type: "number", not: { const: 0 } },
             title: { type: "string", minLength: 1 },
             posterPath: { type: ["string", "null"], default: null },
             rating: { type: ["number", "null"], default: null },
@@ -219,7 +221,7 @@ export async function collectionRoutes(app: FastifyInstance) {
           type: "object",
           required: ["tmdbId", "season", "episodes", "name", "totalEpisodes"],
           properties: {
-            tmdbId: { type: "number", minimum: 1 },
+            tmdbId: { type: "number", not: { const: 0 } },
             season: { type: "number", minimum: 1 },
             episodes: {
               type: "array",
@@ -345,10 +347,44 @@ export async function collectionRoutes(app: FastifyInstance) {
       ]);
 
       const movieEnrichments = await Promise.all(
-        movies.map((doc) => getTmdbDetails("movie", doc.tmdbId))
+        movies.map((doc) =>
+          doc.tmdbId < 0
+            ? CustomMovie.findOne({
+                userId: uid,
+                customId: doc.tmdbId,
+              }).then((custom) =>
+                custom
+                  ? {
+                      rating: 0,
+                      voteCount: 0,
+                      overview: "",
+                      year: custom.year,
+                      genreIds: custom.genreIds,
+                    }
+                  : null
+              )
+            : getTmdbDetails("movie", doc.tmdbId)
+        )
       );
       const seriesEnrichments = await Promise.all(
-        series.map((doc) => getTmdbDetails("tv", doc.tmdbId))
+        series.map((doc) =>
+          doc.tmdbId < 0
+            ? CustomSeries.findOne({
+                userId: uid,
+                customId: doc.tmdbId,
+              }).then((custom) =>
+                custom
+                  ? {
+                      rating: 0,
+                      voteCount: 0,
+                      overview: "",
+                      year: custom.year,
+                      genreIds: custom.genreIds,
+                    }
+                  : null
+              )
+            : getTmdbDetails("tv", doc.tmdbId)
+        )
       );
 
       return {

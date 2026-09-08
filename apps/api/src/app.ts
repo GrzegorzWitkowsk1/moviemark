@@ -3,6 +3,7 @@ import cors from "@fastify/cors";
 import { messagesRoutes } from "./routes/messages";
 import { authRoutes } from "./routes/auth";
 import { collectionRoutes } from "./routes/collection";
+import { customRoutes } from "./routes/custom";
 import { config } from "./config";
 import authPlugin from "./plugins/auth";
 
@@ -41,6 +42,7 @@ export async function buildApp(options: { logger?: boolean } = {}) {
   await app.register(messagesRoutes);
   await app.register(authRoutes);
   await app.register(collectionRoutes);
+  await app.register(customRoutes);
 
   return app;
 }

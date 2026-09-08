@@ -228,3 +228,55 @@ export interface TmdbSearchResult {
   total_pages: number;
   total_results: number;
 }
+
+export interface CustomEpisode {
+  season: number;
+  episode: number;
+  name: string;
+}
+
+export interface CustomSeason {
+  seasonNumber: number;
+  episodes: CustomEpisode[];
+}
+
+export interface CustomMovieRequest {
+  name: string;
+  genreIds?: number[];
+  year?: string | null;
+  runtimeMinutes?: number | null;
+}
+
+export interface CustomSeriesRequest {
+  name: string;
+  genreIds?: number[];
+  year?: string | null;
+  seasons: CustomSeason[];
+}
+
+export interface CustomMovieResponse {
+  customId: number;
+  mediaType: "movie";
+  name: string;
+  genreIds: number[];
+  year: string | null;
+  runtimeMinutes: number | null;
+  watchedAt: string;
+}
+
+export interface CustomSeriesResponse {
+  customId: number;
+  mediaType: "tv";
+  name: string;
+  genreIds: number[];
+  year: string | null;
+  seasons: CustomSeason[];
+  totalEpisodes: number;
+  watchedAt: string;
+}
+
+export type CustomItemResponse = CustomMovieResponse | CustomSeriesResponse;
+
+export interface CustomMediaIdParams {
+  id: string;
+}

@@ -37,7 +37,7 @@ export function useMovieWatched(tmdbId: number) {
   return useQuery({
     queryKey: movieStatusKey(tmdbId),
     queryFn: () => getMovieCollectionStatus(tmdbId),
-    enabled: Number.isFinite(tmdbId) && tmdbId > 0,
+    enabled: Number.isFinite(tmdbId) && tmdbId !== 0,
   });
 }
 
@@ -45,7 +45,7 @@ export function useSeriesWatched(tmdbId: number) {
   return useQuery({
     queryKey: seriesStatusKey(tmdbId),
     queryFn: () => getSeriesCollectionStatus(tmdbId),
-    enabled: Number.isFinite(tmdbId) && tmdbId > 0,
+    enabled: Number.isFinite(tmdbId) && tmdbId !== 0,
   });
 }
 

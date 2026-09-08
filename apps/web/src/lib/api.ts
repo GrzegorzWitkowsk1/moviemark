@@ -2,6 +2,9 @@ import type {
   AddMovieRequest,
   AuthErrorResponse,
   CollectionResponse,
+  CustomItemResponse,
+  CustomMovieRequest,
+  CustomSeriesRequest,
   LoginRequest,
   LoginResponse,
   MovieStatusResponse,
@@ -11,6 +14,7 @@ import type {
   RegisterRequest,
   RegisterResponse,
   SeriesStatusResponse,
+  TmdbMediaType,
   UserResponse,
 } from "shared";
 import { config } from "./config";
@@ -233,4 +237,29 @@ export async function uncheckSeriesEpisode(
       method: "DELETE",
     }
   );
+}
+
+export async function createCustomMovie(
+  payload: CustomMovieRequest
+): Promise<CustomItemResponse> {
+  return apiFetch<CustomItemResponse>("/custom/movie", {
+    method: "POST",
+    body: payload,
+  });
+}
+
+export async function createCustomSeries(
+  payload: CustomSeriesRequest
+): Promise<CustomItemResponse> {
+  return apiFetch<CustomItemResponse>("/custom/series", {
+    method: "POST",
+    body: payload,
+  });
+}
+
+export async function getCustomItem(
+  id: number,
+  type: TmdbMediaType
+): Promise<CustomItemResponse> {
+  return apiFetch<CustomItemResponse>(`/custom/${id}?type=${type}`);
 }

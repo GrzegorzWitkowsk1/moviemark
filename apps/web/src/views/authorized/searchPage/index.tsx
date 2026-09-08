@@ -16,6 +16,7 @@ import StyledTextField from "@/shared/components/textField";
 import ContainedButton from "@/shared/components/buttons/containedButton";
 import MovieCard, { type MovieCardData } from "@/shared/components/MovieCard";
 import type { TmdbMovie, TmdbTv } from "shared";
+import AddCustomDialog from "./components/AddCustomDialog";
 
 function toCardData(item: TmdbMovie | TmdbTv): MovieCardData {
   const isTv = "name" in item;
@@ -50,6 +51,7 @@ export default function SearchPage() {
 
   const { data: results, isLoading } = useSearch(debouncedValue);
   const hasQuery = debouncedValue.trim().length > 0;
+  const [customOpen, setCustomOpen] = useState(false);
 
   return (
     <Box className="fade-in" sx={{ width: "100%", maxWidth: 900, mx: "auto" }}>
@@ -145,12 +147,14 @@ export default function SearchPage() {
           <ContainedButton
             size="large"
             sx={{ mt: 1 }}
-            onClick={() => {}}
+            onClick={() => setCustomOpen(true)}
           >
             Add movie/series
           </ContainedButton>
         </Box>
       ) : null}
+
+      <AddCustomDialog open={customOpen} onClose={() => setCustomOpen(false)} />
     </Box>
   );
 }

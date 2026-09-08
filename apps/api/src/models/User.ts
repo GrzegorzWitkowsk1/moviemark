@@ -5,6 +5,7 @@ interface IUser {
   surname: string;
   email: string;
   passwordHash: string;
+  nextCustomId: number;
 }
 
 const UserSchema = new mongoose.Schema<IUser>(
@@ -12,6 +13,10 @@ const UserSchema = new mongoose.Schema<IUser>(
     name: {
       type: String,
       required: true,
+    },
+    nextCustomId: {
+      type: Number,
+      default: 1,
     },
     surname: {
       type: String,

@@ -26,17 +26,22 @@ import ContainedButton from "@/shared/components/buttons/containedButton";
 import SectionCarousel from "@/views/authorized/homePage/components/SectionCarousel";
 import DetailHero, { type HeroMetaItem } from "./components/DetailHero";
 import SeasonsSection from "./components/SeasonsSection";
+import CustomDetailsView from "./components/CustomDetailsView";
 
 export default function DetailsPage() {
   const [params] = useSearchParams();
   const rawId = params.get("id");
   const id = Number(rawId);
 
-  if (!rawId || !Number.isFinite(id) || id <= 0) {
+  if (!rawId || !Number.isFinite(id) || id === 0) {
     return <MissingId />;
   }
 
   const mediaType: TmdbMediaType = params.get("type") === "tv" ? "tv" : "movie";
+
+  if (id < 0) {
+    return <CustomDetailsView id={id} mediaType={mediaType} />;
+  }
 
   return mediaType === "tv" ? (
     <TvView id={id} />
