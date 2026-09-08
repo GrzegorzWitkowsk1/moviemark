@@ -30,6 +30,12 @@ export default defineConfig([
     },
   },
   {
+    files: ['src/test/**/*.{ts,tsx}'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
+    },
+  },
+  {
     files: [
       'src/hocs/**/*.{ts,tsx}',
       'src/views/authorized/index.tsx',
