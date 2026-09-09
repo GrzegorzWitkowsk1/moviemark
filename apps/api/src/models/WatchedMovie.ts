@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import type { Types } from "mongoose";
 
-interface IWatchedMovie {
+export interface IWatchedMovie {
   userId: Types.ObjectId;
   tmdbId: number;
   title: string;

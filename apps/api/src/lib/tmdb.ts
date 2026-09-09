@@ -1,7 +1,7 @@
 import type { TmdbMediaType } from "shared";
 import { config } from "../config";
 
-interface TmdbDetailsResult {
+export interface TmdbDetailsResult {
   rating: number;
   voteCount: number;
   overview: string;

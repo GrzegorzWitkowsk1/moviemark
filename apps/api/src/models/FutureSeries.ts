@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import type { Types } from "mongoose";
 
-interface IFutureSeries {
+export interface IFutureSeries {
   userId: Types.ObjectId;
   tmdbId: number;
   name: string;

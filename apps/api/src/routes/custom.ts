@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { Types } from "mongoose";
 import { User } from "../models/User";
+import { userId } from "../lib/request";
 import { CustomMovie } from "../models/CustomMovie";
 import { CustomSeries } from "../models/CustomSeries";
 import { WatchedMovie } from "../models/WatchedMovie";
@@ -15,10 +16,6 @@ import type {
 
 interface CustomTypeQuery {
   type: string;
-}
-
-function userId(request: { user: { id: string } }): Types.ObjectId {
-  return new Types.ObjectId(request.user.id);
 }
 
 async function allocateCustomId(uid: Types.ObjectId): Promise<number> {
