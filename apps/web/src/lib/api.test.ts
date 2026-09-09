@@ -1,4 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
+import { HttpResponse, http } from "msw";
 import {
   addMovieToCollection,
   getMovieCollectionStatus,
@@ -11,24 +12,20 @@ import {
   setAccessToken,
   getAccessToken,
 } from "./token";
+import { server } from "@/test/server";
 
-function jsonResponse(body: unknown, status = 200): Response {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { "Content-Type": "application/json" },
-  });
-}
+const API = "http://localhost:3000";
 
 beforeEach(() => {
   clearAccessToken();
-  vi.unstubAllGlobals();
 });
 
 describe("api fetch", () => {
   it("returns parsed JSON on success", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue(jsonResponse({ watched: false }))
+    server.use(
+      http.get(`${API}/collection/movie/550`, () =>
+        HttpResponse.json({ watched: false })
+      )
     );
 
     await expect(getMovieCollectionStatus(550)).resolves.toEqual({
@@ -37,16 +34,23 @@ describe("api fetch", () => {
   });
 
   it("returns null on 204", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(null, { status: 204 })));
+    server.use(
+      http.get(`${API}/collection/movie/550`, () =>
+        new HttpResponse(null, { status: 204 })
+      )
+    );
+
     const result = await getMovieCollectionStatus(550);
     expect(result).toBeNull();
   });
 
   it("translates error.* codes to localized messages", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue(
-        jsonResponse({ error: "error.auth.login.invalidCredentials" }, 401)
+    server.use(
+      http.get(`${API}/collection/movie/550`, () =>
+        HttpResponse.json(
+          { error: "error.auth.login.invalidCredentials" },
+          { status: 401 }
+        )
       )
     );
 
@@ -56,18 +60,20 @@ describe("api fetch", () => {
   });
 
   it("passes through non error.* codes", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue(jsonResponse({ error: "some.raw.code" }, 400))
+    server.use(
+      http.get(`${API}/collection/movie/550`, () =>
+        HttpResponse.json({ error: "some.raw.code" }, { status: 400 })
+      )
     );
 
     await expect(getMovieCollectionStatus(550)).rejects.toThrow("some.raw.code");
   });
 
   it("falls back to error.generic for unknown bodies", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue(jsonResponse({ nope: true }, 500))
+    server.use(
+      http.get(`${API}/collection/movie/550`, () =>
+        HttpResponse.json({ nope: true }, { status: 500 })
+      )
     );
 
     await expect(getMovieCollectionStatus(550)).rejects.toThrow(
@@ -76,7 +82,9 @@ describe("api fetch", () => {
   });
 
   it("throws a network error when fetch fails", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("boom")));
+    server.use(
+      http.get(`${API}/collection/movie/550`, () => HttpResponse.error())
+    );
 
     await expect(getMovieCollectionStatus(550)).rejects.toThrow(
       "Network error. Please try again later."
@@ -88,45 +96,43 @@ describe("401 refresh flow", () => {
   it("retries once with a fresh token when an expired token returns 401", async () => {
     setAccessToken("expired-token");
 
-    const fetchMock = vi
-      .fn()
-      .mockResolvedValueOnce(jsonResponse({ error: "error.unauthorized" }, 401))
-      .mockResolvedValueOnce(
-        jsonResponse({ accessToken: "new-token" }, 200)
+    const authHeaders: (string | null)[] = [];
+    server.use(
+      http.get(`${API}/collection/movie/550`, ({ request }) => {
+        authHeaders.push(request.headers.get("authorization"));
+        if (authHeaders.length === 1) {
+          return HttpResponse.json(
+            { error: "error.unauthorized" },
+            { status: 401 }
+          );
+        }
+        return HttpResponse.json({ watched: true });
+      }),
+      http.post(`${API}/auth/refresh`, () =>
+        HttpResponse.json({ accessToken: "new-token" })
       )
-      .mockResolvedValueOnce(jsonResponse({ watched: true }, 200));
-
-    vi.stubGlobal("fetch", fetchMock);
+    );
 
     await expect(getMovieCollectionStatus(550)).resolves.toEqual({
       watched: true,
     });
     expect(getAccessToken()).toBe("new-token");
-
-    const calls = fetchMock.mock.calls as [string, RequestInit][];
-    expect(calls[0][0]).toContain("/collection/movie/550");
-    expect((calls[0][1].headers as Record<string, string>).Authorization).toBe(
-      "Bearer expired-token"
-    );
-    expect(calls[1][0]).toContain("/auth/refresh");
-    expect((calls[2][1].headers as Record<string, string>).Authorization).toBe(
-      "Bearer new-token"
-    );
+    expect(authHeaders).toEqual(["Bearer expired-token", "Bearer new-token"]);
   });
 
   it("clears the token and surfaces the error when refresh fails", async () => {
     setAccessToken("expired-token");
 
-    const fetchMock = vi
-      .fn()
-      .mockResolvedValueOnce(jsonResponse({ error: "error.unauthorized" }, 401))
-      .mockResolvedValueOnce(jsonResponse({ error: "error.unauthorized" }, 401));
-
-    vi.stubGlobal("fetch", fetchMock);
-
-    await expect(getMovieCollectionStatus(550)).rejects.toThrow(
-      "Unauthorized"
+    server.use(
+      http.get(`${API}/collection/movie/550`, () =>
+        HttpResponse.json({ error: "error.unauthorized" }, { status: 401 })
+      ),
+      http.post(`${API}/auth/refresh`, () =>
+        HttpResponse.json({ error: "error.unauthorized" }, { status: 401 })
+      )
     );
+
+    await expect(getMovieCollectionStatus(550)).rejects.toThrow("Unauthorized");
     expect(getAccessToken()).toBeNull();
   });
 });
@@ -134,10 +140,20 @@ describe("401 refresh flow", () => {
 describe("register and login", () => {
   it("registers without an Authorization header or refresh retry", async () => {
     setAccessToken("existing-token");
-    const fetchMock = vi.fn().mockResolvedValue(
-      jsonResponse({ message: "Registration successful" }, 201)
+
+    let captured: { method: string; hasAuth: boolean } | undefined;
+    server.use(
+      http.post(`${API}/auth/register`, ({ request }) => {
+        captured = {
+          method: request.method,
+          hasAuth: request.headers.has("authorization"),
+        };
+        return HttpResponse.json(
+          { message: "Registration successful" },
+          { status: 201 }
+        );
+      })
     );
-    vi.stubGlobal("fetch", fetchMock);
 
     await registerUser({
       name: "Anna",
@@ -146,10 +162,8 @@ describe("register and login", () => {
       password: "Password123",
     });
 
-    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-    expect(url).toContain("/auth/register");
-    expect(init.method).toBe("POST");
-    expect(init.headers).not.toHaveProperty("Authorization");
+    expect(captured?.method).toBe("POST");
+    expect(captured?.hasAuth).toBe(false);
   });
 
   it("logs in and returns the parsed payload", async () => {
@@ -157,9 +171,8 @@ describe("register and login", () => {
       user: { id: "1", name: "Anna", email: "a@test.com" },
       accessToken: "token",
     };
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue(jsonResponse(payload, 200))
+    server.use(
+      http.post(`${API}/auth/login`, () => HttpResponse.json(payload))
     );
 
     await expect(
@@ -171,7 +184,9 @@ describe("register and login", () => {
 describe("logout", () => {
   it("clears the token even when the request fails", async () => {
     setAccessToken("token");
-    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("boom")));
+    server.use(
+      http.post(`${API}/auth/logout`, () => HttpResponse.error())
+    );
 
     await expect(logoutUser()).rejects.toThrow(
       "Network error. Please try again later."
@@ -181,25 +196,34 @@ describe("logout", () => {
 
   it("posts to /auth/logout and clears the token", async () => {
     setAccessToken("token");
-    const fetchMock = vi.fn().mockResolvedValue(
-      jsonResponse({ message: "Logged out" }, 200)
+
+    let captured: { method: string; url: string } | undefined;
+    server.use(
+      http.post(`${API}/auth/logout`, ({ request }) => {
+        captured = { method: request.method, url: request.url };
+        return HttpResponse.json({ message: "Logged out" });
+      })
     );
-    vi.stubGlobal("fetch", fetchMock);
 
     await logoutUser();
     expect(getAccessToken()).toBeNull();
-
-    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-    expect(url).toContain("/auth/logout");
-    expect(init.method).toBe("POST");
+    expect(captured?.method).toBe("POST");
+    expect(captured?.url).toContain("/auth/logout");
   });
 });
 
 describe("request shaping", () => {
   it("sends a JSON body and content-type for mutations", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue(jsonResponse({ watched: true }, 200))
+    let captured: { method: string; contentType: string | null; body: string } | undefined;
+    server.use(
+      http.post(`${API}/collection/movie`, async ({ request }) => {
+        captured = {
+          method: request.method,
+          contentType: request.headers.get("content-type"),
+          body: await request.text(),
+        };
+        return HttpResponse.json({ watched: true });
+      })
     );
 
     await addMovieToCollection({
@@ -209,14 +233,8 @@ describe("request shaping", () => {
       rating: 8.4,
     });
 
-    const [, init] = vi.mocked(fetch).mock.calls[0] as [
-      string,
-      RequestInit
-    ];
-    expect(init.method).toBe("POST");
-    expect((init.headers as Record<string, string>)["Content-Type"]).toBe(
-      "application/json"
-    );
-    expect(init.body).toContain('"tmdbId":550');
+    expect(captured?.method).toBe("POST");
+    expect(captured?.contentType).toBe("application/json");
+    expect(captured?.body).toContain('"tmdbId":550');
   });
 });

@@ -1,11 +1,8 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { describe, expect, it } from "vitest";
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import SectionCarousel from "./SectionCarousel";
 import type { TmdbMovie, TmdbTv } from "shared";
 import { renderWithProviders } from "@/test/utils";
-
-const tmdb = vi.hoisted(() => ({ getGenres: vi.fn(), tmdbLanguage: vi.fn() }));
-vi.mock("@/lib/tmdb", () => tmdb);
 
 const movies: TmdbMovie[] = [
   {
@@ -60,18 +57,6 @@ const series: TmdbTv[] = [
     genre_ids: [18],
   },
 ];
-
-beforeEach(() => {
-  tmdb.getGenres.mockReset();
-  tmdb.tmdbLanguage.mockReset();
-  tmdb.tmdbLanguage.mockReturnValue("en-US");
-  tmdb.getGenres.mockImplementation(async (mediaType: string) => ({
-    genres:
-      mediaType === "movie"
-        ? [{ id: 28, name: "Action" }]
-        : [{ id: 18, name: "Drama" }],
-  }));
-});
 
 describe("SectionCarousel", () => {
   it("renders nothing when every list is empty", () => {

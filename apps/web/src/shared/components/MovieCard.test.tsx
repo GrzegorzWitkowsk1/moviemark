@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { useLocation } from "react-router-dom";
 import MovieCard, { type MovieCardData } from "./MovieCard";
@@ -14,9 +14,6 @@ function LocationProbe() {
   );
 }
 
-const tmdb = vi.hoisted(() => ({ getGenres: vi.fn(), tmdbLanguage: vi.fn() }));
-vi.mock("@/lib/tmdb", () => tmdb);
-
 const baseMovie: MovieCardData = {
   mediaType: "movie",
   id: 550,
@@ -28,18 +25,6 @@ const baseMovie: MovieCardData = {
   voteCount: 25000,
   genreIds: [28],
 };
-
-beforeEach(() => {
-  tmdb.getGenres.mockReset();
-  tmdb.tmdbLanguage.mockReset();
-  tmdb.tmdbLanguage.mockReturnValue("en-US");
-  tmdb.getGenres.mockImplementation(async (mediaType: string) => ({
-    genres:
-      mediaType === "movie"
-        ? [{ id: 28, name: "Action" }]
-        : [{ id: 10765, name: "Sci-Fi & Fantasy" }],
-  }));
-});
 
 describe("MovieCard", () => {
   it("renders title, poster, rating and resolved genre", async () => {

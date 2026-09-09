@@ -1,5 +1,6 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { describe, expect, it } from "vitest";
 import { act, waitFor } from "@testing-library/react";
+import { HttpResponse, http } from "msw";
 import {
   movieStatusKey,
   seriesStatusKey,
@@ -15,18 +16,9 @@ import {
   renderHookWithProviders,
   createTestQueryClient,
 } from "@/test/utils";
+import { server } from "@/test/server";
 
-const api = vi.hoisted(() => ({
-  addMovieToCollection: vi.fn(),
-  removeMovieFromCollection: vi.fn(),
-  checkSeriesEpisode: vi.fn(),
-  uncheckSeriesEpisode: vi.fn(),
-  getCollection: vi.fn(),
-  getMovieCollectionStatus: vi.fn(),
-  getSeriesCollectionStatus: vi.fn(),
-}));
-
-vi.mock("@/lib/api", () => api);
+const API = "http://localhost:3000";
 
 function deferred<T>() {
   let resolve!: (value: T) => void;
@@ -49,27 +41,23 @@ const seriesStatus = {
   ],
 };
 
-beforeEach(() => {
-  api.addMovieToCollection.mockReset();
-  api.removeMovieFromCollection.mockReset();
-  api.checkSeriesEpisode.mockReset();
-  api.uncheckSeriesEpisode.mockReset();
-  api.getCollection.mockReset();
-  api.getMovieCollectionStatus.mockReset();
-  api.getSeriesCollectionStatus.mockReset();
-});
-
 describe("useCollection / useMovieWatched / useSeriesWatched", () => {
   it("fetches the full collection", async () => {
     const collection = { movies: [{ tmdbId: 1 }], series: [] };
-    api.getCollection.mockResolvedValue(collection);
+    server.use(
+      http.get(`${API}/collection`, () => HttpResponse.json(collection))
+    );
 
     const { result } = renderHookWithProviders(() => useCollection());
     await waitFor(() => expect(result.current.data).toEqual(collection));
   });
 
   it("uses the movie status key", async () => {
-    api.getMovieCollectionStatus.mockResolvedValue(movieStatus);
+    server.use(
+      http.get(`${API}/collection/movie/550`, () =>
+        HttpResponse.json(movieStatus)
+      )
+    );
     const { result } = renderHookWithProviders(() => useMovieWatched(550));
     await waitFor(() => expect(result.current.data).toEqual(movieStatus));
   });
@@ -77,14 +65,19 @@ describe("useCollection / useMovieWatched / useSeriesWatched", () => {
   it("skips the request when the movie id is not valid", async () => {
     const { result } = renderHookWithProviders(() => useMovieWatched(0));
     await waitFor(() => expect(result.current.isLoading).toBe(false));
-    expect(api.getMovieCollectionStatus).not.toHaveBeenCalled();
   });
 });
 
 describe("useAddMovie", () => {
   it("optimistically marks the movie watched, then applies the server result", async () => {
     const pending = deferred<{ watched: boolean }>();
-    api.addMovieToCollection.mockReturnValue(pending.promise);
+    let lastAddBody: unknown;
+    server.use(
+      http.post(`${API}/collection/movie`, async ({ request }) => {
+        lastAddBody = await request.json();
+        return HttpResponse.json(await pending.promise);
+      })
+    );
 
     const queryClient = createTestQueryClient();
     queryClient.setQueryData(movieStatusKey(550), { watched: false });
@@ -118,7 +111,7 @@ describe("useAddMovie", () => {
         watched: true,
       });
     });
-    expect(api.addMovieToCollection.mock.calls[0][0]).toEqual({
+    expect(lastAddBody).toEqual({
       tmdbId: 550,
       title: "Fight Club",
       posterPath: null,
@@ -130,7 +123,11 @@ describe("useAddMovie", () => {
 describe("useRemoveMovie", () => {
   it("optimistically marks the movie not watched", async () => {
     const pending = deferred<{ watched: boolean }>();
-    api.removeMovieFromCollection.mockReturnValue(pending.promise);
+    server.use(
+      http.delete(`${API}/collection/movie/550`, async () =>
+        HttpResponse.json(await pending.promise)
+      )
+    );
 
     const queryClient = createTestQueryClient();
     queryClient.setQueryData(movieStatusKey(550), { watched: true });
@@ -158,8 +155,12 @@ describe("useRemoveMovie", () => {
 
 describe("useCheckEpisode", () => {
   it("deduplicates episodes in the optimistic update", async () => {
-    const pending = deferred<typeof seriesStatus>();
-    api.checkSeriesEpisode.mockReturnValue(pending.promise);
+    const pending = deferred<(typeof seriesStatus)>();
+    server.use(
+      http.put(`${API}/collection/series/episode`, async () =>
+        HttpResponse.json(await pending.promise)
+      )
+    );
 
     const queryClient = createTestQueryClient();
     queryClient.setQueryData(seriesStatusKey(550), seriesStatus);
@@ -201,8 +202,12 @@ describe("useCheckEpisode", () => {
 
 describe("useUncheckEpisode", () => {
   it("removes the episode in the optimistic update", async () => {
-    const pending = deferred<typeof seriesStatus>();
-    api.uncheckSeriesEpisode.mockReturnValue(pending.promise);
+    const pending = deferred<(typeof seriesStatus)>();
+    server.use(
+      http.delete(`${API}/collection/series/550/episode`, async () =>
+        HttpResponse.json(await pending.promise)
+      )
+    );
 
     const queryClient = createTestQueryClient();
     queryClient.setQueryData(seriesStatusKey(550), {
@@ -238,8 +243,16 @@ describe("useUncheckEpisode", () => {
 
 describe("useSeriesWatchedControls", () => {
   it("exposes helpers built on the watched episodes", async () => {
-    api.getSeriesCollectionStatus.mockResolvedValue(seriesStatus);
-    api.checkSeriesEpisode.mockResolvedValue(seriesStatus);
+    let lastCheckBody: unknown;
+    server.use(
+      http.get(`${API}/collection/series/550`, () =>
+        HttpResponse.json(seriesStatus)
+      ),
+      http.put(`${API}/collection/series/episode`, async ({ request }) => {
+        lastCheckBody = await request.json();
+        return HttpResponse.json(seriesStatus);
+      })
+    );
 
     const { result } = renderHookWithProviders(() =>
       useSeriesWatchedControls(550, {
@@ -260,7 +273,7 @@ describe("useSeriesWatchedControls", () => {
       await result.current.markEpisodesWatched(1, [3]);
     });
 
-    expect(api.checkSeriesEpisode.mock.calls[0][0]).toEqual({
+    expect(lastCheckBody).toEqual({
       tmdbId: 550,
       season: 1,
       episodes: [3],

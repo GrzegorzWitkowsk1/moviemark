@@ -1,32 +1,28 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { act, waitFor } from "@testing-library/react";
+import { HttpResponse, http } from "msw";
 import { useCreateCustomItem, useCustomItem } from "./useCustom";
 import { renderHookWithProviders } from "@/test/utils";
+import { server } from "@/test/server";
 
-const api = vi.hoisted(() => ({
-  createCustomMovie: vi.fn(),
-  createCustomSeries: vi.fn(),
-  getCustomItem: vi.fn(),
-}));
-
-vi.mock("@/lib/api", () => api);
-
-beforeEach(() => {
-  api.createCustomMovie.mockReset();
-  api.createCustomSeries.mockReset();
-  api.getCustomItem.mockReset();
-});
+const API = "http://localhost:3000";
 
 describe("useCustomItem", () => {
   it("fetches custom items with a negative (custom) id", async () => {
     const item = { id: -1, title: "My Movie", watched: false };
-    api.getCustomItem.mockResolvedValue(item);
+    let capturedUrl = "";
+    server.use(
+      http.get(`${API}/custom/:id`, ({ request }) => {
+        capturedUrl = request.url;
+        return HttpResponse.json(item);
+      })
+    );
 
     const { result } = renderHookWithProviders(() =>
       useCustomItem(-1, "movie")
     );
     await waitFor(() => expect(result.current.data).toEqual(item));
-    expect(api.getCustomItem).toHaveBeenCalledWith(-1, "movie");
+    expect(capturedUrl).toContain("/custom/-1?type=movie");
   });
 
   it("never fetches for positive (tmdb) ids", async () => {
@@ -34,14 +30,19 @@ describe("useCustomItem", () => {
       useCustomItem(123, "movie")
     );
     await waitFor(() => expect(result.current.isLoading).toBe(false));
-    expect(api.getCustomItem).not.toHaveBeenCalled();
   });
 });
 
 describe("useCreateCustomItem", () => {
   it("creates a custom movie", async () => {
-    const created = { id: -1, mediaType: "movie", customId: -1 };
-    api.createCustomMovie.mockResolvedValue(created);
+    const created = { id: -1, mediaType: "movie" as const, customId: -1 };
+    let lastBody: unknown;
+    server.use(
+      http.post(`${API}/custom/movie`, async ({ request }) => {
+        lastBody = await request.json();
+        return HttpResponse.json(created);
+      })
+    );
 
     const { result } = renderHookWithProviders(() => useCreateCustomItem());
 
@@ -57,7 +58,7 @@ describe("useCreateCustomItem", () => {
       });
     });
 
-    expect(api.createCustomMovie).toHaveBeenCalledWith({
+    expect(lastBody).toEqual({
       name: "My Movie",
       genreIds: [28],
       year: "2020",
@@ -67,8 +68,14 @@ describe("useCreateCustomItem", () => {
   });
 
   it("creates a custom series through the series endpoint", async () => {
-    const created = { id: -1, mediaType: "tv", customId: -1 };
-    api.createCustomSeries.mockResolvedValue(created);
+    const created = { id: -1, mediaType: "tv" as const, customId: -1 };
+    let lastBody: unknown;
+    server.use(
+      http.post(`${API}/custom/series`, async ({ request }) => {
+        lastBody = await request.json();
+        return HttpResponse.json(created);
+      })
+    );
 
     const { result } = renderHookWithProviders(() => useCreateCustomItem());
 
@@ -79,7 +86,7 @@ describe("useCreateCustomItem", () => {
       });
     });
 
-    expect(api.createCustomSeries).toHaveBeenCalledWith({
+    expect(lastBody).toEqual({
       name: "My Series",
       seasons: [],
     });

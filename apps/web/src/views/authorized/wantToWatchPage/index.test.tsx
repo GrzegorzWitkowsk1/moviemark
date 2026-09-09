@@ -1,22 +1,13 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { HttpResponse, http } from "msw";
 import type { FutureMovieResponse, FutureSeriesResponse } from "shared";
 import WantToWatchPage from "./index";
 import { renderWithProviders } from "@/test/utils";
+import { server } from "@/test/server";
 
-const api = vi.hoisted(() => ({
-  getFutureList: vi.fn(),
-}));
-
-vi.mock("@/lib/api", () => api);
-
-const tmdb = vi.hoisted(() => ({
-  getGenres: vi.fn(),
-  tmdbLanguage: vi.fn(),
-}));
-
-vi.mock("@/lib/tmdb", () => tmdb);
+const API = "http://localhost:3000";
 
 const futureMovie: FutureMovieResponse = {
   tmdbId: 550,
@@ -38,25 +29,16 @@ const futureSeries: FutureSeriesResponse = {
   rating: 9.5,
 };
 
-beforeEach(() => {
-  api.getFutureList.mockReset();
-  tmdb.getGenres.mockReset();
-  tmdb.tmdbLanguage.mockReset();
-  tmdb.tmdbLanguage.mockReturnValue("en-US");
-  tmdb.getGenres.mockImplementation(async (mediaType: string) => ({
-    genres:
-      mediaType === "movie"
-        ? [{ id: 28, name: "Action" }]
-        : [{ id: 18, name: "Drama" }],
-  }));
-});
-
 describe("WantToWatchPage", () => {
   it("filters the list by media type", async () => {
-    api.getFutureList.mockResolvedValue({
-      movies: [futureMovie],
-      series: [futureSeries],
-    });
+    server.use(
+      http.get(`${API}/future`, () =>
+        HttpResponse.json({
+          movies: [futureMovie],
+          series: [futureSeries],
+        })
+      )
+    );
     const userEventCtx = userEvent.setup();
 
     renderWithProviders(<WantToWatchPage />);
@@ -74,7 +56,11 @@ describe("WantToWatchPage", () => {
   });
 
   it("shows the empty state when no items are saved", async () => {
-    api.getFutureList.mockResolvedValue({ movies: [], series: [] });
+    server.use(
+      http.get(`${API}/future`, () =>
+        HttpResponse.json({ movies: [], series: [] })
+      )
+    );
 
     renderWithProviders(<WantToWatchPage />);
 

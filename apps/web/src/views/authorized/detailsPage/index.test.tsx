@@ -1,38 +1,14 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { HttpResponse, http } from "msw";
 import type { CustomMovieResponse, TmdbMovieDetails } from "shared";
 import DetailsPage from "./index";
 import { renderWithProviders } from "@/test/utils";
+import { server } from "@/test/server";
+import { TMDB_BASE } from "@/test/handlers/tmdbHandlers";
 
-const tmdb = vi.hoisted(() => ({
-  getGenres: vi.fn(),
-  tmdbLanguage: vi.fn(),
-  getMovieDetails: vi.fn(),
-  getSimilarMovies: vi.fn(),
-  getTvDetails: vi.fn(),
-  getSimilarTv: vi.fn(),
-}));
-
-vi.mock("@/lib/tmdb", () => tmdb);
-
-const api = vi.hoisted(() => ({
-  getMovieCollectionStatus: vi.fn(),
-  getSeriesCollectionStatus: vi.fn(),
-  getFutureMovieStatus: vi.fn(),
-  getFutureSeriesStatus: vi.fn(),
-  addMovieToCollection: vi.fn(),
-  removeMovieFromCollection: vi.fn(),
-  addFutureMovie: vi.fn(),
-  addFutureSeries: vi.fn(),
-  removeFutureMovie: vi.fn(),
-  removeFutureSeries: vi.fn(),
-  checkSeriesEpisode: vi.fn(),
-  uncheckSeriesEpisode: vi.fn(),
-  getCustomItem: vi.fn(),
-}));
-
-vi.mock("@/lib/api", () => api);
+const API = "http://localhost:3000";
 
 const movie: TmdbMovieDetails = {
   adult: false,
@@ -65,23 +41,14 @@ const similarMovie: TmdbMovieDetails = {
   vote_count: 20000,
 };
 
-beforeEach(() => {
-  Object.values(tmdb).forEach((fn) => fn.mockReset());
-  Object.values(api).forEach((fn) => fn.mockReset());
-  tmdb.tmdbLanguage.mockReturnValue("en-US");
-  tmdb.getGenres.mockResolvedValue({ genres: [] });
-  api.getMovieCollectionStatus.mockResolvedValue({ watched: false });
-  api.getFutureMovieStatus.mockResolvedValue({ wanted: false });
-  api.getSeriesCollectionStatus.mockResolvedValue({
-    watched: false,
-    watchedCount: 0,
-    totalEpisodes: 0,
-    watchedEpisodes: [],
-  });
-  api.getFutureSeriesStatus.mockResolvedValue({ wanted: false });
-  api.addMovieToCollection.mockResolvedValue({});
-  api.addFutureMovie.mockResolvedValue({});
-});
+function similarList(results: TmdbMovieDetails[] = []) {
+  return {
+    page: 1,
+    total_pages: results.length === 0 ? 0 : 1,
+    total_results: results.length,
+    results,
+  };
+}
 
 describe("DetailsPage", () => {
   it("shows a missing-id notice when no id is provided", () => {
@@ -93,13 +60,12 @@ describe("DetailsPage", () => {
   });
 
   it("renders a movie with its hero meta and similar titles", async () => {
-    tmdb.getMovieDetails.mockResolvedValue(movie);
-    tmdb.getSimilarMovies.mockResolvedValue({
-      page: 1,
-      total_pages: 1,
-      total_results: 1,
-      results: [similarMovie],
-    });
+    server.use(
+      http.get(`${TMDB_BASE}/movie/550`, () => HttpResponse.json(movie)),
+      http.get(`${TMDB_BASE}/movie/550/similar`, () =>
+        HttpResponse.json(similarList([similarMovie]))
+      )
+    );
 
     renderWithProviders(<DetailsPage />, {
       route: "/auth/movies?id=550&type=movie",
@@ -121,13 +87,19 @@ describe("DetailsPage", () => {
   });
 
   it("marks a movie as watched", async () => {
-    tmdb.getMovieDetails.mockResolvedValue(movie);
-    tmdb.getSimilarMovies.mockResolvedValue({
-      page: 1,
-      total_pages: 0,
-      total_results: 0,
-      results: [],
-    });
+    server.use(
+      http.get(`${TMDB_BASE}/movie/550`, () => HttpResponse.json(movie)),
+      http.get(`${TMDB_BASE}/movie/550/similar`, () =>
+        HttpResponse.json(similarList())
+      )
+    );
+    let lastAddBody: unknown;
+    server.use(
+      http.post(`${API}/collection/movie`, async ({ request }) => {
+        lastAddBody = await request.json();
+        return HttpResponse.json({ watched: true });
+      })
+    );
     const userEventCtx = userEvent.setup();
 
     renderWithProviders(<DetailsPage />, {
@@ -140,7 +112,7 @@ describe("DetailsPage", () => {
     await userEventCtx.click(addButton);
 
     await waitFor(() => {
-      expect(api.addMovieToCollection.mock.calls[0][0]).toEqual({
+      expect(lastAddBody).toEqual({
         tmdbId: 550,
         title: "Fight Club",
         posterPath: "/fc.jpg",
@@ -159,7 +131,14 @@ describe("DetailsPage", () => {
       runtimeMinutes: 120,
       watchedAt: "2026-01-01T00:00:00Z",
     };
-    api.getCustomItem.mockResolvedValue(customMovie);
+    let lastAddBody: unknown;
+    server.use(
+      http.get(`${API}/custom/:id`, () => HttpResponse.json(customMovie)),
+      http.post(`${API}/collection/movie`, async ({ request }) => {
+        lastAddBody = await request.json();
+        return HttpResponse.json({ watched: true });
+      })
+    );
     const userEventCtx = userEvent.setup();
 
     renderWithProviders(<DetailsPage />, {
@@ -177,7 +156,7 @@ describe("DetailsPage", () => {
     );
 
     await waitFor(() => {
-      expect(api.addMovieToCollection.mock.calls[0][0]).toEqual({
+      expect(lastAddBody).toEqual({
         tmdbId: -1,
         title: "My Movie",
         posterPath: null,

@@ -1,19 +1,12 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
-import { waitFor } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
+import { waitFor, act } from "@testing-library/react";
+import { HttpResponse, http } from "msw";
 import { getAccessToken } from "@/lib/token";
 import { renderHookWithProviders, createTestQueryClient } from "@/test/utils";
-
-const api = vi.hoisted(() => ({
-  loginUser: vi.fn(),
-  registerUser: vi.fn(),
-  getCurrentUser: vi.fn(),
-  logoutUser: vi.fn(),
-}));
-
-vi.mock("@/lib/api", () => api);
-
+import { server } from "@/test/server";
 import { useLogin, useLogout, useRegister, useUser } from "./index";
-import { act } from "@testing-library/react";
+
+const API = "http://localhost:3000";
 
 const user = {
   id: "1",
@@ -22,16 +15,18 @@ const user = {
   email: "anna@test.com",
 };
 
-beforeEach(() => {
-  api.loginUser.mockReset();
-  api.registerUser.mockReset();
-  api.getCurrentUser.mockReset();
-  api.logoutUser.mockReset();
-});
-
 describe("useRegister", () => {
   it("calls registerUser with the payload", async () => {
-    api.registerUser.mockResolvedValue({ message: "Registration successful" });
+    let lastBody: unknown;
+    server.use(
+      http.post(`${API}/auth/register`, async ({ request }) => {
+        lastBody = await request.json();
+        return HttpResponse.json(
+          { message: "Registration successful" },
+          { status: 201 }
+        );
+      })
+    );
 
     const { result } = renderHookWithProviders(() => useRegister());
     await act(async () => {
@@ -43,7 +38,7 @@ describe("useRegister", () => {
       });
     });
 
-    expect(api.registerUser).toHaveBeenCalledWith({
+    expect(lastBody).toEqual({
       name: "Anna",
       surname: "Kowalska",
       email: "a@test.com",
@@ -55,10 +50,13 @@ describe("useRegister", () => {
 
 describe("useLogin", () => {
   it("stores the access token and caches the user", async () => {
-    api.loginUser.mockResolvedValue({
-      user,
-      accessToken: "token-abc",
-    });
+    let lastBody: unknown;
+    server.use(
+      http.post(`${API}/auth/login`, async ({ request }) => {
+        lastBody = await request.json();
+        return HttpResponse.json({ user, accessToken: "token-abc" });
+      })
+    );
 
     const queryClient = createTestQueryClient();
     const { result } = renderHookWithProviders(() => useLogin(), {
@@ -75,7 +73,7 @@ describe("useLogin", () => {
 
     expect(getAccessToken()).toBe("token-abc");
     expect(queryClient.getQueryData(["user"])).toEqual(user);
-    expect(api.loginUser).toHaveBeenCalledWith({
+    expect(lastBody).toEqual({
       email: "anna@test.com",
       password: "Password123",
       remember: true,
@@ -83,7 +81,14 @@ describe("useLogin", () => {
   });
 
   it("does not cache a user when login fails", async () => {
-    api.loginUser.mockRejectedValue(new Error("Invalid email or password"));
+    server.use(
+      http.post(`${API}/auth/login`, () =>
+        HttpResponse.json(
+          { error: "error.auth.login.invalidCredentials" },
+          { status: 401 }
+        )
+      )
+    );
 
     const queryClient = createTestQueryClient();
     const { result } = renderHookWithProviders(() => useLogin(), {
@@ -105,7 +110,9 @@ describe("useLogin", () => {
 
 describe("useUser", () => {
   it("reports isLoading then authenticates", async () => {
-    api.getCurrentUser.mockResolvedValue(user);
+    server.use(
+      http.get(`${API}/auth/me`, () => HttpResponse.json(user))
+    );
 
     const { result } = renderHookWithProviders(() => useUser());
 
@@ -117,7 +124,11 @@ describe("useUser", () => {
   });
 
   it("reports not authenticated when the request fails", async () => {
-    api.getCurrentUser.mockRejectedValue(new Error("Unauthorized"));
+    server.use(
+      http.get(`${API}/auth/me`, () =>
+        HttpResponse.json({ error: "error.unauthorized" }, { status: 401 })
+      )
+    );
 
     const { result } = renderHookWithProviders(() => useUser());
 
@@ -131,7 +142,11 @@ describe("useUser", () => {
 
 describe("useLogout", () => {
   it("clears the user and collection caches on settle", async () => {
-    api.logoutUser.mockResolvedValue(undefined);
+    server.use(
+      http.post(`${API}/auth/logout`, () =>
+        HttpResponse.json({ message: "Logged out" })
+      )
+    );
 
     const queryClient = createTestQueryClient();
     queryClient.setQueryData(["user"], user);

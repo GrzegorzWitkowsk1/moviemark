@@ -1,23 +1,14 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { HttpResponse, http } from "msw";
 import type { TmdbMovie, TmdbTv } from "shared";
 import SearchPage from "./index";
 import { renderWithProviders } from "@/test/utils";
+import { server } from "@/test/server";
+import { TMDB_BASE } from "@/test/handlers/tmdbHandlers";
 
-const tmdb = vi.hoisted(() => ({
-  getGenres: vi.fn(),
-  searchMulti: vi.fn(),
-  tmdbLanguage: vi.fn(),
-}));
-
-vi.mock("@/lib/tmdb", () => tmdb);
-
-const api = vi.hoisted(() => ({
-  createCustomMovie: vi.fn(),
-}));
-
-vi.mock("@/lib/api", () => api);
+const API = "http://localhost:3000";
 
 const movie: TmdbMovie = {
   adult: false,
@@ -53,28 +44,18 @@ const tv: TmdbTv = {
   vote_count: 100,
 };
 
-beforeEach(() => {
-  tmdb.getGenres.mockReset();
-  tmdb.searchMulti.mockReset();
-  tmdb.tmdbLanguage.mockReset();
-  api.createCustomMovie.mockReset();
-  tmdb.tmdbLanguage.mockReturnValue("en-US");
-  tmdb.getGenres.mockImplementation(async (mediaType: string) => ({
-    genres:
-      mediaType === "movie"
-        ? [{ id: 28, name: "Action" }]
-        : [{ id: 18, name: "Drama" }],
-  }));
-});
-
 describe("SearchPage", () => {
   it("renders results for the query from the URL", async () => {
-    tmdb.searchMulti.mockResolvedValue({
-      page: 1,
-      total_pages: 1,
-      total_results: 2,
-      results: [movie, tv],
-    });
+    server.use(
+      http.get(`${TMDB_BASE}/search/multi`, () =>
+        HttpResponse.json({
+          page: 1,
+          total_pages: 1,
+          total_results: 2,
+          results: [movie, tv],
+        })
+      )
+    );
 
     renderWithProviders(<SearchPage />, { route: "/auth/search?q=fight" });
 
@@ -86,12 +67,16 @@ describe("SearchPage", () => {
   });
 
   it("shows the empty state with an add-custom button when there are no results", async () => {
-    tmdb.searchMulti.mockResolvedValue({
-      page: 1,
-      total_pages: 0,
-      total_results: 0,
-      results: [],
-    });
+    server.use(
+      http.get(`${TMDB_BASE}/search/multi`, () =>
+        HttpResponse.json({
+          page: 1,
+          total_pages: 0,
+          total_results: 0,
+          results: [],
+        })
+      )
+    );
 
     renderWithProviders(<SearchPage />, { route: "/auth/search?q=zzz" });
 
@@ -102,21 +87,31 @@ describe("SearchPage", () => {
   });
 
   it("adds a custom movie from the dialog", async () => {
-    tmdb.searchMulti.mockResolvedValue({
-      page: 1,
-      total_pages: 0,
-      total_results: 0,
-      results: [],
-    });
-    api.createCustomMovie.mockResolvedValue({
-      customId: -1,
-      mediaType: "movie",
-      name: "My Movie",
-      genreIds: [],
-      year: null,
-      runtimeMinutes: null,
-      watchedAt: new Date().toISOString(),
-    });
+    server.use(
+      http.get(`${TMDB_BASE}/search/multi`, () =>
+        HttpResponse.json({
+          page: 1,
+          total_pages: 0,
+          total_results: 0,
+          results: [],
+        })
+      )
+    );
+    let lastCustomBody: unknown;
+    server.use(
+      http.post(`${API}/custom/movie`, async ({ request }) => {
+        lastCustomBody = await request.json();
+        return HttpResponse.json({
+          customId: -1,
+          mediaType: "movie",
+          name: "My Movie",
+          genreIds: [],
+          year: null,
+          runtimeMinutes: null,
+          watchedAt: new Date().toISOString(),
+        });
+      })
+    );
     const userEventCtx = userEvent.setup();
 
     renderWithProviders(<SearchPage />, { route: "/auth/search?q=zzz" });
@@ -132,10 +127,13 @@ describe("SearchPage", () => {
       screen.getByRole("button", { name: "Add to collection" })
     );
 
-    await waitFor(() => {
-      expect(screen.getByText("Movie added to your collection!")).toBeTruthy();
-    });
-    expect(api.createCustomMovie).toHaveBeenCalledWith({
+    await waitFor(
+      () => {
+        expect(screen.getByText("Movie added to your collection!")).toBeTruthy();
+      },
+      { timeout: 10_000 }
+    );
+    expect(lastCustomBody).toEqual({
       name: "My Movie",
       genreIds: [],
       year: null,

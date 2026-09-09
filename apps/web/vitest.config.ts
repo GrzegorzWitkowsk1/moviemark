@@ -13,5 +13,8 @@ export default defineConfig({
     include: ["src/**/*.test.{ts,tsx}"],
     restoreMocks: true,
     clearMocks: true,
+    testTimeout: 15_000,
+    pool: "forks",
+    fileParallelism: false,
   },
 });

@@ -1,18 +1,13 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { HttpResponse, http } from "msw";
 import { useLocation } from "react-router-dom";
 import HomePage from "./index";
 import type { TmdbMovie, TmdbTv } from "shared";
 import { renderWithProviders } from "@/test/utils";
-
-const tmdb = vi.hoisted(() => ({
-  getGenres: vi.fn(),
-  getHomeContent: vi.fn(),
-  tmdbLanguage: vi.fn(),
-}));
-
-vi.mock("@/lib/tmdb", () => tmdb);
+import { server } from "@/test/server";
+import { TMDB_BASE } from "@/test/handlers/tmdbHandlers";
 
 function movie(id: number, title: string): TmdbMovie {
   return {
@@ -56,6 +51,15 @@ const homeContent = {
   trending: { movies: [], series: [series] },
 };
 
+function listResult(results: unknown[] = []) {
+  return {
+    page: 1,
+    results,
+    total_pages: results.length === 0 ? 0 : 1,
+    total_results: results.length,
+  };
+}
+
 function LocationProbe() {
   const location = useLocation();
   return (
@@ -67,17 +71,23 @@ function LocationProbe() {
 }
 
 beforeEach(() => {
-  tmdb.getGenres.mockReset();
-  tmdb.getHomeContent.mockReset();
-  tmdb.tmdbLanguage.mockReset();
-  tmdb.tmdbLanguage.mockReturnValue("en-US");
-  tmdb.getGenres.mockImplementation(async (mediaType: string) => ({
-    genres:
-      mediaType === "movie"
-        ? [{ id: 28, name: "Action" }]
-        : [{ id: 18, name: "Drama" }],
-  }));
-  tmdb.getHomeContent.mockResolvedValue(homeContent);
+  server.use(
+    http.get(`${TMDB_BASE}/movie/now_playing`, () =>
+      HttpResponse.json(listResult(homeContent.new.movies))
+    ),
+    http.get(`${TMDB_BASE}/tv/on_the_air`, () =>
+      HttpResponse.json(listResult(homeContent.new.series))
+    ),
+    http.get(`${TMDB_BASE}/movie/upcoming`, () =>
+      HttpResponse.json(listResult(homeContent.upcoming.movies))
+    ),
+    http.get(`${TMDB_BASE}/trending/movie/day`, () =>
+      HttpResponse.json(listResult(homeContent.trending.movies))
+    ),
+    http.get(`${TMDB_BASE}/trending/tv/day`, () =>
+      HttpResponse.json(listResult(homeContent.trending.series))
+    )
+  );
 });
 
 describe("HomePage", () => {

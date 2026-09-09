@@ -1,22 +1,13 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { HttpResponse, http } from "msw";
 import type { WatchedMovieResponse, WatchedSeriesResponse } from "shared";
 import CollectionPage from "./index";
 import { renderWithProviders } from "@/test/utils";
+import { server } from "@/test/server";
 
-const api = vi.hoisted(() => ({
-  getCollection: vi.fn(),
-}));
-
-vi.mock("@/lib/api", () => api);
-
-const tmdb = vi.hoisted(() => ({
-  getGenres: vi.fn(),
-  tmdbLanguage: vi.fn(),
-}));
-
-vi.mock("@/lib/tmdb", () => tmdb);
+const API = "http://localhost:3000";
 
 const watchedMovie: WatchedMovieResponse = {
   tmdbId: 550,
@@ -41,25 +32,16 @@ const watchedSeries: WatchedSeriesResponse = {
   rating: 9.5,
 };
 
-beforeEach(() => {
-  api.getCollection.mockReset();
-  tmdb.getGenres.mockReset();
-  tmdb.tmdbLanguage.mockReset();
-  tmdb.tmdbLanguage.mockReturnValue("en-US");
-  tmdb.getGenres.mockImplementation(async (mediaType: string) => ({
-    genres:
-      mediaType === "movie"
-        ? [{ id: 28, name: "Action" }]
-        : [{ id: 18, name: "Drama" }],
-  }));
-});
-
 describe("CollectionPage", () => {
   it("groups and filters watched items by media type", async () => {
-    api.getCollection.mockResolvedValue({
-      movies: [watchedMovie],
-      series: [watchedSeries],
-    });
+    server.use(
+      http.get(`${API}/collection`, () =>
+        HttpResponse.json({
+          movies: [watchedMovie],
+          series: [watchedSeries],
+        })
+      )
+    );
     const userEventCtx = userEvent.setup();
 
     renderWithProviders(<CollectionPage />);
@@ -78,7 +60,11 @@ describe("CollectionPage", () => {
   });
 
   it("shows the empty state when the collection is empty", async () => {
-    api.getCollection.mockResolvedValue({ movies: [], series: [] });
+    server.use(
+      http.get(`${API}/collection`, () =>
+        HttpResponse.json({ movies: [], series: [] })
+      )
+    );
 
     renderWithProviders(<CollectionPage />);
 

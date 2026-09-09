@@ -1,32 +1,30 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { HttpResponse, http } from "msw";
 import SettingsPage from "./index";
 import { renderWithProviders } from "@/test/utils";
+import { server } from "@/test/server";
 
-const api = vi.hoisted(() => ({
-  getCurrentUser: vi.fn(),
-  updateProfile: vi.fn(),
-  changePassword: vi.fn(),
-}));
-
-vi.mock("@/lib/api", () => api);
+const API = "http://localhost:3000";
 
 const user = { id: "1", name: "Anna", surname: "Kowalska", email: "anna@test.com" };
 
-beforeEach(() => {
-  api.getCurrentUser.mockReset();
-  api.updateProfile.mockReset();
-  api.changePassword.mockReset();
-  api.getCurrentUser.mockResolvedValue(user);
-});
-
 describe("SettingsPage profile form", () => {
   it("submits the profile update and shows a success message", async () => {
-    api.updateProfile.mockResolvedValue({
-      user: { ...user, surname: "Nowak" },
-      accessToken: "new-token",
-    });
+    server.use(
+      http.get(`${API}/auth/me`, () => HttpResponse.json(user))
+    );
+    let lastProfileBody: unknown;
+    server.use(
+      http.put(`${API}/auth/profile`, async ({ request }) => {
+        lastProfileBody = await request.json();
+        return HttpResponse.json({
+          user: { ...user, surname: "Nowak" },
+          accessToken: "new-token",
+        });
+      })
+    );
     const userEventCtx = userEvent.setup();
 
     renderWithProviders(<SettingsPage />, { route: "/auth/settings" });
@@ -46,7 +44,7 @@ describe("SettingsPage profile form", () => {
     await waitFor(() => {
       expect(screen.getByText("Profile updated!")).toBeTruthy();
     });
-    expect(api.updateProfile).toHaveBeenCalledWith({
+    expect(lastProfileBody).toEqual({
       name: "Anna",
       surname: "Nowak",
       email: "anna@test.com",
@@ -56,7 +54,16 @@ describe("SettingsPage profile form", () => {
 
 describe("SettingsPage password form", () => {
   it("changes the password and shows a success message", async () => {
-    api.changePassword.mockResolvedValue({ message: "changed" });
+    server.use(
+      http.get(`${API}/auth/me`, () => HttpResponse.json(user))
+    );
+    let lastPasswordBody: unknown;
+    server.use(
+      http.put(`${API}/auth/password`, async ({ request }) => {
+        lastPasswordBody = await request.json();
+        return HttpResponse.json({ message: "changed" });
+      })
+    );
     const userEventCtx = userEvent.setup();
 
     renderWithProviders(<SettingsPage />, { route: "/auth/settings" });
@@ -73,7 +80,7 @@ describe("SettingsPage password form", () => {
     await waitFor(() => {
       expect(screen.getByText("Password changed!")).toBeTruthy();
     });
-    expect(api.changePassword).toHaveBeenCalledWith({
+    expect(lastPasswordBody).toEqual({
       newPassword: "Password123",
     });
   });

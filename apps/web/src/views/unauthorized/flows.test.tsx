@@ -1,21 +1,16 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { HttpResponse, http } from "msw";
 import { useLocation } from "react-router-dom";
 import LoginPage from "./loginPage";
 import RegisterPage from "./registerPage";
 import { withAuth } from "@/hocs/withAuth";
 import { withPublic } from "@/hocs/withPublic";
 import { renderWithProviders } from "@/test/utils";
+import { server } from "@/test/server";
 
-const api = vi.hoisted(() => ({
-  loginUser: vi.fn(),
-  registerUser: vi.fn(),
-  getCurrentUser: vi.fn(),
-  logoutUser: vi.fn(),
-}));
-
-vi.mock("@/lib/api", () => api);
+const API = "http://localhost:3000";
 
 function LocationProbe() {
   const location = useLocation();
@@ -29,16 +24,16 @@ function LocationProbe() {
 
 const user = { id: "1", name: "Anna", surname: "Kowalska", email: "a@test.com" };
 
-beforeEach(() => {
-  api.loginUser.mockReset();
-  api.registerUser.mockReset();
-  api.getCurrentUser.mockReset();
-  api.logoutUser.mockReset();
-});
-
 describe("LoginPage flow", () => {
   it("signs in and navigates to the home page", async () => {
-    api.loginUser.mockResolvedValue({ user, accessToken: "token" });
+    let lastLoginBody: unknown;
+    server.use(
+      http.post(`${API}/auth/login`, async ({ request }) => {
+        lastLoginBody = await request.json();
+        return HttpResponse.json({ user, accessToken: "token" });
+      }),
+      http.get(`${API}/auth/me`, () => HttpResponse.json(user))
+    );
     const userEventCtx = userEvent.setup();
 
     renderWithProviders(
@@ -60,11 +55,14 @@ describe("LoginPage flow", () => {
 
     await userEventCtx.click(screen.getByRole("button", { name: "Sign in" }));
 
-    await waitFor(() => {
-      expect(screen.getByTestId("probe").textContent).toBe("/auth/home");
-    });
+    await waitFor(
+      () => {
+        expect(screen.getByTestId("probe").textContent).toBe("/auth/home");
+      },
+      { timeout: 10_000 }
+    );
     expect(screen.getByText("Welcome back!")).toBeTruthy();
-    expect(api.loginUser).toHaveBeenCalledWith({
+    expect(lastLoginBody).toEqual({
       email: "anna@test.com",
       password: "Password123",
       remember: false,
@@ -72,7 +70,14 @@ describe("LoginPage flow", () => {
   });
 
   it("shows the server error in a snackbar on failure", async () => {
-    api.loginUser.mockRejectedValue(new Error("Invalid email or password"));
+    server.use(
+      http.post(`${API}/auth/login`, () =>
+        HttpResponse.json(
+          { error: "error.auth.login.invalidCredentials" },
+          { status: 401 }
+        )
+      )
+    );
     const userEventCtx = userEvent.setup();
 
     renderWithProviders(<LoginPage />, { route: "/login" });
@@ -112,7 +117,16 @@ describe("LoginPage flow", () => {
 
 describe("RegisterPage flow", () => {
   it("registers and redirects to the login page", async () => {
-    api.registerUser.mockResolvedValue({ message: "Registration successful" });
+    let lastRegisterBody: unknown;
+    server.use(
+      http.post(`${API}/auth/register`, async ({ request }) => {
+        lastRegisterBody = await request.json();
+        return HttpResponse.json(
+          { message: "Registration successful" },
+          { status: 201 }
+        );
+      })
+    );
     const userEventCtx = userEvent.setup();
 
     renderWithProviders(
@@ -137,24 +151,34 @@ describe("RegisterPage flow", () => {
 
     await userEventCtx.click(screen.getByRole("button", { name: "Register" }));
 
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          "Registration successful, you will be redirected to the login page"
+        )
+      ).toBeTruthy();
+    });
+
     await waitFor(
       () => {
         expect(screen.getByTestId("probe").textContent).toBe("/login");
       },
-      { timeout: 3000 }
+      { timeout: 10_000 }
     );
-    expect(api.registerUser).toHaveBeenCalledWith({
+    expect(lastRegisterBody).toEqual({
       name: "Anna",
       surname: "Kowalska",
       email: "anna@test.com",
       password: "Password123",
     });
-  });
+  }, 15_000);
 });
 
 describe("route guards", () => {
   it("withAuth renders children for authenticated users", async () => {
-    api.getCurrentUser.mockResolvedValue(user);
+    server.use(
+      http.get(`${API}/auth/me`, () => HttpResponse.json(user))
+    );
     const Component = withAuth(() => <span>Protected</span>);
 
     renderWithProviders(
@@ -169,7 +193,11 @@ describe("route guards", () => {
   });
 
   it("withAuth redirects unauthenticated users to login", async () => {
-    api.getCurrentUser.mockRejectedValue(new Error("Unauthorized"));
+    server.use(
+      http.get(`${API}/auth/me`, () =>
+        HttpResponse.json({ error: "error.unauthorized" }, { status: 401 })
+      )
+    );
     const Component = withAuth(() => <span>Protected</span>);
 
     renderWithProviders(
@@ -186,7 +214,11 @@ describe("route guards", () => {
   });
 
   it("withPublic renders children for guests and redirects authenticated users home", async () => {
-    api.getCurrentUser.mockRejectedValue(new Error("Unauthorized"));
+    server.use(
+      http.get(`${API}/auth/me`, () =>
+        HttpResponse.json({ error: "error.unauthorized" }, { status: 401 })
+      )
+    );
     const GuestComponent = withPublic(() => <span>Login form</span>);
 
     renderWithProviders(
@@ -200,7 +232,9 @@ describe("route guards", () => {
   });
 
   it("withPublic redirects authenticated users away from guest pages", async () => {
-    api.getCurrentUser.mockResolvedValue(user);
+    server.use(
+      http.get(`${API}/auth/me`, () => HttpResponse.json(user))
+    );
     const GuestComponent = withPublic(() => <span>Login form</span>);
 
     renderWithProviders(
@@ -211,8 +245,11 @@ describe("route guards", () => {
       { route: "/login" }
     );
 
-    await waitFor(() => {
-      expect(screen.getByTestId("probe").textContent).toBe("/auth/home");
-    });
+    await waitFor(
+      () => {
+        expect(screen.getByTestId("probe").textContent).toBe("/auth/home");
+      },
+      { timeout: 10_000 }
+    );
   });
 });

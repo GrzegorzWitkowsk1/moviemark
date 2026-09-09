@@ -1,18 +1,16 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { HttpResponse, http } from "msw";
 import i18n from "@/i18n";
 import { tmdbLanguage } from "./tmdb";
+import { server } from "@/test/server";
+import { TMDB_BASE } from "@/test/handlers/tmdbHandlers";
 
 afterEach(async () => {
   await i18n.changeLanguage("en");
   vi.unstubAllEnvs();
-  vi.unstubAllGlobals();
 });
 
 describe("tmdbLanguage", () => {
-  beforeEach(async () => {
-    await i18n.changeLanguage("en");
-  });
-
   it("maps English to en-US", () => {
     expect(tmdbLanguage()).toBe("en-US");
   });
@@ -29,13 +27,6 @@ describe("tmdbLanguage", () => {
 });
 
 describe("tmdb fetch layer", () => {
-  function jsonResponse(body: unknown) {
-    return new Response(JSON.stringify(body), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-
   it("throws without a token", async () => {
     vi.stubEnv("VITE_TMDB_TOKEN", "");
     vi.resetModules();
@@ -50,18 +41,23 @@ describe("tmdb fetch layer", () => {
     vi.resetModules();
     const tmdb = await import("./tmdb");
 
-    const fetchSpy = vi.fn().mockResolvedValue(
-      jsonResponse({ results: [] })
+    let captured: { url: string; body: string } | undefined;
+    server.use(
+      http.get(`${TMDB_BASE}/search/multi`, ({ request }) => {
+        captured = {
+          url: request.url,
+          body: JSON.stringify(request.headers),
+        };
+        return HttpResponse.json({ results: [] });
+      })
     );
-    vi.stubGlobal("fetch", fetchSpy);
 
     await tmdb.searchMulti("fight club");
 
-    const [url, init] = fetchSpy.mock.calls[0] as [string, RequestInit];
-    expect(url).toContain("/search/multi?query=fight%20club");
-    expect(url).toContain("language=en-US");
-    expect(url).toContain("api_key=plain-key");
-    expect(init.headers).toEqual({});
+    expect(captured?.url).toContain("/search/multi?query=fight%20club");
+    expect(captured?.url).toContain("language=en-US");
+    expect(captured?.url).toContain("api_key=plain-key");
+    expect(captured?.body).toBe("{}");
   });
 
   it("sends a Bearer token and no api_key for a JWT", async () => {
@@ -69,17 +65,22 @@ describe("tmdb fetch layer", () => {
     vi.resetModules();
     const tmdb = await import("./tmdb");
 
-    const fetchSpy = vi.fn().mockResolvedValue(jsonResponse({ results: [] }));
-    vi.stubGlobal("fetch", fetchSpy);
+    let captured: { url: string; auth: string | null } | undefined;
+    server.use(
+      http.get(`${TMDB_BASE}/movie/550`, ({ request }) => {
+        captured = {
+          url: request.url,
+          auth: request.headers.get("authorization"),
+        };
+        return HttpResponse.json({ id: 550 });
+      })
+    );
 
     await tmdb.getMovieDetails(550);
 
-    const [url, init] = fetchSpy.mock.calls[0] as [string, RequestInit];
-    expect(url).toContain("/movie/550?language=en-US");
-    expect(url).not.toContain("api_key=");
-    expect((init.headers as Record<string, string>).Authorization).toBe(
-      "Bearer eyJ.some.jwt"
-    );
+    expect(captured?.url).toContain("/movie/550?language=en-US");
+    expect(captured?.url).not.toContain("api_key=");
+    expect(captured?.auth).toBe("Bearer eyJ.some.jwt");
   });
 
   it("uses the Polish language when the UI is in Polish", async () => {
@@ -89,13 +90,17 @@ describe("tmdb fetch layer", () => {
 
     await i18n.changeLanguage("pl");
 
-    const fetchSpy = vi.fn().mockResolvedValue(jsonResponse({ results: [] }));
-    vi.stubGlobal("fetch", fetchSpy);
+    let capturedUrl = "";
+    server.use(
+      http.get(`${TMDB_BASE}/trending/movie/week`, ({ request }) => {
+        capturedUrl = request.url;
+        return HttpResponse.json({ results: [] });
+      })
+    );
 
     await tmdb.getTrending("movie", "week");
 
-    const [url] = fetchSpy.mock.calls[0] as [string, RequestInit];
-    expect(url).toContain("/trending/movie/week?language=pl-PL");
+    expect(capturedUrl).toContain("/trending/movie/week?language=pl-PL");
   });
 
   it("honours an explicit language override for details", async () => {
@@ -103,12 +108,16 @@ describe("tmdb fetch layer", () => {
     vi.resetModules();
     const tmdb = await import("./tmdb");
 
-    const fetchSpy = vi.fn().mockResolvedValue(jsonResponse({ id: 550 }));
-    vi.stubGlobal("fetch", fetchSpy);
+    let capturedUrl = "";
+    server.use(
+      http.get(`${TMDB_BASE}/movie/550`, ({ request }) => {
+        capturedUrl = request.url;
+        return HttpResponse.json({ id: 550 });
+      })
+    );
 
     await tmdb.getMovieDetails(550, "en-US");
 
-    const [url] = fetchSpy.mock.calls[0] as [string, RequestInit];
-    expect(url).toContain("language=en-US");
+    expect(capturedUrl).toContain("language=en-US");
   });
 });

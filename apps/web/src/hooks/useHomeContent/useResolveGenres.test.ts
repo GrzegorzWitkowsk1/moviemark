@@ -1,6 +1,6 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { waitFor } from "@testing-library/react";
-import { genreNames } from "./useResolveGenres";
+import { genreNames, useResolveGenres } from "./useResolveGenres";
 import { renderHookWithProviders } from "@/test/utils";
 
 const movieGenres = { 28: "Action", 12: "Adventure", 878: "Science Fiction" };
@@ -41,27 +41,8 @@ describe("genreNames", () => {
 
 describe("useResolveGenres", () => {
   it("returns resolved genre names from the cache", async () => {
-    vi.mock("@/lib/tmdb", async () => {
-      const actual = await vi.importActual<typeof import("@/lib/tmdb")>(
-        "@/lib/tmdb"
-      );
-      return {
-        ...actual,
-        getGenres: vi.fn().mockResolvedValue({
-          genres: [
-            { id: 28, name: "Action" },
-            { id: 12, name: "Adventure" },
-          ],
-        }),
-      };
-    });
-
-    const { useResolveGenres: useResolveGenresLazy } = await import(
-      "./useResolveGenres"
-    );
-
     const { result } = renderHookWithProviders(() =>
-      useResolveGenresLazy("movie", [28, 12])
+      useResolveGenres("movie", [28, 12])
     );
 
     await waitFor(() => {
