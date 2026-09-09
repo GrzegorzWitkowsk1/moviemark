@@ -124,15 +124,20 @@ sequenceDiagram
 
 Testing is split across the two apps and runs through the root script.
 
-- **Frontend (`apps/web`)** — **Vitest** + **Testing Library** in jsdom, with **MSW** mocking the API and TMDB. Tests are colocated with source as `.test.ts(x)` files and cover hooks, components, pages, forms/schemas, API/token/tmdb utilities, and full unauthorized flows.
+- **Frontend unit/component (`apps/web`)** — **Vitest** + **Testing Library** in jsdom, with **MSW** mocking the API and TMDB. Tests are colocated with source as `.test.ts(x)` files and cover hooks, components, pages, forms/schemas, API/token/tmdb utilities, and full unauthorized flows.
 - **Backend (`apps/api`)** — **`bun:test`** integration tests that spin up the Fastify app with an **in-memory MongoDB** (`mongodb-memory-server`) and exercise real request/response cycles via `app.inject()`. Covers auth, collections, future/watch-later, custom entries, and the TMDB proxy.
+- **Frontend e2e (`apps/web`)** — **Playwright** end-to-end tests in `apps/web/tests/e2e`, driving a real Chromium browser against the **actual API and MongoDB** (Playwright's `webServer` starts both dev servers automatically). TMDB responses are mocked at the browser level with `page.route()`, so the suite runs offline and deterministically on top of real auth and database flows. Coverage includes register/login, session persistence and token refresh, search (results, detail navigation, no-results), collection add/remove, custom movie creation with negative IDs, user data isolation between accounts, protected-route redirects, and logout.
 
 ```sh
-# Run all tests across workspaces
+# Run all unit/integration tests across workspaces
 bun run test
 
 # Run a single workspace
 bun exec turbo test --filter=web
+
+# Run e2e tests (requires a running MongoDB, e.g. `docker compose up -d`;
+# first-time setup: `cd apps/web && bunx playwright install chromium`)
+cd apps/web && bun run test:e2e
 ```
 
 ## Running
@@ -185,7 +190,8 @@ bun exec turbo test --filter=web
 | `bun run build` | Build all workspaces |
 | `bun run lint` | Lint all workspaces |
 | `bun run check-types` | Type-check all workspaces |
-| `bun run test` | Run all tests |
+| `bun run test` | Run all unit/integration tests |
+| `bun run test:e2e` | Run Playwright e2e tests (`apps/web`) |
 | `bun run format` | Format with Prettier |
 | `bun run check:translations` | Validate en/pl translation key parity |
 
