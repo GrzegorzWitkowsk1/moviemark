@@ -6,10 +6,6 @@ Built as a **Turborepo monorepo** and managed with **Bun**.
 
 ## Screenshots
 
-> Add screenshots here. Store them in `docs/screenshots/` and reference them like the examples below.
-
-<!-- Replace the placeholders below with actual screenshots. -->
-
 | Home | Search |
 | --- | --- |
 | ![Home](docs/screenshots/home.png) | ![Search](docs/screenshots/search.png) |
@@ -201,6 +197,4 @@ bun exec turbo test --filter=web
 
 ## Live demo
 
-> Add the link to your deployed version here once it's live.
-
-🔗 **Live demo:** https://example.com
+🔗 **Live demo:** Not available now
