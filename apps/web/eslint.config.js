@@ -36,6 +36,14 @@ export default defineConfig([
     },
   },
   {
+    files: ['tests/**/*.ts'],
+    rules: {
+      'react-hooks/rules-of-hooks': 'off',
+      'react-hooks/exhaustive-deps': 'off',
+      'react-refresh/only-export-components': 'off',
+    },
+  },
+  {
     files: [
       'src/hocs/**/*.{ts,tsx}',
       'src/views/authorized/index.tsx',
