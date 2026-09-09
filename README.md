@@ -60,6 +60,17 @@ Key points:
 - **`packages/shared`** holds the shared request/response types so the frontend and backend stay in sync.
 - The API applies security hardening: Helmet headers, CORS restricted to the web origin, per-route rate limiting, and passwords hashed with bcrypt.
 
+### Architectural Decisions
+
+| Technology | Why? |
+|------------|------|
+| Turborepo | Monorepo structure and shared code |
+| TanStack Query | Server-state management and caching |
+| Fastify | Lightweight, TypeScript-friendly backend |
+| JWT + HttpOnly refresh cookie | Stateless authentication with protected refresh tokens |
+| MongoDB | Flexible document-oriented data model |
+| Shared package | Shared TypeScript contracts between frontend and backend |
+
 ### Authentication
 
 ```mermaid
