@@ -32,13 +32,11 @@ const SORT_OPTIONS: { value: SortOrder; labelKey: string }[] = [
 ];
 
 function toCardData(item: FutureItem): MovieCardData {
-  const movieItem = item as FutureMovieResponse;
-  const seriesItem = item as FutureSeriesResponse;
   const isTv = item.mediaType === "tv";
   return {
     mediaType: item.mediaType,
     id: item.tmdbId,
-    title: isTv ? seriesItem.name : movieItem.title,
+    title: isTv ? item.name : item.title,
     year: item.year ?? null,
     overview: item.overview ?? "",
     voteCount: item.voteCount ?? 0,
@@ -49,9 +47,7 @@ function toCardData(item: FutureItem): MovieCardData {
 }
 
 function itemTitle(item: FutureItem): string {
-  const movieItem = item as FutureMovieResponse;
-  const seriesItem = item as FutureSeriesResponse;
-  return item.mediaType === "tv" ? seriesItem.name : movieItem.title;
+  return item.mediaType === "tv" ? item.name : item.title;
 }
 
 function itemRating(item: FutureItem): number {
@@ -67,9 +63,7 @@ export default function WantToWatchPage() {
   const { data, isLoading } = useFutureList();
 
   const items = useMemo<FutureItem[]>(() => {
-    const all = data
-      ? (data.movies as FutureItem[]).concat(data.series as FutureItem[])
-      : [];
+    const all = data ? [...data.movies, ...data.series] : [];
     return all.filter((item) => item.mediaType === mediaType);
   }, [data, mediaType]);
 

@@ -30,13 +30,11 @@ const SORT_OPTIONS: { value: SortOrder; labelKey: string }[] = [
 ];
 
 function toCardData(item: CollectionItem): MovieCardData {
-  const movieItem = item as WatchedMovieResponse;
-  const seriesItem = item as WatchedSeriesResponse;
   const isTv = item.mediaType === "tv";
   return {
     mediaType: item.mediaType,
     id: item.tmdbId,
-    title: isTv ? seriesItem.name : movieItem.title,
+    title: isTv ? item.name : item.title,
     year: item.year ?? null,
     overview: item.overview ?? "",
     voteCount: item.voteCount ?? 0,
@@ -47,9 +45,7 @@ function toCardData(item: CollectionItem): MovieCardData {
 }
 
 function itemTitle(item: CollectionItem): string {
-  const movieItem = item as WatchedMovieResponse;
-  const seriesItem = item as WatchedSeriesResponse;
-  return item.mediaType === "tv" ? seriesItem.name : movieItem.title;
+  return item.mediaType === "tv" ? item.name : item.title;
 }
 
 function itemRating(item: CollectionItem): number {
@@ -75,11 +71,7 @@ export default function CollectionPage() {
   const { data, isLoading } = useCollection();
 
   const items = useMemo<CollectionItem[]>(() => {
-    const all = data
-      ? (data.movies as CollectionItem[]).concat(
-          data.series as CollectionItem[]
-        )
-      : [];
+    const all = data ? [...data.movies, ...data.series] : [];
     return all.filter((item) => item.mediaType === mediaType);
   }, [data, mediaType]);
 
@@ -224,10 +216,15 @@ export default function CollectionPage() {
 
 							{mediaType === "tv" ? (
 								<Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-									{groupItems.map((item) => (
+									{groupItems
+										.filter(
+											(item): item is WatchedSeriesResponse =>
+												item.mediaType === "tv"
+										)
+										.map((item) => (
 										<SeriesCollectionCard
 											key={item.tmdbId}
-											series={item as WatchedSeriesResponse}
+											series={item}
 										/>
 									))}
 								</Box>

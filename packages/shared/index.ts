@@ -185,7 +185,7 @@ export interface WatchedMovieResponse {
   title: string;
   posterPath: string | null;
   watchedAt: string;
-  mediaType: TmdbMediaType;
+  mediaType: "movie";
   rating?: number;
   voteCount?: number;
   overview?: string;
@@ -201,7 +201,7 @@ export interface WatchedSeriesResponse {
   watchedCount: number;
   watchedEpisodes: WatchedEpisode[];
   watchedAt: string;
-  mediaType: TmdbMediaType;
+  mediaType: "tv";
   rating?: number;
   voteCount?: number;
   overview?: string;
@@ -247,7 +247,7 @@ export interface FutureMovieResponse {
   title: string;
   posterPath: string | null;
   addedAt: string;
-  mediaType: TmdbMediaType;
+  mediaType: "movie";
   rating?: number;
   voteCount?: number;
   overview?: string;
@@ -260,7 +260,7 @@ export interface FutureSeriesResponse {
   name: string;
   posterPath: string | null;
   addedAt: string;
-  mediaType: TmdbMediaType;
+  mediaType: "tv";
   rating?: number;
   voteCount?: number;
   overview?: string;
