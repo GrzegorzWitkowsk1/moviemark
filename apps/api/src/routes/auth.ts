@@ -56,6 +56,7 @@ export async function authRoutes(app: FastifyInstance) {
           },
         },
       },
+      config: { rateLimit: { max: config.isProduction ? 10 : config.rateLimitMax, timeWindow: "1 minute" } },
     },
     async (request, reply) => {
       try {
@@ -108,6 +109,7 @@ export async function authRoutes(app: FastifyInstance) {
           },
         },
       },
+      config: { rateLimit: { max: config.isProduction ? 10 : config.rateLimitMax, timeWindow: "1 minute" } },
     },
     async (request, reply) => {
       try {

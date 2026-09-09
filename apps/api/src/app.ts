@@ -1,9 +1,11 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
+import helmet from "@fastify/helmet";
 import { authRoutes } from "./routes/auth";
 import { collectionRoutes } from "./routes/collection";
 import { customRoutes } from "./routes/custom";
 import { futureRoutes } from "./routes/future";
+import { tmdbRoutes } from "./routes/tmdb";
 import { config } from "./config";
 import authPlugin from "./plugins/auth";
 
@@ -35,6 +37,7 @@ export async function buildApp(options: { logger?: boolean } = {}) {
     return reply.code(500).send({ error: "error.internal" });
   });
 
+  await app.register(helmet);
   await app.register(cors, {
     origin: config.corsOrigin,
     credentials: true,
@@ -46,6 +49,7 @@ export async function buildApp(options: { logger?: boolean } = {}) {
   await app.register(collectionRoutes);
   await app.register(customRoutes);
   await app.register(futureRoutes);
+  await app.register(tmdbRoutes);
 
   return app;
 }

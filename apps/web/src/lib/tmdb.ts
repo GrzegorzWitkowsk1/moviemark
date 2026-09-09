@@ -11,33 +11,14 @@ import type {
   TmdbTvDetails,
 } from "shared";
 import i18n from "@/i18n";
-import { config } from "./config";
+import { apiFetch } from "./api";
 
 export function tmdbLanguage(): string {
   return i18n.language === "pl" ? "pl-PL" : "en-US";
 }
 
 async function fetchTmdbJson<T>(path: string): Promise<T> {
-  if (!config.tmdbToken) {
-    throw new Error("Missing VITE_TMDB_TOKEN.");
-  }
-
-  const isJwt = config.tmdbToken.startsWith("eyJ");
-  const separator = path.includes("?") ? "&" : "?";
-  const url = isJwt
-    ? `${config.tmdbApiBase}${path}`
-    : `${config.tmdbApiBase}${path}${separator}api_key=${config.tmdbToken}`;
-  const headers: Record<string, string> = isJwt
-    ? { Authorization: `Bearer ${config.tmdbToken}` }
-    : {};
-
-  const res = await fetch(url, { headers });
-
-  if (!res.ok) {
-    throw new Error(`TMDB request failed (${res.status}) for ${path}.`);
-  }
-
-  return (await res.json()) as T;
+  return apiFetch<T>(`/tmdb${path}`);
 }
 
 export function getNowPlayingMovies(): Promise<TmdbListResult<TmdbMovie>> {

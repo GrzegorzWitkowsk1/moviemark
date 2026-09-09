@@ -1,11 +1,10 @@
-import { afterAll, afterEach, beforeAll, beforeEach, vi } from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach } from "vitest";
 import { cleanup } from "@testing-library/react";
 import "@testing-library/jest-dom/vitest";
 import i18n, { STORAGE_KEY } from "@/i18n";
 import { server } from "./server";
 
 beforeAll(() => {
-  vi.stubEnv("VITE_TMDB_TOKEN", "eyJtest.token.for.msw");
   server.listen({ onUnhandledRequest: "error" });
 });
 

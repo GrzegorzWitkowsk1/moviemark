@@ -11,30 +11,48 @@ interface TmdbDetailsResult {
 
 const suggestTimeoutMs = 3000;
 
+function tmdbToken(): string {
+  return Bun.env.TMDB_TOKEN ?? config.tmdbToken;
+}
+
+export function buildTmdbUrl(queryPath: string): string | null {
+  const token = tmdbToken();
+  if (!token) {
+    return null;
+  }
+  const isJwt = token.startsWith("eyJ");
+  const separator = queryPath.includes("?") ? "&" : "?";
+  return isJwt
+    ? `${config.tmdbApiBase}${queryPath}`
+    : `${config.tmdbApiBase}${queryPath}${separator}api_key=${token}`;
+}
+
+export function tmdbRequestHeaders(): Record<string, string> {
+  const token = tmdbToken();
+  const isJwt = token?.startsWith("eyJ");
+  return isJwt ? { Authorization: `Bearer ${token}` } : {};
+}
+
 export async function getTmdbDetails(
   mediaType: TmdbMediaType,
   tmdbId: number
 ): Promise<TmdbDetailsResult | null> {
-  if (!config.tmdbToken) {
+  if (!tmdbToken()) {
     return null;
   }
 
-  const isJwt = config.tmdbToken.startsWith("eyJ");
   const path = `/${mediaType}/${tmdbId}?language=en-US`;
-  const separator = path.includes("?") ? "&" : "?";
-  const url = isJwt
-    ? `${config.tmdbApiBase}${path}`
-    : `${config.tmdbApiBase}${path}${separator}api_key=${config.tmdbToken}`;
-  const headers: Record<string, string> = isJwt
-    ? { Authorization: `Bearer ${config.tmdbToken}` }
-    : {};
+  const url = buildTmdbUrl(path);
+  if (!url) {
+    return null;
+  }
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), suggestTimeoutMs);
 
   try {
     const res = await fetch(url, {
-      headers,
+      headers: tmdbRequestHeaders(),
       signal: controller.signal,
     });
     if (!res.ok) {

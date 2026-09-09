@@ -1,6 +1,6 @@
 import { HttpResponse, http } from "msw";
 
-export const TMDB_BASE = "https://api.themoviedb.org/3";
+export const TMDB_BASE = "http://localhost:3000/tmdb";
 
 const movieGenres: { id: number; name: string }[] = [
   { id: 28, name: "Action" },

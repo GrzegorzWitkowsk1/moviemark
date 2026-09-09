@@ -134,7 +134,7 @@ async function rawFetch(
   }
 }
 
-async function apiFetch<T>(
+export async function apiFetch<T>(
   path: string,
   options: ApiFetchOptions = {},
   retried = false
