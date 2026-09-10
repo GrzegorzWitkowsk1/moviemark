@@ -1,5 +1,7 @@
 import type { FastifyInstance } from "fastify";
+import rateLimit from "@fastify/rate-limit";
 import { buildTmdbUrl, tmdbRequestHeaders } from "../lib/tmdb";
+import { config } from "../config";
 
 const TMDB_PROXY_PATH =
   /^(?:(?:movie|tv)\/\d+(?:\/(?:season\/\d+|similar))?|movie\/(?:now_playing|upcoming)|tv\/on_the_air|trending\/(?:movie|tv)\/(?:day|week)|genre\/(?:movie|tv)\/list|search\/multi)$/;
@@ -7,6 +9,11 @@ const TMDB_PROXY_PATH =
 const LANGUAGE_RE = /^[a-z]{2}(?:-[A-Z]{2})?$/;
 
 export async function tmdbRoutes(app: FastifyInstance) {
+  await app.register(rateLimit, {
+    max: config.tmdbRateLimitMax,
+    timeWindow: "1 minute",
+  });
+
   app.get<{
     Params: { "*": string };
     Querystring: { language?: string; query?: string };

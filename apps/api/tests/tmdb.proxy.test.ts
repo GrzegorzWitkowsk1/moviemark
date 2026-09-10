@@ -117,4 +117,27 @@ describe("tmdb proxy routes", () => {
       status_message: "Not found",
     });
   });
+
+  it("rate limits excessive proxy usage", async () => {
+    globalThis.fetch = (async () =>
+      new Response(JSON.stringify({ results: [] }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      })) as unknown as typeof fetch;
+
+    let saw429 = false;
+    let statusCode = 0;
+    for (let i = 0; i < 35 && !saw429; i++) {
+      const res = await app.inject({
+        method: "GET",
+        url: "/tmdb/movie/550",
+        headers: { authorization: `Bearer ${accessToken}` },
+      });
+      statusCode = res.statusCode;
+      if (res.statusCode === 429) saw429 = true;
+    }
+
+    expect(saw429).toBe(true);
+    expect(statusCode).toBe(429);
+  });
 });

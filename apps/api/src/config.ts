@@ -47,6 +47,7 @@ export const config = {
   refreshTokenTtl: Bun.env.REFRESH_TOKEN_TTL ?? "7d",
   cookieName: Bun.env.COOKIE_NAME ?? "refreshToken",
   rateLimitMax: number("RATE_LIMIT_MAX", 100),
+  tmdbRateLimitMax: number("TMDB_RATE_LIMIT_MAX", 30),
   isProduction: Bun.env.NODE_ENV === "production",
   tmdbApiBase: Bun.env.TMDB_API_BASE ?? "https://api.themoviedb.org/3",
   tmdbToken: Bun.env.TMDB_TOKEN ?? "",
