@@ -203,4 +203,4 @@ cd apps/web && bun run test:e2e
 
 ## Live demo
 
-🔗 **Live demo:** Not available now
+🔗 **Live demo:** https://moviemark.grzegorz-witkowski.workers.dev
