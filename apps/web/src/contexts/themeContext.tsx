@@ -2,6 +2,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   useSyncExternalStore,
@@ -31,8 +32,6 @@ function getInitialMode(): ThemeMode {
 }
 
 function resolveMode(mode: ThemeMode): "light" | "dark" {
-  document.documentElement.className =
-    mode === "dark" || (mode === "system") ? "dark" : "";
   if (mode !== "system") return mode;
 
   return window.matchMedia("(prefers-color-scheme: dark)").matches
@@ -64,9 +63,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     [mode, prefersDark]
   );
 
+  useEffect(() => {
+    document.documentElement.className = mode;
+  }, [mode, resolvedMode]);
+
   const setMode = useCallback((newMode: ThemeMode) => {
     setModeState(newMode);
-    document.documentElement.className = newMode === "dark" || (newMode === "system" && prefersDark) ? "dark" : "";
     try {
       localStorage.setItem(STORAGE_KEY, newMode);
     } catch {
