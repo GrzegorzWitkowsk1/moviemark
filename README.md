@@ -201,6 +201,31 @@ cd apps/web && bun run test:e2e
 - API server: `http://localhost:3000`
 - MongoDB: `localhost:27017`
 
+## Deployment
+
+The web app is deployed to Cloudflare Pages and the API runs separately (e.g. on Render), so `moviemark.pages.dev` and the API host are **different origins**. Cross-origin sessions rely on the refresh cookie, which the API sends with:
+
+- `SameSite=None; Secure` when `NODE_ENV=production`,
+- `SameSite=Lax` otherwise (sufficient when API and web share a site, e.g. localhost).
+
+Required environment variables on the deployed API:
+
+```sh
+NODE_ENV=production
+MONGO_URI=mongodb://admin:password@db-host:27017/moviemark?authSource=admin
+CORS_ORIGIN=https://<exact web host, no trailing slash>  # e.g. https://moviemark.pages.dev
+JWT_SECRET=<long random secret>
+TMDB_TOKEN=<your TMDB api token>
+```
+
+Production web builds must point the API base at the deployed host, not localhost:
+
+```sh
+VITE_API_BASE=https://<your-render-host>
+```
+
+> The `/auth/refresh` endpoint rejects requests whose `Origin` header doesn't match `CORS_ORIGIN`, so other sites can't replay refresh cookies cross-site.
+
 ## Live demo
 
 🔗 **Live demo:** https://moviemark.grzegorz-witkowski.workers.dev

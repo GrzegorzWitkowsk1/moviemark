@@ -36,6 +36,16 @@ declare module "fastify" {
   }
 }
 
+export function refreshCookieAttributes(remember: boolean, isProduction: boolean) {
+  return {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? ("none" as const) : ("lax" as const),
+    path: "/",
+    maxAge: remember ? 60 * 60 * 24 * 7 : 60 * 60 * 24 * 1,
+  };
+}
+
 export default fp(
   async function authPlugin(app: FastifyInstance) {
     await app.register(jwt, {
@@ -74,17 +84,17 @@ export default fp(
       "setRefreshCookie",
       (reply: FastifyReply, token: string, remember?: boolean) => {
         reply.setCookie(config.cookieName, token, {
-          httpOnly: true,
-          secure: config.isProduction,
-          sameSite: "lax",
-          path: "/",
-          maxAge: remember ? 60 * 60 * 24 * 7 : 60 * 60 * 24 * 1,
+          ...refreshCookieAttributes(remember ?? false, config.isProduction),
         });
       }
     );
 
     app.decorate("clearRefreshCookie", (reply: FastifyReply) => {
-      reply.clearCookie(config.cookieName, { path: "/" });
+      reply.clearCookie(config.cookieName, {
+        path: "/",
+        secure: config.isProduction,
+        sameSite: config.isProduction ? "none" : "lax",
+      });
     });
   },
   { name: "auth" }

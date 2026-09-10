@@ -147,6 +147,11 @@ export async function authRoutes(app: FastifyInstance) {
   }>(
     "/auth/refresh",
     async (request, reply) => {
+      const origin = request.headers.origin;
+      if (origin && origin !== config.corsOrigin) {
+        return reply.code(403).send({ error: "error.unauthorized" });
+      }
+
       const token = request.cookies[config.cookieName];
       if (!token) {
         return reply.code(401).send({ error: "error.unauthorized" });

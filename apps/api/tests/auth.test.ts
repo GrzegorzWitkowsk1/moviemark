@@ -166,6 +166,35 @@ describe("auth routes", () => {
     expect(res.statusCode).toBe(401);
   });
 
+  it("rejects refresh from a disallowed origin", async () => {
+    const user = await registerAndLogin(app, "origin-bad@test.com");
+    const refreshToken = refreshTokenFromHeader(user.refreshCookie);
+
+    const res = await app.inject({
+      method: "POST",
+      url: "/auth/refresh",
+      cookies: { [config.cookieName]: refreshToken },
+      headers: { origin: "https://evil.example.com" },
+    });
+
+    expect(res.statusCode).toBe(403);
+  });
+
+  it("allows refresh from the configured origin", async () => {
+    const user = await registerAndLogin(app, "origin-ok@test.com");
+    const refreshToken = refreshTokenFromHeader(user.refreshCookie);
+
+    const res = await app.inject({
+      method: "POST",
+      url: "/auth/refresh",
+      cookies: { [config.cookieName]: refreshToken },
+      headers: { origin: config.corsOrigin },
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.json<{ accessToken: string }>().accessToken).toBeTruthy();
+  });
+
   it("logs out and clears the cookie", async () => {
     const user = await registerAndLogin(app, "logout@test.com");
 
@@ -337,5 +366,10 @@ describe("auth routes", () => {
   it("sets a 1-day refresh cookie when remember is false", async () => {
     const maxAge = await maxAgeWithRemember("rememberfalse@test.com", false);
     expect(maxAge).toBe("Max-Age=86400");
+  });
+
+  it("sets a Lax refresh cookie in non-production", async () => {
+    const user = await registerAndLogin(app, "lax@test.com");
+    expect(user.refreshCookie).toContain("SameSite=Lax");
   });
 });
