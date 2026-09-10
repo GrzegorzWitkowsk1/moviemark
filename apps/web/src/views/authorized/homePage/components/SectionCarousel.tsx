@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   Box,
   IconButton,
@@ -61,6 +61,8 @@ export default function SectionCarousel({
     movies.length > 0 ? "movie" : "tv"
   );
   const [pageIndex, setPageIndex] = useState(0);
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const touchStartX = useRef(0);
 
   const viewMode = hasSeriesToggle
     ? selectedMode
@@ -68,11 +70,34 @@ export default function SectionCarousel({
       ? "movie"
       : "tv";
   const items = viewMode === "movie" ? movies : series ?? [];
+  const totalPages = Math.max(1, Math.ceil(items.length / perPage));
+  const currentPage = Math.min(pageIndex, totalPages - 1);
+
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      if (!isMobile) return;
+      touchStartX.current = e.touches[0].clientX;
+    },
+    [isMobile]
+  );
+
+  const handleTouchEnd = useCallback(
+    (e: React.TouchEvent) => {
+      if (!isMobile) return;
+      const delta = e.changedTouches[0].clientX - touchStartX.current;
+      if (Math.abs(delta) < 50) return;
+      if (delta < 0 && currentPage < totalPages - 1) {
+        setPageIndex(currentPage + 1);
+      } else if (delta > 0 && currentPage > 0) {
+        setPageIndex(currentPage - 1);
+      }
+    },
+    [isMobile, currentPage, totalPages]
+  );
+
   if (movies.length === 0 && (series?.length ?? 0) === 0) {
     return null;
   }
-  const totalPages = Math.max(1, Math.ceil(items.length / perPage));
-  const currentPage = Math.min(pageIndex, totalPages - 1);
   const visible = items.slice(
     currentPage * perPage,
     currentPage * perPage + perPage
@@ -153,7 +178,12 @@ export default function SectionCarousel({
 				</Box>
 			</Box>
 
-			<Grid container spacing={2}>
+			<Grid
+				container
+				spacing={2}
+				onTouchStart={handleTouchStart}
+				onTouchEnd={handleTouchEnd}
+			>
 				{visible.map((item) => (
 					<Grid key={`${item.id}`} size={{ xs: 6, sm: 4, md: 3, lg: 2 }}>
 						<MovieCard movie={toCardData(item)} />
