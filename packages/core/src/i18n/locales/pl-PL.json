@@ -1,0 +1,223 @@
+{
+  "common": {
+    "search": "Szukaj",
+    "searchPlaceholder": "Szukaj filmów i seriali...",
+    "movies": "Filmy",
+    "series": "Seriale",
+    "noDescription": "Brak dostępnego opisu.",
+    "saveChanges": "Zapisz zmiany",
+    "saving": "Zapisywanie...",
+    "cancel": "Anuluj",
+    "confirm": "Potwierdź",
+    "pleaseWait": "Proszę czekać...",
+    "yes": "Tak",
+    "no": "Nie",
+    "loading": "Wczytywanie...",
+    "tryAgain": "Spróbuj ponownie",
+    "somethingWentWrong": "Coś poszło nie tak. Spróbuj ponownie.",
+    "networkError": "Błąd sieci. Spróbuj ponownie później.",
+    "genericError": "Coś poszło nie tak. Spróbuj ponownie.",
+    "togglePasswordVisibility": "przełącz widoczność hasła",
+    "seasonHeader": "Sezon {{number}}",
+    "ratingVotes": "({{count}})",
+    "emailPlaceholder": "ty@przyklad.pl",
+    "form": {
+      "name": "Imię",
+      "surname": "Nazwisko",
+      "email": "E-mail",
+      "password": "Hasło"
+    },
+    "mediaType": {
+      "movies": "Filmy",
+      "series": "Seriale"
+    },
+    "sort": {
+      "alphabetical": "Alfabetycznie",
+      "highestRated": "Najwyżej oceniane"
+    }
+  },
+  "nav": {
+    "home": "Strona główna",
+    "collection": "Kolekcja",
+    "wantToWatch": "Do obejrzenia",
+    "search": "Szukaj",
+    "settings": "Ustawienia",
+    "myCollection": "Moja kolekcja",
+    "logOut": "Wyloguj się",
+    "accountMenu": "Menu konta"
+  },
+  "auth": {
+    "title": "Witaj w MovieMark.",
+    "subtitle": "Uzupełnij swój dziennik filmów i seriali",
+    "signIn": "Zaloguj się",
+    "signingIn": "Logowanie...",
+    "rememberMe": "Zapamiętaj mnie",
+    "noAccount": "Nie masz konta? Załóż je!",
+    "welcomeBack": "Witaj ponownie!",
+    "register": "Zarejestruj się",
+    "registering": "Rejestracja...",
+    "repeatPassword": "Powtórz hasło",
+    "alreadyHaveAccount": "Masz już konto?",
+    "registrationSuccess": "Rejestracja zakończona sukcesem, nastąpi przekierowanie do strony logowania",
+    "namePlaceholder": "Jan",
+    "surnamePlaceholder": "Kowalski"
+  },
+  "validation": {
+    "nameRequired": "Imię jest wymagane",
+    "surnameRequired": "Nazwisko jest wymagane",
+    "emailInvalid": "Nieprawidłowy adres e-mail",
+    "passwordRequired": "Hasło jest wymagane",
+    "passwordMin": "Hasło musi mieć co najmniej 8 znaków",
+    "passwordCapital": "Hasło musi zawierać co najmniej jedną wielką literę",
+    "passwordNumber": "Hasło musi zawierać co najmniej jedną cyfrę",
+    "passwordsDontMatch": "Hasła nie są zgodne"
+  },
+  "error": {
+    "generic": "Coś poszło nie tak. Spróbuj ponownie.",
+    "unauthorized": "Brak autoryzacji",
+    "internal": "Wewnętrzny błąd serwera",
+    "invalidRequest": "Nieprawidłowe żądanie",
+    "requestFailed": "Żądanie nie powiodło się",
+    "invalidTmdbId": "Nieprawidłowe tmdbId",
+    "invalidMediaType": "Nieprawidłowy typ multimediów",
+    "auth": {
+      "login": {
+        "invalidCredentials": "Nieprawidłowy e-mail lub hasło"
+      },
+      "register": {
+        "emailTaken": "Ten e-mail jest już zarejestrowany"
+      },
+      "profile": {
+        "emailTaken": "Ten e-mail jest już zarejestrowany"
+      },
+      "userNotFound": "Nie znaleziono użytkownika"
+    },
+    "collection": {
+      "movieAlreadyAdded": "Film jest już w kolekcji",
+      "invalidEpisodeQuery": "Nieprawidłowe zapytanie o odcinek"
+    },
+    "custom": {
+      "invalidId": "Nieprawidłowe id niestandardowe",
+      "movieNotFound": "Nie znaleziono niestandardowego filmu",
+      "seriesNotFound": "Nie znaleziono niestandardowego serialu"
+    },
+    "future": {
+      "movieAlreadyAdded": "Film jest już na liście do obejrzenia",
+      "seriesAlreadyAdded": "Serial jest już na liście do obejrzenia"
+    }
+  },
+  "home": {
+    "heroTitle": "Twój spokojny mały kinowy dziennik.",
+    "heroSubtitle": "Przeglądaj i zapamiętuj filmy oraz seriale, które kochasz - w przestrzeni, która przypomina ulubioną kawiarnię.",
+    "newReleases": "Nowości",
+    "upcoming": "Zapowiedzi",
+    "trending": "Popularne",
+    "previous": "Poprzednie",
+    "next": "Następne"
+  },
+  "search": {
+    "placeholder": "Szukaj filmów, seriali, gatunków...",
+    "searching": "Szukanie...",
+    "resultsFound_one": "Znaleziono {{count}} wynik",
+    "resultsFound_few": "Znaleziono {{count}} wyniki",
+    "resultsFound_many": "Znaleziono {{count}} wyników",
+    "resultsFound_other": "Znaleziono {{count}} wyniki",
+    "noResults": "Nie znaleziono wyników",
+    "addCustom": "Dodaj film/serial"
+  },
+  "addCustom": {
+    "title": "Dodaj własny film / serial",
+    "seriesNameRequired": "Nazwa serialu *",
+    "seriesNamePlaceholder": "Nazwa serialu",
+    "movieNameRequired": "Nazwa filmu *",
+    "movieNamePlaceholder": "Nazwa filmu",
+    "year": "Rok",
+    "genre": "Gatunek",
+    "selectGenres": "Wybierz gatunki",
+    "seasons": "Sezony",
+    "addSeason": "Dodaj sezon",
+    "addEpisode": "Dodaj odcinek",
+    "noSeasons": "Brak sezonów. Dodaj sezon, aby zacząć dodawać odcinki.",
+    "durationMinutes": "Czas trwania (minuty)",
+    "durationExample": "np. 120",
+    "addToCollection": "Dodaj do kolekcji",
+    "movieAdded": "Film dodany do Twojej kolekcji!",
+    "seriesAdded": "Serial dodany do Twojej kolekcji!",
+    "movieNameError": "Nazwa filmu jest wymagana.",
+    "seriesNameError": "Nazwa serialu jest wymagana.",
+    "atLeastOneSeason": "Dodaj co najmniej jeden sezon.",
+    "everySeasonEpisode": "Każdy sezon musi mieć co najmniej jeden odcinek.",
+    "episodePrefix": "EP {{number}}",
+    "removeSeason": "Usuń sezon",
+    "removeEpisode": "Usuń odcinek"
+  },
+  "collection": {
+    "title": "Moja kolekcja",
+    "description": "Twoja osobista półka obejrzanych filmów i seriali.",
+    "sortRecent": "Ostatnio obejrzane",
+    "empty": "Twoja kolekcja jest pusta.",
+    "watchedProgress": "Obejrzane {{watched}}/{{total}} "
+  },
+  "wantToWatch": {
+    "description": "Twoja lista filmów i seriali do obejrzenia w przyszłości.",
+    "sortRecent": "Ostatnio dodane",
+    "empty": "Twoja lista do obejrzenia jest pusta."
+  },
+  "details": {
+    "unknown": "Nieznane",
+    "movieRuntime": "{{minutes}} min.",
+    "episodeRuntime": "{{minutes}} min",
+    "minPerEpisode": "~ {{minutes}} min/odc.",
+    "seasons": "Sezony",
+    "youMayAlsoLike": "Może Ci się spodobać",
+    "seasonLoadError": "Nie udało się wczytać odcinków tego sezonu.",
+    "episodeName": "Odcinek {{number}}",
+    "watched": "Obejrzane",
+    "addToWatched": "Dodaj do obejrzanych",
+    "inList": "Na liście",
+    "watchInFuture": "Obejrzyj w przyszłości",
+    "loadError": "Nie udało się wczytać tego tytułu. Spróbuj ponownie.",
+    "loadErrorShort": "Nie udało się wczytać tego tytułu.",
+    "missingId": "Brakujący lub nieprawidłowy identyfikator filmu/serialu.",
+    "addedByYou": "Dodane przez Ciebie do Twojej osobistej kolekcji.",
+    "markAsWatchedTitle": "Oznaczyć jako obejrzane?",
+    "markAsWatchedBody": "Oznaczasz EP{{episode}} jako obejrzany, ale {{earlier}} nie są. Czy obejrzałeś je też?",
+    "dontAskAgain": "Nie pytaj ponownie dla tego serialu",
+    "noJustEpisode": "Nie, tylko EP{{number}}"
+  },
+  "settings": {
+    "subtitle": "Dostosuj MovieMark, abyś czuł, że jest Twój.",
+    "accountSettings": "Ustawienia konta",
+    "namePlaceholder": "Twoje imię",
+    "surnamePlaceholder": "Twoje nazwisko",
+    "changePassword": "Zmień hasło",
+    "changing": "Zmienianie...",
+    "newPassword": "Nowe hasło",
+    "newPasswordPlaceholder": "Wpisz nowe hasło",
+    "confirmNewPassword": "Potwierdź nowe hasło",
+    "confirmPasswordPlaceholder": "Potwierdź nowe hasło",
+    "appearance": "Wygląd",
+    "theme": {
+      "light": "Jasny",
+      "lightSub": "jasny motyw",
+      "dark": "Ciemny",
+      "darkSub": "ciemny motyw",
+      "system": "System",
+      "systemSub": "Dopasuj do systemu"
+    },
+    "language": "Język",
+    "languageOptions": {
+      "english": "English",
+      "polish": "Polski"
+    },
+    "profileUpdated": "Profil zaktualizowany!",
+    "passwordChanged": "Hasło zmienione!",
+    "failedProfileUpdate": "Nie udało się zaktualizować profilu.",
+    "failedPasswordChange": "Nie udało się zmienić hasła.",
+    "accountDeletionRequested": "Zażądano usunięcia konta",
+    "deleteAccount": "Usuń konto",
+    "deleteDialogTitle": "Jesteś pewien?",
+    "deleteDialogContent": "Tej operacji nie można cofnąć. Wszystkie Twoje dane zostaną trwale usunięte.",
+    "footer": "MovieMark v1.0. Wszelkie prawa zastrzeżone. {{year}} \u00AE "
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "name": "mobile",
+  "private": true,
+  "version": "0.0.0",
+  "main": "index.ts",
+  "scripts": {
+    "dev": "expo start",
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@expo/vector-icons": "^15.1.1",
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "@react-navigation/bottom-tabs": "^7.19.2",
+    "@react-navigation/native": "^7.4.1",
+    "@react-navigation/native-stack": "^7.19.2",
+    "@tanstack/react-query": "^5.102.8",
+    "core": "*",
+    "expo": "~57.0.24",
+    "expo-constants": "~57.0.19",
+    "expo-linking": "~57.0.10",
+    "expo-secure-store": "~57.0.4",
+    "expo-status-bar": "~57.0.1",
+    "i18next": "^26.4.2",
+    "react": "19.2.3",
+    "react-i18next": "^17.0.13",
+    "react-native": "0.86.3",
+    "react-native-paper": "^5.15.3",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-screens": "~4.26.0",
+    "shared": "*"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.28.0",
+    "@types/react": "~19.2.2",
+    "babel-preset-expo": "~57.0.12",
+    "typescript": "~6.0.3"
+  },
+  "peerDependencies": {
+    "typescript": "~6.0.2"
+  }
+}

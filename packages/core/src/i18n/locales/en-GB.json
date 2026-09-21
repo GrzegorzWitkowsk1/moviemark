@@ -1,0 +1,221 @@
+{
+  "common": {
+    "search": "Search",
+    "searchPlaceholder": "Search movies & series...",
+    "movies": "Movies",
+    "series": "Series",
+    "noDescription": "No description available.",
+    "saveChanges": "Save Changes",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "pleaseWait": "Please wait...",
+    "yes": "Yes",
+    "no": "No",
+    "loading": "Loading...",
+    "tryAgain": "Try again",
+    "somethingWentWrong": "Something went wrong. Please try again.",
+    "networkError": "Network error. Please try again later.",
+    "genericError": "Something went wrong. Please try again.",
+    "togglePasswordVisibility": "toggle password visibility",
+    "seasonHeader": "Season {{number}}",
+    "ratingVotes": "({{count}})",
+    "emailPlaceholder": "you@example.com",
+    "form": {
+      "name": "Name",
+      "surname": "Surname",
+      "email": "Email",
+      "password": "Password"
+    },
+    "mediaType": {
+      "movies": "Movies",
+      "series": "Series"
+    },
+    "sort": {
+      "alphabetical": "Alphabetical",
+      "highestRated": "Highest rated"
+    }
+  },
+  "nav": {
+    "home": "Home",
+    "collection": "Collection",
+    "wantToWatch": "Want to watch",
+    "search": "Search",
+    "settings": "Settings",
+    "myCollection": "My collection",
+    "logOut": "Log Out",
+    "accountMenu": "Account menu"
+  },
+  "auth": {
+    "title": "Welcome in MovieMark.",
+    "subtitle": "Complete your movie and series diary",
+    "signIn": "Sign in",
+    "signingIn": "Signing in...",
+    "rememberMe": "Remember me",
+    "noAccount": "Don't have an account? Create it!",
+    "welcomeBack": "Welcome back!",
+    "register": "Register",
+    "registering": "Registering...",
+    "repeatPassword": "Repeat password",
+    "alreadyHaveAccount": "Already have an account?",
+    "registrationSuccess": "Registration successful, you will be redirected to the login page",
+    "namePlaceholder": "John",
+    "surnamePlaceholder": "Doe"
+  },
+  "validation": {
+    "nameRequired": "Name is required",
+    "surnameRequired": "Surname is required",
+    "emailInvalid": "Invalid email address",
+    "passwordRequired": "Password is required",
+    "passwordMin": "Password must be at least 8 characters",
+    "passwordCapital": "Password must contain at least one capital letter",
+    "passwordNumber": "Password must contain at least one number",
+    "passwordsDontMatch": "Passwords do not match"
+  },
+  "error": {
+    "generic": "Something went wrong. Please try again.",
+    "unauthorized": "Unauthorized",
+    "internal": "Internal server error",
+    "invalidRequest": "Invalid request",
+    "requestFailed": "Request failed",
+    "invalidTmdbId": "Invalid tmdbId",
+    "invalidMediaType": "Invalid media type",
+    "auth": {
+      "login": {
+        "invalidCredentials": "Invalid email or password"
+      },
+      "register": {
+        "emailTaken": "Email already registered"
+      },
+      "profile": {
+        "emailTaken": "Email already registered"
+      },
+      "userNotFound": "User not found"
+    },
+    "collection": {
+      "movieAlreadyAdded": "Movie already in collection",
+      "invalidEpisodeQuery": "Invalid episode query"
+    },
+    "custom": {
+      "invalidId": "Invalid custom id",
+      "movieNotFound": "Custom movie not found",
+      "seriesNotFound": "Custom series not found"
+    },
+    "future": {
+      "movieAlreadyAdded": "Movie already in want to watch list",
+      "seriesAlreadyAdded": "Series already in want to watch list"
+    }
+  },
+  "home": {
+    "heroTitle": "Your calm little cinema log.",
+    "heroSubtitle": "Browse, rate and remember the movies and shows you love - in a space that feels like a favorite café.",
+    "newReleases": "New Releases",
+    "upcoming": "Upcoming",
+    "trending": "Trending",
+    "previous": "Previous",
+    "next": "Next"
+  },
+  "search": {
+    "placeholder": "Search movies, series, genres....",
+    "searching": "Searching...",
+    "resultsFound_one": "{{count}} result found",
+    "resultsFound_other": "{{count}} results found",
+    "noResults": "No results found",
+    "addCustom": "Add movie/series"
+  },
+  "addCustom": {
+    "title": "Add your own movie / series",
+    "seriesNameRequired": "Series name *",
+    "seriesNamePlaceholder": "Series name",
+    "movieNameRequired": "Movie name *",
+    "movieNamePlaceholder": "Movie name",
+    "year": "Year",
+    "genre": "Genre",
+    "selectGenres": "Select genres",
+    "seasons": "Seasons",
+    "addSeason": "Add season",
+    "addEpisode": "Add episode",
+    "noSeasons": "No seasons yet. Add a season to start adding episodes.",
+    "durationMinutes": "Duration (minutes)",
+    "durationExample": "e.g. 120",
+    "addToCollection": "Add to collection",
+    "movieAdded": "Movie added to your collection!",
+    "seriesAdded": "Series added to your collection!",
+    "movieNameError": "Movie name is required.",
+    "seriesNameError": "Series name is required.",
+    "atLeastOneSeason": "Add at least one season.",
+    "everySeasonEpisode": "Every season must have at least one episode.",
+    "episodePrefix": "EP {{number}}",
+    "removeSeason": "Remove season",
+    "removeEpisode": "Remove episode"
+  },
+  "collection": {
+    "title": "My collection",
+    "description": "Your personal shelf of watched films and shows.",
+    "sortRecent": "Recently watched",
+    "empty": "Your collection is empty.",
+    "watchedProgress": "Watched {{watched}}/{{total}}"
+  },
+  "wantToWatch": {
+    "description": "Your list of films and shows to watch in the future.",
+    "sortRecent": "Recently added",
+    "empty": "Your want to watch list is empty."
+  },
+  "details": {
+    "unknown": "Unknown",
+    "movieRuntime": "{{minutes}} min.",
+    "episodeRuntime": "{{minutes}} min",
+    "minPerEpisode": "~ {{minutes}} min/ep",
+    "seasons": "Seasons",
+    "youMayAlsoLike": "You may also like",
+    "seasonLoadError": "Couldn't load episodes for this season.",
+    "episodeName": "Episode {{number}}",
+    "watched": "Watched",
+    "addToWatched": "Add to watched",
+    "inList": "In list",
+    "watchInFuture": "Watch in future",
+    "loadError": "Couldn't load this title. Please try again.",
+    "loadErrorShort": "Couldn't load this title.",
+    "missingId": "Missing or invalid movie/series id.",
+    "addedByYou": "Added by you to your personal collection.",
+    "markAsWatchedTitle": "Mark as watched?",
+    "markAsWatchedBody": "You're marking EP{{episode}} as watched, but {{earlier}} aren't. Did you watch them too?",
+    "dontAskAgain": "Don't ask again for this series",
+    "noJustEpisode": "No, just EP{{number}}"
+  },
+  "settings": {
+    "subtitle": "Tune MovieMark to feel like yours.",
+    "accountSettings": "Account Settings",
+    "namePlaceholder": "Your name",
+    "surnamePlaceholder": "Your surname",
+    "changePassword": "Change Password",
+    "changing": "Changing...",
+    "newPassword": "New Password",
+    "newPasswordPlaceholder": "Enter new password",
+    "confirmNewPassword": "Confirm New Password",
+    "confirmPasswordPlaceholder": "Confirm new password",
+    "appearance": "Appearance",
+    "theme": {
+      "light": "Light",
+      "lightSub": "light theme",
+      "dark": "Dark",
+      "darkSub": "dark theme",
+      "system": "System",
+      "systemSub": "Match your OS"
+    },
+    "language": "Language",
+    "languageOptions": {
+      "english": "English",
+      "polish": "Polski"
+    },
+    "profileUpdated": "Profile updated!",
+    "passwordChanged": "Password changed!",
+    "failedProfileUpdate": "Failed to update profile.",
+    "failedPasswordChange": "Failed to change password.",
+    "accountDeletionRequested": "Account deletion requested",
+    "deleteAccount": "Delete Account",
+    "deleteDialogTitle": "Are you sure?",
+    "deleteDialogContent": "This action cannot be undone. All your data will be permanently deleted.",
+    "footer": "MovieMark v1.0. All rights reserved. {{year}} \u00AE "
+  }
+}
