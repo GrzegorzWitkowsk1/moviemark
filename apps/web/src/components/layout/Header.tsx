@@ -17,7 +17,7 @@ import {
   useMediaQuery,
   Divider,
 } from '@mui/material';
-import { Search, LogOut, Settings, LayoutGrid, Clock } from 'lucide-react';
+import { Search, LogOut, Settings, LayoutGrid, Clock, ChartNoAxesCombined } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { useUser, useLogout } from '@/hooks/useAuth';
@@ -29,6 +29,7 @@ const NAV_ITEMS = [
   { labelKey: 'nav.home', path: '/auth/home' },
   { labelKey: 'nav.collection', path: '/auth/collections' },
   { labelKey: 'nav.wantToWatch', path: '/auth/want-to-watch' },
+  { labelKey: 'nav.statistics', path: '/auth/statistics' },
   { labelKey: 'nav.settings', path: '/auth/settings' },
 ] as const;
 
@@ -331,6 +332,15 @@ export default function Header() {
 						>
 							<Clock size={18} style={{ marginRight: 10 }} />
 							{t('nav.wantToWatch')}
+						</MenuItem>
+						<MenuItem
+							onClick={() => {
+								handleMenuClose();
+								navigate("/auth/statistics");
+							}}
+						>
+							<ChartNoAxesCombined size={18} style={{ marginRight: 10 }} />
+							{t('nav.statistics')}
 						</MenuItem>
 						<MenuItem
 							onClick={() => {

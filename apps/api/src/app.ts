@@ -7,6 +7,7 @@ import { collectionRoutes } from "./routes/collection";
 import { customRoutes } from "./routes/custom";
 import { futureRoutes } from "./routes/future";
 import { tmdbRoutes } from "./routes/tmdb";
+import { statisticsRoutes } from "./routes/statistics";
 import { config } from "./config";
 import authPlugin from "./plugins/auth";
 
@@ -52,6 +53,7 @@ export async function buildApp(options: { logger?: boolean } = {}) {
   await app.register(customRoutes);
   await app.register(futureRoutes);
   await app.register(tmdbRoutes);
+  await app.register(statisticsRoutes);
 
   return app;
 }

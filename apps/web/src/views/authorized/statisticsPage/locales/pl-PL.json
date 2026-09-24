@@ -1,0 +1,44 @@
+{
+  "statistics": {
+    "subtitle": "Twoja podróż przez oglądanie w liczbach.",
+    "hero": {
+      "thisYear": "Ten rok",
+      "movies_one": "{{count}} film",
+      "movies_few": "{{count}} filmy",
+      "movies_many": "{{count}} filmów",
+      "series_one": "{{count}} pełny serial",
+      "series_few": "{{count}} pełne seriale",
+      "series_many": "{{count}} pełnych seriali",
+      "summary": "Obejrzałeś {{movies}} i {{series}} w {{year}}.",
+      "watchtime": "{{duration}} całkowitego czasu oglądania — tak trzymaj."
+    },
+    "stats": {
+      "watchedMovies": "obejrzane filmy",
+      "completedSeries": "obejrzane seriale",
+      "watchedEpisodes": "obejrzane odcinki",
+      "totalTitles": "tytuły łącznie"
+    },
+    "charts": {
+      "titles": {
+        "title": "Wykres tytułów",
+        "subtitle": "Filmy vs seriale, które obejrzałeś."
+      },
+      "watchtime": {
+        "title": "Czas oglądania",
+        "subtitle": "Łączny czas oglądania — {{duration}}."
+      }
+    },
+    "favourites": {
+      "title": "Twoje ulubione gatunki",
+      "subtitle": "Na podstawie wszystkiego, co obejrzałeś.",
+      "mostWatched": "NAJCZĘŚCIEJ OGLĄDANE",
+      "empty": "Nie masz jeszcze ulubionych gatunków."
+    },
+    "genres": {
+      "count_one": "{{count}} tytuł",
+      "count_few": "{{count}} tytuły",
+      "count_many": "{{count}} tytułów",
+      "other": "Inne"
+    }
+  }
+}

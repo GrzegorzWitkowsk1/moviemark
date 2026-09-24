@@ -12,6 +12,8 @@ import enDetails from "@/views/authorized/detailsPage/locales/en-GB.json";
 import plDetails from "@/views/authorized/detailsPage/locales/pl-PL.json";
 import enSettings from "@/views/authorized/settingsPage/locales/en-GB.json";
 import plSettings from "@/views/authorized/settingsPage/locales/pl-PL.json";
+import enStatistics from "@/views/authorized/statisticsPage/locales/en-GB.json";
+import plStatistics from "@/views/authorized/statisticsPage/locales/pl-PL.json";
 
 export const resources = {
   en: {
@@ -23,6 +25,7 @@ export const resources = {
       ...enWantToWatch,
       ...enDetails,
       ...enSettings,
+      ...enStatistics,
     },
   },
   pl: {
@@ -34,6 +37,7 @@ export const resources = {
       ...plWantToWatch,
       ...plDetails,
       ...plSettings,
+      ...plStatistics,
     },
   },
 } as const;

@@ -1,0 +1,41 @@
+{
+  "statistics": {
+    "subtitle": "Your watching journey in numbers.",
+    "hero": {
+      "thisYear": "This year",
+      "movies_one": "{{count}} movie",
+      "movies_other": "{{count}} movies",
+      "series_one": "{{count}} full series",
+      "series_other": "{{count}} full series",
+      "summary": "You watched {{movies}} and {{series}} in {{year}}.",
+      "watchtime": "{{duration}} of total watchtime — keep it going."
+    },
+    "stats": {
+      "watchedMovies": "watched movies",
+      "completedSeries": "series watched",
+      "watchedEpisodes": "episodes watched",
+      "totalTitles": "total titles"
+    },
+    "charts": {
+      "titles": {
+        "title": "Titles chart",
+        "subtitle": "Movies vs series you've watched."
+      },
+      "watchtime": {
+        "title": "Watchtime",
+        "subtitle": "Total time spent watching — {{duration}}."
+      }
+    },
+    "favourites": {
+      "title": "Your favourite genres",
+      "subtitle": "Based on everything you've watched.",
+      "mostWatched": "MOST WATCHED",
+      "empty": "No favourite genres yet."
+    },
+    "genres": {
+      "count_one": "{{count}} title",
+      "count_other": "{{count}} titles",
+      "other": "Other"
+    }
+  }
+}

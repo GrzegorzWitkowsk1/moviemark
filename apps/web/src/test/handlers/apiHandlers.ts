@@ -132,6 +132,25 @@ export const apiHandlers = [
     })
   ),
 
+  http.get("http://localhost:3000/statistics", () =>
+    HttpResponse.json({
+      totalMovies: 3,
+      watchedMovies: 3,
+      watchedSeries: 1,
+      watchedEpisodes: 12,
+      movieWatchtimeMinutes: 450,
+      seriesWatchtimeMinutes: 120,
+      moviesWatchedInYear: 3,
+      seriesWatchedInYear: 1,
+      watchtimeMinutesInYear: 570,
+      fullSeriesWatched: 1,
+      favouriteGenres: [
+        { genreId: 28, count: 2 },
+        { genreId: 878, count: 1 },
+      ],
+    })
+  ),
+
   http.get("http://localhost:3000/future", () =>
     HttpResponse.json(emptyFuture)
   ),

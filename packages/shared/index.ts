@@ -301,6 +301,25 @@ export interface FutureStatusResponse {
   wanted: boolean;
 }
 
+export interface FavouriteGenreStat {
+  genreId: number;
+  count: number;
+}
+
+export interface StatisticsResponse {
+  watchedMovies: number;
+  watchedSeries: number;
+  watchedEpisodes: number;
+  movieWatchtimeMinutes: number;
+  seriesWatchtimeMinutes: number;
+  moviesWatchedInYear: number;
+  seriesWatchedInYear: number;
+  watchtimeMinutesInYear: number;
+  favouriteGenres: FavouriteGenreStat[];
+  totalMovies: number;
+  fullSeriesWatched: number;
+}
+
 export interface TmdbSearchResult {
   page: number;
   results: (TmdbMovie | TmdbTv)[];

@@ -7,6 +7,8 @@ export interface TmdbDetailsResult {
   overview: string;
   year: string | null;
   genreIds: number[];
+  runtime: number | null;
+  episodeRunTime: number | null;
 }
 
 const suggestTimeoutMs = 3000;
@@ -66,6 +68,8 @@ export async function getTmdbDetails(
       first_air_date?: string;
       genre_ids?: number[];
       genres?: { id: number }[];
+      runtime?: number;
+      episode_run_time?: number[];
     };
 
     const dateField =
@@ -79,6 +83,9 @@ export async function getTmdbDetails(
       genreIds: (data.genre_ids ?? data.genres?.map((g) => g.id) ?? []).slice(
         0
       ),
+      runtime: mediaType === "movie" ? (data.runtime ?? null) : null,
+      episodeRunTime:
+        mediaType === "tv" ? (data.episode_run_time?.[0] ?? null) : null,
     };
   } catch {
     return null;

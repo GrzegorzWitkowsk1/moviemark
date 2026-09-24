@@ -225,6 +225,8 @@ export async function getCollection(uid: Types.ObjectId): Promise<CollectionResp
                   overview: "",
                   year: custom.year,
                   genreIds: custom.genreIds,
+                  runtime: custom.runtimeMinutes ?? null,
+                  episodeRunTime: null,
                 }
               : null
           )
@@ -242,6 +244,8 @@ export async function getCollection(uid: Types.ObjectId): Promise<CollectionResp
                   overview: "",
                   year: custom.year,
                   genreIds: custom.genreIds,
+                  runtime: null,
+                  episodeRunTime: null,
                 }
               : null
           )

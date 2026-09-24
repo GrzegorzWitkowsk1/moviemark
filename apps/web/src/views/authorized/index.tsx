@@ -4,6 +4,7 @@ import SearchPage from './searchPage';
 import SettingsPage from './settingsPage';
 import CollectionPage from './collectionPage';
 import WantToWatchPage from './wantToWatchPage';
+import StatisticsPage from './statisticsPage';
 import DetailsPage from './detailsPage';
 import { withAuth } from '@/hocs/withAuth';
 import AppLayout from '@/components/layout/AppLayout';
@@ -18,6 +19,7 @@ function Authorized() {
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/collections" element={<CollectionPage />} />
             <Route path="/want-to-watch" element={<WantToWatchPage />} />
+            <Route path="/statistics" element={<StatisticsPage />} />
             <Route path="/movies" element={<DetailsPage />} />
         </Routes>
         </AppLayout>

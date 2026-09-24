@@ -20,6 +20,7 @@ import type {
   RegisterRequest,
   RegisterResponse,
   SeriesStatusResponse,
+  StatisticsResponse,
   TmdbMediaType,
   UpdateProfileRequest,
   UpdateProfileResponse,
@@ -230,6 +231,10 @@ export async function uploadAvatar(
 
 export async function getCollection(): Promise<CollectionResponse> {
   return apiFetch<CollectionResponse>("/collection");
+}
+
+export async function getStatistics(): Promise<StatisticsResponse> {
+  return apiFetch<StatisticsResponse>("/statistics");
 }
 
 export async function getMovieCollectionStatus(

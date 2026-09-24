@@ -83,10 +83,14 @@ export async function findWatchedCollection(
 export async function findCustomMovie(
   uid: Types.ObjectId,
   customId: number
-): Promise<{ year: string | null; genreIds: number[] } | null> {
+): Promise<{
+  year: string | null;
+  genreIds: number[];
+  runtimeMinutes: number | null;
+} | null> {
   return CustomMovie.findOne(
     { userId: uid, customId },
-    { year: 1, genreIds: 1, _id: 0 }
+    { year: 1, genreIds: 1, runtimeMinutes: 1, _id: 0 }
   );
 }
 
