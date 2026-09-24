@@ -15,6 +15,7 @@ import {
   uncheckSeriesEpisode,
   uncheckSeriesSeason,
 } from "@/lib/api";
+import { statisticsKey } from "@/hooks/useStatistics";
 
 // ------- KEYS -------
 export const collectionKey = ["collection"] as const;
@@ -67,6 +68,7 @@ export function useAddMovie() {
     onSettled: (_data, _error, { tmdbId }) => {
       queryClient.invalidateQueries({ queryKey: movieStatusKey(tmdbId) });
       queryClient.invalidateQueries({ queryKey: collectionKey });
+      queryClient.invalidateQueries({ queryKey: statisticsKey });
     },
   });
 }
@@ -86,6 +88,7 @@ export function useRemoveMovie() {
     onSettled: (_data, _error, tmdbId) => {
       queryClient.invalidateQueries({ queryKey: movieStatusKey(tmdbId) });
       queryClient.invalidateQueries({ queryKey: collectionKey }); 
+      queryClient.invalidateQueries({ queryKey: statisticsKey });
     },
   });
 }
@@ -122,6 +125,7 @@ export function useCheckEpisode() {
     onSettled: (_data, _error, { tmdbId }) => {
       queryClient.invalidateQueries({ queryKey: seriesStatusKey(tmdbId) });
       queryClient.invalidateQueries({ queryKey: collectionKey }); 
+      queryClient.invalidateQueries({ queryKey: statisticsKey });
     },
   });
 }
@@ -160,6 +164,7 @@ export function useUncheckEpisode() {
     onSettled: (_data, _error, { tmdbId }) => {
       queryClient.invalidateQueries({ queryKey: seriesStatusKey(tmdbId) });
       queryClient.invalidateQueries({ queryKey: collectionKey }); 
+      queryClient.invalidateQueries({ queryKey: statisticsKey });
     },
   });
 }
@@ -194,6 +199,7 @@ export function useUncheckSeason() {
     onSettled: (_data, _error, { tmdbId }) => {
       queryClient.invalidateQueries({ queryKey: seriesStatusKey(tmdbId) });
       queryClient.invalidateQueries({ queryKey: collectionKey }); 
+      queryClient.invalidateQueries({ queryKey: statisticsKey });
     },
   });
 }

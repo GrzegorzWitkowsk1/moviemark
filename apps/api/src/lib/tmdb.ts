@@ -11,6 +11,11 @@ export interface TmdbDetailsResult {
   episodeRunTime: number | null;
 }
 
+export interface TmdbSeasonEpisode {
+  episodeNumber: number;
+  runtime: number | null;
+}
+
 const suggestTimeoutMs = 3000;
 
 function tmdbToken(): string {
@@ -87,6 +92,48 @@ export async function getTmdbDetails(
       episodeRunTime:
         mediaType === "tv" ? (data.episode_run_time?.[0] ?? null) : null,
     };
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+export async function getTmdbSeason(
+  tmdbId: number,
+  seasonNumber: number
+): Promise<TmdbSeasonEpisode[] | null> {
+  if (!tmdbToken()) {
+    return null;
+  }
+
+  const path = `/tv/${tmdbId}/season/${seasonNumber}?language=en-US`;
+  const url = buildTmdbUrl(path);
+  if (!url) {
+    return null;
+  }
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), suggestTimeoutMs);
+
+  try {
+    const res = await fetch(url, {
+      headers: tmdbRequestHeaders(),
+      signal: controller.signal,
+    });
+    if (!res.ok) {
+      return null;
+    }
+    const data = (await res.json()) as {
+      episodes?: { episode_number?: number; runtime?: number | null }[];
+    };
+    if (!Array.isArray(data.episodes)) {
+      return null;
+    }
+    return data.episodes.map((episode) => ({
+      episodeNumber: episode.episode_number ?? 0,
+      runtime: episode.runtime ?? null,
+    }));
   } catch {
     return null;
   } finally {

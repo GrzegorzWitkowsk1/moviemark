@@ -13,6 +13,7 @@ import {
   useUncheckEpisode,
   useUncheckSeason,
 } from "./index";
+import { statisticsKey } from "@/hooks/useStatistics";
 import {
   renderHookWithProviders,
   createTestQueryClient,
@@ -41,6 +42,26 @@ const seriesStatus = {
     { season: 1, episode: 2 },
   ],
 };
+
+const statisticsZeros = {
+  watchedMovies: 0,
+  watchedSeries: 0,
+  watchedEpisodes: 0,
+  movieWatchtimeMinutes: 0,
+  seriesWatchtimeMinutes: 0,
+  moviesWatchedInYear: 0,
+  seriesWatchedInYear: 0,
+  watchtimeMinutesInYear: 0,
+  favouriteGenres: [],
+  totalMovies: 0,
+  fullSeriesWatched: 0,
+};
+
+function expectStatisticsInvalidated(queryClient: ReturnType<typeof createTestQueryClient>) {
+  return waitFor(() => {
+    expect(queryClient.getQueryState(statisticsKey)?.isInvalidated).toBe(true);
+  });
+}
 
 describe("useCollection / useMovieWatched / useSeriesWatched", () => {
   it("fetches the full collection", async () => {
@@ -82,6 +103,7 @@ describe("useAddMovie", () => {
 
     const queryClient = createTestQueryClient();
     queryClient.setQueryData(movieStatusKey(550), { watched: false });
+    queryClient.setQueryData(statisticsKey, statisticsZeros);
 
     const { result } = renderHookWithProviders(() => useAddMovie(), {
       queryClient,
@@ -118,6 +140,8 @@ describe("useAddMovie", () => {
       posterPath: null,
       rating: 8.4,
     });
+
+    await expectStatisticsInvalidated(queryClient);
   });
 });
 
@@ -132,6 +156,7 @@ describe("useRemoveMovie", () => {
 
     const queryClient = createTestQueryClient();
     queryClient.setQueryData(movieStatusKey(550), { watched: true });
+    queryClient.setQueryData(statisticsKey, statisticsZeros);
 
     const { result } = renderHookWithProviders(() => useRemoveMovie(), {
       queryClient,
@@ -151,6 +176,8 @@ describe("useRemoveMovie", () => {
       pending.resolve({ watched: false });
       await pending.promise;
     });
+
+    await expectStatisticsInvalidated(queryClient);
   });
 });
 
@@ -165,6 +192,7 @@ describe("useCheckEpisode", () => {
 
     const queryClient = createTestQueryClient();
     queryClient.setQueryData(seriesStatusKey(550), seriesStatus);
+    queryClient.setQueryData(statisticsKey, statisticsZeros);
 
     const { result } = renderHookWithProviders(() => useCheckEpisode(), {
       queryClient,
@@ -198,6 +226,8 @@ describe("useCheckEpisode", () => {
       pending.resolve(seriesStatus);
       await pending.promise;
     });
+
+    await expectStatisticsInvalidated(queryClient);
   });
 });
 
@@ -216,6 +246,7 @@ describe("useUncheckEpisode", () => {
       watched: true,
       watchedCount: 2,
     });
+    queryClient.setQueryData(statisticsKey, statisticsZeros);
 
     const { result } = renderHookWithProviders(() => useUncheckEpisode(), {
       queryClient,
@@ -239,6 +270,8 @@ describe("useUncheckEpisode", () => {
       pending.resolve(seriesStatus);
       await pending.promise;
     });
+
+    await expectStatisticsInvalidated(queryClient);
   });
 });
 
@@ -262,6 +295,7 @@ describe("useUncheckSeason", () => {
         { season: 2, episode: 1 },
       ],
     });
+    queryClient.setQueryData(statisticsKey, statisticsZeros);
 
     const { result } = renderHookWithProviders(() => useUncheckSeason(), {
       queryClient,
@@ -285,6 +319,8 @@ describe("useUncheckSeason", () => {
       pending.resolve(seriesStatus);
       await pending.promise;
     });
+
+    await expectStatisticsInvalidated(queryClient);
   });
 });
 

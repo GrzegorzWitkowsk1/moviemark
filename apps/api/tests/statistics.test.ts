@@ -10,6 +10,7 @@ interface TmdbSpec {
   runtime?: number;
   episode_run_time?: number[];
   genres?: { id: number }[];
+  episodes?: { episode_number: number; runtime: number | null }[];
 }
 
 const tmdbOverrides: Record<string, TmdbSpec> = {};
@@ -18,8 +19,20 @@ const originalFetch = globalThis.fetch;
 function mockTmdbFetch() {
   globalThis.fetch = (async (input: unknown) => {
     const url = String(input);
+    const seasonMatch = url.match(/\/tv\/(\d+)\/season\/(\d+)/);
     const tvMatch = url.match(/\/tv\/(\d+)/);
     const movieMatch = url.match(/\/movie\/(\d+)/);
+    if (seasonMatch) {
+      const key = `tv/${seasonMatch[1]}/season/${seasonMatch[2]}`;
+      const spec = tmdbOverrides[key];
+      if (!spec) {
+        return new Response("Not Found", { status: 404 });
+      }
+      return new Response(JSON.stringify({ episodes: spec.episodes ?? [] }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    }
     const key = tvMatch
       ? `tv/${tvMatch[1]}`
       : movieMatch
@@ -188,6 +201,61 @@ describe("statistics routes", () => {
       totalMovies: 2,
       fullSeriesWatched: 1,
     });
+  });
+
+  it("falls back to per-season runtimes when episode_run_time is empty", async () => {
+    tmdbOverrides["tv/999"] = {
+      episode_run_time: [],
+      genres: [{ id: 18 }],
+    };
+    tmdbOverrides["tv/999/season/1"] = {
+      episodes: [
+        { episode_number: 1, runtime: 30 },
+        { episode_number: 2, runtime: 40 },
+        { episode_number: 3, runtime: 50 },
+        { episode_number: 4, runtime: 45 },
+      ],
+    };
+
+    await markEpisodes(app, user.accessToken, {
+      tmdbId: 999,
+      season: 1,
+      episodes: [1, 2, 3],
+      name: "Short Series",
+      totalEpisodes: 4,
+    });
+
+    const res = await getStats(app, user.accessToken);
+    expect(res.statusCode).toBe(200);
+    const body = res.json<StatisticsResponse>();
+    expect(body.watchedSeries).toBe(1);
+    expect(body.watchedEpisodes).toBe(3);
+    expect(body.seriesWatchtimeMinutes).toBe(120);
+    expect(body.watchtimeMinutesInYear).toBe(120);
+    expect(body.favouriteGenres).toEqual([{ genreId: 18, count: 1 }]);
+  });
+
+  it("returns zero watchtime when season episodes cannot be resolved", async () => {
+    tmdbOverrides["tv/999"] = {
+      episode_run_time: [],
+      genres: [{ id: 18 }],
+    };
+
+    await markEpisodes(app, user.accessToken, {
+      tmdbId: 999,
+      season: 1,
+      episodes: [1, 2],
+      name: "Unresolvable Series",
+      totalEpisodes: 2,
+    });
+
+    const res = await getStats(app, user.accessToken);
+    expect(res.statusCode).toBe(200);
+    const body = res.json<StatisticsResponse>();
+    expect(body.watchedSeries).toBe(1);
+    expect(body.watchedEpisodes).toBe(2);
+    expect(body.seriesWatchtimeMinutes).toBe(0);
+    expect(body.watchtimeMinutesInYear).toBe(0);
   });
 
   it("uses stored runtime and genres for custom media", async () => {

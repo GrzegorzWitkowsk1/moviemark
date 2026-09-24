@@ -11,6 +11,7 @@ import {
   getCustomItem,
 } from "@/lib/api";
 import { collectionKey } from "./useCollection";
+import { statisticsKey } from "@/hooks/useStatistics";
 
 export const customItemKey = (id: number, type: TmdbMediaType) => [
   "custom",
@@ -39,6 +40,7 @@ export function useCreateCustomItem() {
         : createCustomSeries(payload.data as CustomSeriesRequest),
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: collectionKey });
+      queryClient.invalidateQueries({ queryKey: statisticsKey });
       const customId =
         (result as CustomItemResponse & { customId: number }).customId;
       queryClient.invalidateQueries({

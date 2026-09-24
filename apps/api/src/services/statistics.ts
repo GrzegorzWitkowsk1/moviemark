@@ -1,5 +1,5 @@
 import type { Types } from "mongoose";
-import { getTmdbDetails } from "../lib/tmdb";
+import { getTmdbDetails, getTmdbSeason } from "../lib/tmdb";
 import type { StatisticsResponse } from "shared";
 import {
   findCustomMovie,
@@ -59,6 +59,42 @@ async function getSeriesMeta(
   };
 }
 
+async function resolveSeriesRuntime(
+  doc: WatchedSeriesDoc,
+  episodeRuntime: number
+): Promise<number> {
+  if (episodeRuntime > 0) {
+    return doc.watchedEpisodes.length * episodeRuntime;
+  }
+  if (doc.tmdbId < 0 || doc.watchedEpisodes.length === 0) {
+    return 0;
+  }
+
+  const bySeason = new Map<number, number[]>();
+  for (const entry of doc.watchedEpisodes) {
+    const episodes = bySeason.get(entry.season) ?? [];
+    episodes.push(entry.episode);
+    bySeason.set(entry.season, episodes);
+  }
+
+  const seasonRuntimes = await Promise.all(
+    [...bySeason.entries()].map(async ([season, episodes]) => {
+      const seasonEpisodes = await getTmdbSeason(doc.tmdbId, season);
+      if (!seasonEpisodes) {
+        return 0;
+      }
+      const wanted = new Set(episodes);
+      return seasonEpisodes.reduce(
+        (sum, episode) =>
+          sum + (wanted.has(episode.episodeNumber) ? (episode.runtime ?? 0) : 0),
+        0
+      );
+    })
+  );
+
+  return seasonRuntimes.reduce((sum, runtime) => sum + runtime, 0);
+}
+
 export async function getStatistics(
   uid: Types.ObjectId
 ): Promise<StatisticsResponse> {
@@ -66,6 +102,11 @@ export async function getStatistics(
 
   const movieMetas = await Promise.all(movies.map((doc) => getMovieMeta(uid, doc)));
   const seriesMetas = await Promise.all(series.map((doc) => getSeriesMeta(uid, doc)));
+  const seriesRuntimes = await Promise.all(
+    series.map((doc, index) =>
+      resolveSeriesRuntime(doc, seriesMetas[index]!.episodeRuntime)
+    )
+  );
 
   let movieWatchtimeMinutes = 0;
   let seriesWatchtimeMinutes = 0;
@@ -83,8 +124,7 @@ export async function getStatistics(
   });
 
   series.forEach((doc, index) => {
-    const episodeRuntime = seriesMetas[index]!.episodeRuntime;
-    const runtime = doc.watchedEpisodes.length * episodeRuntime;
+    const runtime = seriesRuntimes[index]!;
     seriesWatchtimeMinutes += runtime;
     if (isCurrentYear(doc.watchedAt)) {
       seriesWatchedInYear += 1;

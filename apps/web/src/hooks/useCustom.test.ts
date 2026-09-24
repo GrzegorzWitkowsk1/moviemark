@@ -2,7 +2,11 @@ import { describe, expect, it } from "vitest";
 import { act, waitFor } from "@testing-library/react";
 import { HttpResponse, http } from "msw";
 import { useCreateCustomItem, useCustomItem } from "./useCustom";
-import { renderHookWithProviders } from "@/test/utils";
+import { statisticsKey } from "@/hooks/useStatistics";
+import {
+  createTestQueryClient,
+  renderHookWithProviders,
+} from "@/test/utils";
 import { server } from "@/test/server";
 
 const API = "http://localhost:3000";
@@ -44,7 +48,24 @@ describe("useCreateCustomItem", () => {
       })
     );
 
-    const { result } = renderHookWithProviders(() => useCreateCustomItem());
+    const queryClient = createTestQueryClient();
+    queryClient.setQueryData(statisticsKey, {
+      watchedMovies: 0,
+      watchedSeries: 0,
+      watchedEpisodes: 0,
+      movieWatchtimeMinutes: 0,
+      seriesWatchtimeMinutes: 0,
+      moviesWatchedInYear: 0,
+      seriesWatchedInYear: 0,
+      watchtimeMinutesInYear: 0,
+      favouriteGenres: [],
+      totalMovies: 0,
+      fullSeriesWatched: 0,
+    });
+
+    const { result } = renderHookWithProviders(() => useCreateCustomItem(), {
+      queryClient,
+    });
 
     await act(async () => {
       await result.current.mutateAsync({
@@ -65,6 +86,11 @@ describe("useCreateCustomItem", () => {
       runtimeMinutes: 100,
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    await waitFor(() => {
+      expect(queryClient.getQueryState(statisticsKey)?.isInvalidated).toBe(
+        true
+      );
+    });
   });
 
   it("creates a custom series through the series endpoint", async () => {
