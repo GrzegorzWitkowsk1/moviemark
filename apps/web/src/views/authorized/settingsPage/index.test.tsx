@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import SettingsPage from "./index";
@@ -83,5 +83,107 @@ describe("SettingsPage password form", () => {
     expect(lastPasswordBody).toEqual({
       newPassword: "Password123",
     });
+  });
+});
+
+function fileInput(container: HTMLElement): HTMLInputElement {
+  const input = container.querySelector('input[type="file"]');
+  if (!(input instanceof HTMLInputElement)) {
+    throw new Error("file input not found");
+  }
+  return input;
+}
+
+describe("SettingsPage avatar", () => {
+  it("uploads a valid avatar and shows a success message", async () => {
+    server.use(
+      http.get(`${API}/auth/me`, () =>
+        HttpResponse.json({ ...user, avatar: null })
+      )
+    );
+    let called = false;
+    server.use(
+      http.put(`${API}/auth/avatar`, () => {
+        called = true;
+        return HttpResponse.json({
+          user: { ...user, avatar: "data:image/png;base64,fake" },
+          accessToken: "avatar-token",
+        });
+      })
+    );
+    const userEventCtx = userEvent.setup();
+    const { container } = renderWithProviders(<SettingsPage />, {
+      route: "/auth/settings",
+    });
+
+    await screen.findByPlaceholderText("Your name");
+    const file = new File(["fake-png"], "me.png", { type: "image/png" });
+    await userEventCtx.upload(fileInput(container), file);
+
+    await waitFor(() => {
+      expect(screen.getByText("Avatar updated!")).toBeTruthy();
+    });
+    expect(called).toBe(true);
+  });
+
+  it("rejects a non jpeg/png file without calling the API", async () => {
+    server.use(
+      http.get(`${API}/auth/me`, () =>
+        HttpResponse.json({ ...user, avatar: null })
+      )
+    );
+    let called = false;
+    server.use(
+      http.put(`${API}/auth/avatar`, () => {
+        called = true;
+        return HttpResponse.json({ user, accessToken: "t" });
+      })
+    );
+    const { container } = renderWithProviders(<SettingsPage />, {
+      route: "/auth/settings",
+    });
+
+    await screen.findByPlaceholderText("Your name");
+    const file = new File(["gif"], "me.gif", { type: "image/gif" });
+    fireEvent.change(fileInput(container), { target: { files: [file] } });
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("Only JPEG or PNG images are allowed")
+      ).toBeTruthy();
+    });
+    expect(called).toBe(false);
+  });
+
+  it("rejects an oversized file without calling the API", async () => {
+    server.use(
+      http.get(`${API}/auth/me`, () =>
+        HttpResponse.json({ ...user, avatar: null })
+      )
+    );
+    let called = false;
+    server.use(
+      http.put(`${API}/auth/avatar`, () => {
+        called = true;
+        return HttpResponse.json({ user, accessToken: "t" });
+      })
+    );
+    const userEventCtx = userEvent.setup();
+    const { container } = renderWithProviders(<SettingsPage />, {
+      route: "/auth/settings",
+    });
+
+    await screen.findByPlaceholderText("Your name");
+    const big = new File([new ArrayBuffer(2 * 1024 * 1024 + 1)], "big.png", {
+      type: "image/png",
+    });
+    await userEventCtx.upload(fileInput(container), big);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("Image is too large (max 2 MB)")
+      ).toBeTruthy();
+    });
+    expect(called).toBe(false);
   });
 });

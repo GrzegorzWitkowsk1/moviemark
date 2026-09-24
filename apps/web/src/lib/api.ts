@@ -23,6 +23,7 @@ import type {
   TmdbMediaType,
   UpdateProfileRequest,
   UpdateProfileResponse,
+  UploadAvatarResponse,
   UserResponse,
 } from "shared";
 import { config } from "./config";
@@ -112,7 +113,8 @@ async function rawFetch(
   } = options;
 
   const headers: Record<string, string> = {};
-  if (body !== undefined) {
+  const isFormData = body instanceof FormData;
+  if (body !== undefined && !isFormData) {
     headers["Content-Type"] = "application/json";
   }
   if (includeAuth) {
@@ -127,7 +129,7 @@ async function rawFetch(
       method,
       headers,
       credentials: "include",
-      body: body !== undefined ? JSON.stringify(body) : undefined,
+      body: body !== undefined ? (isFormData ? body : JSON.stringify(body)) : undefined,
     });
   } catch {
     throw new Error(i18n.t("common.networkError"));
@@ -212,6 +214,17 @@ export async function changePassword(
   return apiFetch<ChangePasswordResponse>("/auth/password", {
     method: "PUT",
     body: payload,
+  });
+}
+
+export async function uploadAvatar(
+  file: File
+): Promise<UploadAvatarResponse> {
+  const formData = new FormData();
+  formData.append("avatar", file);
+  return apiFetch<UploadAvatarResponse>("/auth/avatar", {
+    method: "PUT",
+    body: formData,
   });
 }
 

@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Box, Typography, useTheme, alpha, InputAdornment, IconButton } from "@mui/material";
-import { User, Lock, Palette, Globe, Eye, EyeOff } from "lucide-react";
+import { User, Lock, Palette, Globe, Eye, EyeOff, Upload } from "lucide-react";
+import { AVATAR_ALLOWED_MIME, AVATAR_MAX_BYTES } from "shared";
 import StyledCard from "@/shared/components/card";
 import StyledTextField from "@/shared/components/textField";
 import {StyledSelect, PaperStyles, StyledMenuItem} from "@/shared/components/select";
@@ -14,7 +15,7 @@ import { useSnackbar } from "@/contexts/snackbarContext";
 import { useThemeMode, type ThemeMode } from "@/contexts/themeContext";
 import { useLanguage, type Language } from "@/contexts/languageContext";
 import { useDialog } from "@/contexts/dialogContext";
-import { updateProfile, changePassword } from "@/lib/api";
+import { updateProfile, changePassword, uploadAvatar } from "@/lib/api";
 import { setAccessToken } from "@/lib/token";
 import {
   createProfileSchema,
@@ -84,6 +85,117 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
+function AvatarUploader({
+  avatar,
+  initials,
+  uploading,
+  onFile,
+}: {
+  avatar: string | null;
+  initials: string;
+  uploading: boolean;
+  onFile: (event: React.ChangeEvent<HTMLInputElement>) => void;
+}) {
+  const theme = useTheme();
+  const { t } = useTranslation();
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  return (
+    <Box
+      role="button"
+      aria-label={t("settings.uploadAvatar")}
+      tabIndex={0}
+      onClick={() => inputRef.current?.click()}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          inputRef.current?.click();
+        }
+      }}
+      sx={{
+        position: "relative",
+        width: 112,
+        height: 112,
+        borderRadius: "50%",
+        overflow: "hidden",
+        cursor: "pointer",
+        mx: "auto",
+        flexShrink: 0,
+        backgroundColor: alpha(theme.palette.primary.main, 0.15),
+        border: `2px solid ${alpha(theme.palette.primary.main, 0.4)}`,
+        transition: "border-color 0.2s ease",
+        "&:hover": {
+          borderColor: theme.palette.primary.main,
+        },
+        "&:focus-visible": {
+          outline: `2px solid ${theme.palette.primary.main}`,
+          outlineOffset: 2,
+        },
+        "&:hover .avatar-overlay": {
+          opacity: 1,
+        },
+      }}
+    >
+      {avatar ? (
+        <Box
+          component="img"
+          src={avatar}
+          alt=""
+          sx={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+        />
+      ) : (
+        <Box
+          sx={{
+            width: "100%",
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: theme.palette.primary.main,
+            fontSize: "2rem",
+            fontWeight: 700,
+          }}
+        >
+          {initials}
+        </Box>
+      )}
+      <Box
+        className="avatar-overlay"
+        sx={{
+          position: "absolute",
+          inset: 0,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 0.5,
+          borderRadius:'50%',
+          backgroundColor: alpha(theme.palette.common.black, 0.55),
+          backdropFilter: "blur(4px)",
+          WebkitBackdropFilter: "blur(4px)",
+          opacity: 0,
+          transition: "opacity 0.2s ease",
+          color: theme.palette.common.white,
+          textAlign: "center",
+          px: 1,
+        }}
+      >
+        <Upload size={22} />
+        <Typography sx={{ fontSize: "0.72rem", fontWeight: 600, lineHeight: 1.2 }}>
+          {uploading ? t("common.saving") : t("settings.uploadAvatar")}
+        </Typography>
+      </Box>
+      <input
+        ref={inputRef}
+        type="file"
+        accept={AVATAR_ALLOWED_MIME.join(",")}
+        hidden
+        onChange={onFile}
+      />
+    </Box>
+  );
+}
+
 export default function SettingsPage() {
   const theme = useTheme();
   const queryClient = useQueryClient();
@@ -110,6 +222,41 @@ export default function SettingsPage() {
   });
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+
+  const initials = user
+    ? `${user.name.charAt(0)}${user.surname.charAt(0)}`.toUpperCase()
+    : "";
+
+  const onAvatarFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) {
+      return;
+    }
+    if (!(AVATAR_ALLOWED_MIME as readonly string[]).includes(file.type)) {
+      open(t("settings.avatarInvalidType"), "failure");
+      return;
+    }
+    if (file.size > AVATAR_MAX_BYTES) {
+      open(t("settings.avatarTooLarge"), "failure");
+      return;
+    }
+    try {
+      setAvatarUploading(true);
+      const result = await uploadAvatar(file);
+      setAccessToken(result.accessToken);
+      queryClient.setQueryData(["user"], result.user);
+      open(t("settings.avatarUpdated"), "success");
+    } catch (error) {
+      open(
+        error instanceof Error ? error.message : t("settings.avatarFailed"),
+        "failure"
+      );
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
 
   const onProfileSubmit = async (data: ProfileFormValues) => {
     try {
@@ -205,6 +352,12 @@ export default function SettingsPage() {
 					onSubmit={profileForm.handleSubmit(onProfileSubmit)}
 					sx={{ display: "flex", flexDirection: "column", gap: 2 }}
 				>
+					<AvatarUploader
+						avatar={user?.avatar ?? null}
+						initials={initials}
+						uploading={avatarUploading}
+						onFile={onAvatarFile}
+					/>
 					<Box
 						sx={{
 							display: "flex",

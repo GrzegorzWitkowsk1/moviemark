@@ -1,5 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import rateLimit from "@fastify/rate-limit";
+import multipart from "@fastify/multipart";
 import { Types } from "mongoose";
 import { User } from "../models/User";
 import type {
@@ -14,21 +15,35 @@ import type {
   RegisterResponse,
   UpdateProfileRequest,
   UpdateProfileResponse,
+  UploadAvatarResponse,
   UserResponse,
 } from "shared";
+import { AVATAR_ALLOWED_MIME, AVATAR_MAX_BYTES } from "shared";
 import { config } from "../config";
+
+function avatarToDataUrl(avatar: {
+  data: Buffer;
+  contentType: string;
+}): string {
+  return `data:${avatar.contentType};base64,${avatar.data.toString("base64")}`;
+}
 
 function toUserResponse(user: {
   _id: unknown;
   name: string;
   surname: string;
   email: string;
+  avatar?: {
+    data: Buffer;
+    contentType: string;
+  };
 }): UserResponse {
   return {
     id: String(user._id),
     name: user.name,
     surname: user.surname,
     email: user.email,
+    avatar: user.avatar ? avatarToDataUrl(user.avatar) : null,
   };
 }
 
@@ -36,6 +51,14 @@ export async function authRoutes(app: FastifyInstance) {
   await app.register(rateLimit, {
     max: config.rateLimitMax,
     timeWindow: "1 minute",
+  });
+
+  await app.register(multipart, {
+    limits: {
+      fileSize: AVATAR_MAX_BYTES,
+      files: 1,
+      fields: 0,
+    },
   });
 
   app.post<{
@@ -186,8 +209,12 @@ export async function authRoutes(app: FastifyInstance) {
   }>(
     "/auth/me",
     { preHandler: app.authenticate },
-    async (request) => {
-      return request.user;
+    async (request, reply) => {
+      const user = await User.findById(request.user.id);
+      if (!user) {
+        return reply.code(404).send({ error: "error.auth.userNotFound" });
+      }
+      return toUserResponse(user);
     }
   );
 
@@ -227,6 +254,66 @@ export async function authRoutes(app: FastifyInstance) {
         const user = await User.findByIdAndUpdate(
           uid,
           { name, surname, email: normalizedEmail },
+          { new: true }
+        );
+        if (!user) {
+          return reply.code(404).send({ error: "error.auth.userNotFound" });
+        }
+
+        const userData = toUserResponse(user);
+        const accessToken = app.signAccessToken(userData);
+        return reply.send({ user: userData, accessToken });
+      } catch (error) {
+        request.log.error(error);
+        return reply.code(500).send({ error: "error.internal" });
+      }
+    }
+  );
+
+  app.put<{
+    Reply: UploadAvatarResponse | AuthErrorResponse;
+  }>(
+    "/auth/avatar",
+    {
+      preHandler: app.authenticate,
+      config: { rateLimit: { max: config.isProduction ? 10 : config.rateLimitMax, timeWindow: "1 minute" } },
+    },
+    async (request, reply) => {
+      try {
+        if (!request.isMultipart()) {
+          return reply.code(400).send({ error: "error.auth.avatar.missingFile" });
+        }
+
+        const file = await request.file();
+        if (!file || file.fieldname !== "avatar") {
+          return reply.code(400).send({ error: "error.auth.avatar.missingFile" });
+        }
+
+        if (
+          !(AVATAR_ALLOWED_MIME as readonly string[]).includes(file.mimetype)
+        ) {
+          return reply.code(400).send({ error: "error.auth.avatar.invalidType" });
+        }
+
+        let buffer: Buffer;
+        try {
+          buffer = await file.toBuffer();
+        } catch (error) {
+          const err = error as { code?: string };
+          if (err.code === "FST_REQ_FILE_TOO_LARGE") {
+            return reply.code(400).send({ error: "error.auth.avatar.tooLarge" });
+          }
+          throw error;
+        }
+
+        if (buffer.byteLength > AVATAR_MAX_BYTES) {
+          return reply.code(400).send({ error: "error.auth.avatar.tooLarge" });
+        }
+
+        const uid = new Types.ObjectId(request.user.id);
+        const user = await User.findByIdAndUpdate(
+          uid,
+          { avatar: { data: buffer, contentType: file.mimetype } },
           { new: true }
         );
         if (!user) {

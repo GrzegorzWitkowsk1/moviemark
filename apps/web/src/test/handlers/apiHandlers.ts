@@ -5,6 +5,7 @@ export const TEST_USER = {
   name: "Anna",
   surname: "Kowalska",
   email: "anna@test.com",
+  avatar: null,
 };
 
 const emptyCollection = { movies: [], series: [] };
@@ -59,6 +60,16 @@ export const apiHandlers = [
   http.put("http://localhost:3000/auth/password", () =>
     HttpResponse.json({ message: "changed" })
   ),
+  http.put("http://localhost:3000/auth/avatar", async ({ request }) => {
+    const formData = await request.formData();
+    const entry = formData.get("avatar");
+    const fileName =
+      entry === null || typeof entry === "string" ? "unknown" : entry.name;
+    return HttpResponse.json({
+      user: { ...TEST_USER, avatar: `data:image/png;base64,${fileName}` },
+      accessToken: "avatar-token",
+    });
+  }),
   http.post("http://localhost:3000/auth/refresh", () =>
     HttpResponse.json({ accessToken: "new-token" })
   ),

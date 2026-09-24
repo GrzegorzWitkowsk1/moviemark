@@ -1,3 +1,7 @@
+export const AVATAR_MAX_BYTES = 2 * 1024 * 1024;
+
+export const AVATAR_ALLOWED_MIME = ["image/jpeg", "image/png"] as const;
+
 export interface MessageType {
   _id?: string;
   text: string;
@@ -24,6 +28,7 @@ export interface UserResponse {
   name: string;
   surname: string;
   email: string;
+  avatar: string | null;
 }
 
 export interface LoginRequest {
@@ -52,6 +57,11 @@ export interface UpdateProfileRequest {
 }
 
 export interface UpdateProfileResponse {
+  user: UserResponse;
+  accessToken: string;
+}
+
+export interface UploadAvatarResponse {
   user: UserResponse;
   accessToken: string;
 }

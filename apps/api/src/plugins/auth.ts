@@ -5,6 +5,13 @@ import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { config } from "../config";
 import type { UserResponse } from "shared";
 
+export interface TokenUser {
+  id: string;
+  name: string;
+  surname: string;
+  email: string;
+}
+
 declare module "@fastify/jwt" {
   interface FastifyJWT {
     payload: {
@@ -15,7 +22,7 @@ declare module "@fastify/jwt" {
       surname?: string;
       email?: string;
     };
-    user: UserResponse;
+    user: TokenUser;
   }
 }
 
@@ -55,12 +62,7 @@ export default fp(
     await app.register(cookie);
 
     app.decorate("authenticate", async (request) => {
-      const payload = await request.jwtVerify<{
-        id: string;
-        name: string;
-        surname: string;
-        email: string;
-      }>();
+      const payload = await request.jwtVerify<TokenUser>();
       request.user = {
         id: payload.id,
         name: payload.name,
@@ -69,9 +71,15 @@ export default fp(
       };
     });
 
-    app.decorate("signAccessToken", (payload: UserResponse) =>
-      app.jwt.sign(payload, { expiresIn: config.accessTokenTtl })
-    );
+    app.decorate("signAccessToken", (payload: UserResponse) => {
+      const tokenPayload: TokenUser = {
+        id: payload.id,
+        name: payload.name,
+        surname: payload.surname,
+        email: payload.email,
+      };
+      return app.jwt.sign(tokenPayload, { expiresIn: config.accessTokenTtl });
+    });
 
     app.decorate("signRefreshToken", (userId: string, remember?: boolean) =>
       app.jwt.sign(

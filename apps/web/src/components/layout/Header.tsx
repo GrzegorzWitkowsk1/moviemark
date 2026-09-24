@@ -257,6 +257,7 @@ export default function Header() {
 						aria-label={t('nav.accountMenu')}
 					>
 						<Avatar
+							src={user?.avatar ?? undefined}
 							sx={{
 								width: 32,
 								height: 32,

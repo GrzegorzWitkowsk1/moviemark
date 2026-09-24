@@ -90,6 +90,11 @@
       "profile": {
         "emailTaken": "Email already registered"
       },
+      "avatar": {
+        "invalidType": "Only JPEG or PNG images are allowed",
+        "tooLarge": "Image is too large (max 2 MB)",
+        "missingFile": "No image file provided"
+      },
       "userNotFound": "User not found"
     },
     "collection": {
