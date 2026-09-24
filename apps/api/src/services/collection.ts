@@ -203,6 +203,30 @@ export async function uncheckEpisode(
   return toSeriesStatusResponse(saved);
 }
 
+export async function uncheckSeason(
+  uid: Types.ObjectId,
+  tmdbId: number,
+  season: number
+): Promise<SeriesStatusResponse> {
+  const doc = await findWatchedSeries(uid, tmdbId);
+  if (!doc) {
+    return emptySeriesStatus();
+  }
+
+  doc.watchedEpisodes = doc.watchedEpisodes.filter(
+    (e) => e.season !== season
+  );
+
+  if (doc.watchedEpisodes.length === 0) {
+    await deleteWatchedSeriesById(doc._id);
+    return emptySeriesStatus();
+  }
+
+  doc.watchedAt = new Date();
+  const saved = await saveWatchedSeries(doc);
+  return toSeriesStatusResponse(saved);
+}
+
 export async function removeSeries(
   uid: Types.ObjectId,
   tmdbId: number

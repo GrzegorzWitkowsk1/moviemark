@@ -11,6 +11,7 @@ import {
   useRemoveMovie,
   useSeriesWatchedControls,
   useUncheckEpisode,
+  useUncheckSeason,
 } from "./index";
 import {
   renderHookWithProviders,
@@ -241,9 +242,56 @@ describe("useUncheckEpisode", () => {
   });
 });
 
+describe("useUncheckSeason", () => {
+  it("removes the whole season in the optimistic update", async () => {
+    const pending = deferred<(typeof seriesStatus)>();
+    server.use(
+      http.delete(`${API}/collection/series/550/season`, async () =>
+        HttpResponse.json(await pending.promise)
+      )
+    );
+
+    const queryClient = createTestQueryClient();
+    queryClient.setQueryData(seriesStatusKey(550), {
+      watched: true,
+      watchedCount: 3,
+      totalEpisodes: 12,
+      watchedEpisodes: [
+        { season: 1, episode: 1 },
+        { season: 1, episode: 2 },
+        { season: 2, episode: 1 },
+      ],
+    });
+
+    const { result } = renderHookWithProviders(() => useUncheckSeason(), {
+      queryClient,
+    });
+
+    await act(async () => {
+      void result.current.mutate({ tmdbId: 550, season: 1 });
+    });
+
+    await waitFor(() => {
+      expect(
+        queryClient.getQueryData(seriesStatusKey(550))
+      ).toMatchObject({
+        watched: true,
+        watchedCount: 1,
+        watchedEpisodes: [{ season: 2, episode: 1 }],
+      });
+    });
+
+    await act(async () => {
+      pending.resolve(seriesStatus);
+      await pending.promise;
+    });
+  });
+});
+
 describe("useSeriesWatchedControls", () => {
   it("exposes helpers built on the watched episodes", async () => {
     let lastCheckBody: unknown;
+    let lastUncheckSeasonUrl: string | null = null;
     server.use(
       http.get(`${API}/collection/series/550`, () =>
         HttpResponse.json(seriesStatus)
@@ -251,6 +299,10 @@ describe("useSeriesWatchedControls", () => {
       http.put(`${API}/collection/series/episode`, async ({ request }) => {
         lastCheckBody = await request.json();
         return HttpResponse.json(seriesStatus);
+      }),
+      http.delete(`${API}/collection/series/550/season`, ({ request }) => {
+        lastUncheckSeasonUrl = request.url;
+        return HttpResponse.json({ ...seriesStatus, watchedCount: 0 });
       })
     );
 
@@ -282,5 +334,10 @@ describe("useSeriesWatchedControls", () => {
       totalEpisodes: 12,
       rating: 8.5,
     });
+
+    await act(async () => {
+      await result.current.unmarkSeason(1);
+    });
+    expect(lastUncheckSeasonUrl).toContain("?season=1");
   });
 });

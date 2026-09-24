@@ -288,6 +288,18 @@ export async function uncheckSeriesEpisode(
   );
 }
 
+export async function uncheckSeriesSeason(
+  tmdbId: number,
+  season: number
+): Promise<SeriesStatusResponse> {
+  return apiFetch<SeriesStatusResponse>(
+    `/collection/series/${tmdbId}/season?season=${season}`,
+    {
+      method: "DELETE",
+    }
+  );
+}
+
 export async function createCustomMovie(
   payload: CustomMovieRequest
 ): Promise<CustomItemResponse> {

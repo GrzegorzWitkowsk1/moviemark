@@ -16,6 +16,7 @@ import {
   removeMovie,
   removeSeries,
   uncheckEpisode,
+  uncheckSeason,
 } from "../services/collection";
 
 interface EpisodeQueryParams {
@@ -132,6 +133,23 @@ export async function collectionRoutes(app: FastifyInstance) {
         return reply.code(400).send({ error: "error.collection.invalidEpisodeQuery" });
       }
       return uncheckEpisode(userId(request), tmdbId, season, episode);
+    }
+  );
+
+  app.delete<{
+    Params: TmdbIdParams;
+    Querystring: EpisodeQueryParams;
+    Reply: SeriesStatusResponse | { error: string };
+  }>(
+    "/collection/series/:tmdbId/season",
+    { preHandler: app.authenticate },
+    async (request, reply) => {
+      const tmdbId = parseTmdbId(request.params.tmdbId);
+      const season = Number(request.query.season);
+      if (!Number.isFinite(season) || season < 1) {
+        return reply.code(400).send({ error: "error.collection.invalidSeasonQuery" });
+      }
+      return uncheckSeason(userId(request), tmdbId, season);
     }
   );
 

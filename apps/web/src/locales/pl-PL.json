@@ -100,7 +100,8 @@
     },
     "collection": {
       "movieAlreadyAdded": "Film jest już w kolekcji",
-      "invalidEpisodeQuery": "Nieprawidłowe zapytanie o odcinek"
+      "invalidEpisodeQuery": "Nieprawidłowe zapytanie o odcinek",
+      "invalidSeasonQuery": "Nieprawidłowe zapytanie o sezon"
     },
     "custom": {
       "invalidId": "Nieprawidłowe id niestandardowe",

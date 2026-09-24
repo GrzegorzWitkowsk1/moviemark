@@ -181,6 +181,26 @@ function SeasonAccordion({
     setPending(null);
   };
 
+  const allWatched = totalCount > 0 && progress >= totalCount;
+
+  const handleSeasonToggle = () => {
+    if (watched.isEpisodePending) {
+      return;
+    }
+    if (allWatched) {
+      watched.unmarkSeason(season.season_number).catch(() => {});
+      return;
+    }
+    const numbers =
+      data && data.episodes.length > 0
+        ? data.episodes.map((e) => e.episode_number)
+        : Array.from({ length: totalCount }, (_, index) => index + 1);
+    if (numbers.length === 0) {
+      return;
+    }
+    watched.markEpisodesWatched(season.season_number, numbers).catch(() => {});
+  };
+
   const earlierNumbers = pending?.earlier.map((e) => e.episode_number) ?? [];
 
   return (
@@ -210,15 +230,39 @@ function SeasonAccordion({
               gap: 2,
             }}
           >
-            <Typography
+            <Box
               sx={{
-                fontSize: "1rem",
-                fontWeight: 700,
-                color: theme.palette.text.primary,
+                display: "flex",
+                alignItems: "center",
+                gap: 0.5,
+                minWidth: 0,
               }}
             >
-              {t("common.seasonHeader", { number: season.season_number })}{seasonLabel}
-            </Typography>
+              <Checkbox
+                checked={allWatched}
+                onChange={handleSeasonToggle}
+                onClick={(event) => event.stopPropagation()}
+                disabled={watched.isEpisodePending || totalCount === 0}
+                slotProps={{
+                  input: {
+                    "aria-label": t("details.markSeasonWatched"),
+                    title: t("details.markSeasonWatched"),
+                  },
+                }}
+                color="primary"
+                sx={{ p: 0.5 }}
+              />
+              <Typography
+                noWrap
+                sx={{
+                  fontSize: "1rem",
+                  fontWeight: 700,
+                  color: theme.palette.text.primary,
+                }}
+              >
+                {t("common.seasonHeader", { number: season.season_number })}{seasonLabel}
+              </Typography>
+            </Box>
             <Typography
               sx={{
                 fontSize: "0.85rem",

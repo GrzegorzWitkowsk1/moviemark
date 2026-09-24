@@ -19,6 +19,7 @@
     "markAsWatchedTitle": "Mark as watched?",
     "markAsWatchedBody": "You're marking EP{{episode}} as watched, but {{earlier}} aren't. Did you watch them too?",
     "dontAskAgain": "Don't ask again for this series",
-    "noJustEpisode": "No, just EP{{number}}"
+    "noJustEpisode": "No, just EP{{number}}",
+    "markSeasonWatched": "Mark whole season as watched"
   }
 }

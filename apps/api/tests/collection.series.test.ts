@@ -75,6 +75,12 @@ describe("collection series routes", () => {
       url: `/collection/series/${SERIES_ID}/episode?season=1&episode=1`,
     });
     expect(deleteRes.statusCode).toBe(401);
+
+    const seasonRes = await app.inject({
+      method: "DELETE",
+      url: `/collection/series/${SERIES_ID}/season?season=1`,
+    });
+    expect(seasonRes.statusCode).toBe(401);
   });
 
   it("returns not watched before any episodes are marked", async () => {
@@ -202,6 +208,55 @@ describe("collection series routes", () => {
     const res = await app.inject({
       method: "DELETE",
       url: `/collection/series/${SERIES_ID}/episode?season=not-a-number`,
+      headers: authHeaders(accessToken),
+    });
+
+    expect(res.statusCode).toBe(400);
+  });
+
+  it("unchecks a whole season while keeping others", async () => {
+    await putEpisodes([1, 2, 3], { season: 1 });
+    await putEpisodes([1, 2], { season: 2 });
+
+    const res = await app.inject({
+      method: "DELETE",
+      url: `/collection/series/${SERIES_ID}/season?season=1`,
+      headers: authHeaders(accessToken),
+    });
+
+    expect(res.statusCode).toBe(200);
+    const body = res.json<SeriesStatusResponse>();
+    expect(body.watchedCount).toBe(2);
+    expect(body.watchedEpisodes).toEqual([
+      { season: 2, episode: 1 },
+      { season: 2, episode: 2 },
+    ]);
+  });
+
+  it("removes the series when the last watched season is unchecked", async () => {
+    await putEpisodes([1, 2, 3], { season: 1 });
+
+    const res = await app.inject({
+      method: "DELETE",
+      url: `/collection/series/${SERIES_ID}/season?season=1`,
+      headers: authHeaders(accessToken),
+    });
+
+    expect(res.json<SeriesStatusResponse>()).toEqual({
+      watched: false,
+      watchedCount: 0,
+      totalEpisodes: 0,
+      watchedEpisodes: [],
+    });
+
+    const status = await getStatus();
+    expect(status.json()).toMatchObject({ watched: false, watchedCount: 0 });
+  });
+
+  it("rejects an invalid season query", async () => {
+    const res = await app.inject({
+      method: "DELETE",
+      url: `/collection/series/${SERIES_ID}/season?season=not-a-number`,
       headers: authHeaders(accessToken),
     });
 

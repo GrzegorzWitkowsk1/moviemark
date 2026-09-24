@@ -37,6 +37,6 @@
     "deleteAccount": "Delete Account",
     "deleteDialogTitle": "Are you sure?",
     "deleteDialogContent": "This action cannot be undone. All your data will be permanently deleted.",
-    "footer": "MovieMark v1.0. All rights reserved. {{year}} \u00AE "
+    "footer": "MovieMark v1.1. All rights reserved. {{year}} \u00AE "
   }
 }

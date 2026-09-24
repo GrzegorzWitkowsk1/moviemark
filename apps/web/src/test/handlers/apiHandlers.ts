@@ -96,6 +96,10 @@ export const apiHandlers = [
     "http://localhost:3000/collection/series/:tmdbId/episode",
     () => HttpResponse.json(seriesStatus(false))
   ),
+  http.delete(
+    "http://localhost:3000/collection/series/:tmdbId/season",
+    () => HttpResponse.json(seriesStatus(false))
+  ),
 
   http.post("http://localhost:3000/custom/movie", () =>
     HttpResponse.json({

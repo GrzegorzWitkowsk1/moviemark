@@ -100,7 +100,8 @@
     },
     "collection": {
       "movieAlreadyAdded": "Movie already in collection",
-      "invalidEpisodeQuery": "Invalid episode query"
+      "invalidEpisodeQuery": "Invalid episode query",
+      "invalidSeasonQuery": "Invalid season query"
     },
     "custom": {
       "invalidId": "Invalid custom id",

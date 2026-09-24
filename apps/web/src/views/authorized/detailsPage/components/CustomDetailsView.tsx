@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import { Calendar, Clock, ChevronDown, Tag, Check } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import type { TmdbMediaType } from "shared";
+import type { CustomSeason, TmdbMediaType } from "shared";
 import { useCustomItem } from "@/hooks/useCustom";
 import {
   useResolveGenres,
@@ -135,6 +135,27 @@ export default function CustomDetailsView({
     }
   };
 
+  const handleSeasonToggle = (season: CustomSeason) => {
+    if (watchedControls.isEpisodePending) {
+      return;
+    }
+    const totalCount = season.episodes.length;
+    const watchedCount = watchedControls.countWatchedEpisodes(
+      season.seasonNumber
+    );
+    if (totalCount > 0 && watchedCount >= totalCount) {
+      watchedControls.unmarkSeason(season.seasonNumber).catch(() => {});
+      return;
+    }
+    const numbers = season.episodes.map((e) => e.episode);
+    if (numbers.length === 0) {
+      return;
+    }
+    watchedControls
+      .markEpisodesWatched(season.seasonNumber, numbers)
+      .catch(() => {});
+  };
+
   return (
     <Box sx={{ width: "100%" }}>
       <DetailHero
@@ -195,15 +216,37 @@ export default function CustomDetailsView({
                     }
                     sx={{ borderRadius: "14px", px: 2.5 }}
                   >
-                    <Typography
-                      sx={{
-                        fontSize: "1rem",
-                        fontWeight: 700,
-                        color: theme.palette.text.primary,
-                      }}
-                    >
-                      {t("common.seasonHeader", { number: season.seasonNumber })}
-                    </Typography>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, minWidth: 0 }}>
+                      <Checkbox
+                        checked={
+                          season.episodes.length > 0 &&
+                          watchedControls.countWatchedEpisodes(
+                            season.seasonNumber
+                          ) >= season.episodes.length
+                        }
+                        onChange={() => handleSeasonToggle(season)}
+                        onClick={(event) => event.stopPropagation()}
+                        disabled={watchedControls.isEpisodePending}
+                        slotProps={{
+                          input: {
+                            "aria-label": t("details.markSeasonWatched"),
+                            title: t("details.markSeasonWatched"),
+                          },
+                        }}
+                        color="primary"
+                        sx={{ p: 0.5 }}
+                      />
+                      <Typography
+                        noWrap
+                        sx={{
+                          fontSize: "1rem",
+                          fontWeight: 700,
+                          color: theme.palette.text.primary,
+                        }}
+                      >
+                        {t("common.seasonHeader", { number: season.seasonNumber })}
+                      </Typography>
+                    </Box>
                   </AccordionSummary>
                   <AccordionDetails sx={{ px: 2.5, pb: 2.5 }}>
                     {season.episodes.map((episode, index) => {

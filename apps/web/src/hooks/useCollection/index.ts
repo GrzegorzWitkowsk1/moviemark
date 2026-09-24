@@ -13,6 +13,7 @@ import {
   getSeriesCollectionStatus,
   removeMovieFromCollection,
   uncheckSeriesEpisode,
+  uncheckSeriesSeason,
 } from "@/lib/api";
 
 // ------- KEYS -------
@@ -163,6 +164,40 @@ export function useUncheckEpisode() {
   });
 }
 
+export function useUncheckSeason() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      tmdbId,
+      season,
+    }: {
+      tmdbId: number;
+      season: number;
+    }) => uncheckSeriesSeason(tmdbId, season),
+    onMutate: async ({ tmdbId, season }) => {
+      await queryClient.cancelQueries({ queryKey: seriesStatusKey(tmdbId) });
+      queryClient.setQueryData<SeriesStatusResponse>(
+        seriesStatusKey(tmdbId),
+        (current) => {
+          const watchedEpisodes =
+            current?.watchedEpisodes.filter((e) => e.season !== season) ?? [];
+          return {
+            watched: watchedEpisodes.length > 0,
+            watchedCount: watchedEpisodes.length,
+            totalEpisodes: current?.totalEpisodes ?? 0,
+            watchedEpisodes,
+          };
+        }
+      );
+    },
+    onSettled: (_data, _error, { tmdbId }) => {
+      queryClient.invalidateQueries({ queryKey: seriesStatusKey(tmdbId) });
+      queryClient.invalidateQueries({ queryKey: collectionKey }); 
+    },
+  });
+}
+
 export interface SeriesMeta {
   name: string;
   posterPath: string | null;
@@ -178,6 +213,7 @@ export interface SeriesWatchedControls {
     episodes: number[]
   ) => Promise<void>;
   unmarkEpisode: (season: number, episode: number) => Promise<void>;
+  unmarkSeason: (season: number) => Promise<void>;
   isEpisodePending: boolean;
 }
 
@@ -188,6 +224,7 @@ export function useSeriesWatchedControls(
   const { data } = useSeriesWatched(tvId);
   const checkEpisode = useCheckEpisode();
   const uncheckEpisode = useUncheckEpisode();
+  const uncheckSeason = useUncheckSeason();
 
   const watchedEpisodes = data?.watchedEpisodes ?? [];
 
@@ -218,11 +255,17 @@ export function useSeriesWatchedControls(
     await uncheckEpisode.mutateAsync({ tmdbId: tvId, season, episode });
   };
 
+  const unmarkSeason = async (season: number) => {
+    await uncheckSeason.mutateAsync({ tmdbId: tvId, season });
+  };
+
   return {
     isEpisodeWatched,
     countWatchedEpisodes,
     markEpisodesWatched,
     unmarkEpisode,
-    isEpisodePending: checkEpisode.isPending || uncheckEpisode.isPending,
+    unmarkSeason,
+    isEpisodePending:
+      checkEpisode.isPending || uncheckEpisode.isPending || uncheckSeason.isPending,
   };
 }

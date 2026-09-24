@@ -19,6 +19,7 @@
     "markAsWatchedTitle": "Oznaczyć jako obejrzane?",
     "markAsWatchedBody": "Oznaczasz EP{{episode}} jako obejrzany, ale {{earlier}} nie są. Czy obejrzałeś je też?",
     "dontAskAgain": "Nie pytaj ponownie dla tego serialu",
-    "noJustEpisode": "Nie, tylko EP{{number}}"
+    "noJustEpisode": "Nie, tylko EP{{number}}",
+    "markSeasonWatched": "Oznacz cały sezon jako obejrzany"
   }
 }
