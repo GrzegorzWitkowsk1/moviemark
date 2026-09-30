@@ -1,4 +1,12 @@
 {
+  "boot": {
+    "checkingConnection": "Sprawdzanie połączenia...",
+    "wakingUp": "Budzenie serwera...",
+    "thisMayTakeAMoment": "Serwer w darmowym planie może potrzebować nawet minuty na start.",
+    "elapsed": "{{seconds}} s",
+    "serverUnreachable": "Nie udało się połączyć z serwerem. Mógł przejść w stan uśpienia.",
+    "retry": "Spróbuj ponownie"
+  },
   "common": {
     "search": "Szukaj",
     "searchPlaceholder": "Szukaj filmów i seriali...",

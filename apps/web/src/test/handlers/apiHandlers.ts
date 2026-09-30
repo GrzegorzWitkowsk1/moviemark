@@ -29,6 +29,10 @@ function futureStatus(wanted = false) {
 }
 
 export const apiHandlers = [
+  http.get("http://localhost:3000/health", () =>
+    HttpResponse.json({ status: "ok" })
+  ),
+
   http.post("http://localhost:3000/auth/register", () =>
     HttpResponse.json({ message: "Registration successful" }, { status: 201 })
   ),

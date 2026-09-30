@@ -1,4 +1,12 @@
 {
+  "boot": {
+    "checkingConnection": "Checking connection...",
+    "wakingUp": "Waking up the server...",
+    "thisMayTakeAMoment": "The free-tier server may need up to a minute to start.",
+    "elapsed": "{{seconds}}s",
+    "serverUnreachable": "Couldn't reach the server. It may have gone to sleep.",
+    "retry": "Try again"
+  },
   "common": {
     "search": "Search",
     "searchPlaceholder": "Search movies & series...",

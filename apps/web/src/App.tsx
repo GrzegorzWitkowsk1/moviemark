@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import './App.css'
@@ -8,7 +9,25 @@ import { SnackbarProvider } from './contexts/snackbarContext';
 import { ThemeProvider } from './contexts/themeContext';
 import { LanguageProvider } from './contexts/languageContext';
 import { DialogProvider } from './contexts/dialogContext';
+import { WarmupProvider, useWarmup } from './contexts/warmupContext';
 import { queryClient } from './lib/queryClient';
+import LoadingScreen from './shared/components/LoadingScreen';
+
+function AppGate({ children }: { children: ReactNode }) {
+  const { status, runId, retry } = useWarmup();
+
+  if (status === "ready") {
+    return children;
+  }
+
+  return (
+    <LoadingScreen
+      key={runId}
+      state={status === "checking" ? "pending" : "failed"}
+      onRetry={retry}
+    />
+  );
+}
 
 function App() {
   return (
@@ -19,12 +38,16 @@ function App() {
             <SnackbarProvider>
               <DialogProvider>
                 <LanguageProvider>
-                  <BrowserRouter>
-                    <Routes>
-                      <Route path="/auth/*" element={<Authorized />} />
-                      <Route path="/*" element={<Unauthorized />} />
-                    </Routes>
-                  </BrowserRouter>
+                  <WarmupProvider>
+                    <BrowserRouter>
+                      <AppGate>
+                        <Routes>
+                          <Route path="/auth/*" element={<Authorized />} />
+                          <Route path="/*" element={<Unauthorized />} />
+                        </Routes>
+                      </AppGate>
+                    </BrowserRouter>
+                  </WarmupProvider>
                 </LanguageProvider>
               </DialogProvider>
             </SnackbarProvider>
