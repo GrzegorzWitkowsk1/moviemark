@@ -15,6 +15,7 @@ export default defineConfig({
     clearMocks: true,
     testTimeout: 15_000,
     pool: "forks",
-    fileParallelism: false,
+    fileParallelism: true,
+    maxWorkers: "50%",
   },
 });
