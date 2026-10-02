@@ -15,6 +15,7 @@ export default defineConfig({
       reuseExistingServer: true,
       env: {
         RATE_LIMIT_MAX: "10000",
+        GUEST_RATE_LIMIT_MAX: "10000",
       },
     },
     {

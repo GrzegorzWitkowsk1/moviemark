@@ -7,6 +7,8 @@ import type {
   AuthErrorResponse,
   ChangePasswordRequest,
   ChangePasswordResponse,
+  GuestEndRequest,
+  GuestEndResponse,
   LoginRequest,
   LoginResponse,
   RefreshResponse,
@@ -18,8 +20,9 @@ import type {
   UploadAvatarResponse,
   UserResponse,
 } from "shared";
-import { AVATAR_ALLOWED_MIME, AVATAR_MAX_BYTES } from "shared";
+import { AVATAR_ALLOWED_MIME, AVATAR_MAX_BYTES, GUEST_EMAIL_DOMAIN } from "shared";
 import { config } from "../config";
+import { createGuest, purgeExpiredGuest, purgeGuest } from "../services/guests";
 
 function avatarToDataUrl(avatar: {
   data: Buffer;
@@ -33,6 +36,7 @@ function toUserResponse(user: {
   name: string;
   surname: string;
   email: string;
+  isGuest?: boolean;
   avatar?: {
     data: Buffer;
     contentType: string;
@@ -44,6 +48,7 @@ function toUserResponse(user: {
     surname: user.surname,
     email: user.email,
     avatar: user.avatar ? avatarToDataUrl(user.avatar) : null,
+    isGuest: user.isGuest === true,
   };
 }
 
@@ -84,6 +89,12 @@ export async function authRoutes(app: FastifyInstance) {
     async (request, reply) => {
       try {
         const { name, surname, email, password } = request.body;
+
+        if (email.toLowerCase().endsWith(`@${GUEST_EMAIL_DOMAIN}`)) {
+          return reply
+            .code(400)
+            .send({ error: "error.auth.register.reservedEmail" });
+        }
 
         const existing = await User.findOne({ email: email.toLowerCase() });
         if (existing) {
@@ -139,7 +150,7 @@ export async function authRoutes(app: FastifyInstance) {
         const { email, password, remember } = request.body;
 
         const user = await User.findOne({ email: email.toLowerCase() });
-        if (!user) {
+        if (!user || user.isGuest || !user.passwordHash) {
           return reply
             .code(401)
             .send({ error: "error.auth.login.invalidCredentials" });
@@ -166,6 +177,78 @@ export async function authRoutes(app: FastifyInstance) {
   );
 
   app.post<{
+    Reply: LoginResponse | AuthErrorResponse;
+  }>(
+    "/auth/guest",
+    {
+      config: {
+        rateLimit: {
+          max: config.guestRateLimitMax,
+          timeWindow: "1 hour",
+        },
+      },
+    },
+    async (request, reply) => {
+      try {
+        const uid = await createGuest();
+        const guest = await User.findById(uid);
+        if (!guest) {
+          return reply.code(500).send({ error: "error.internal" });
+        }
+
+        const userData = toUserResponse(guest);
+        const accessToken = app.signAccessToken(userData);
+        const refreshToken = app.signRefreshToken(userData.id);
+        app.setSessionCookie(reply, refreshToken);
+
+        return reply.code(201).send({ user: userData, accessToken });
+      } catch (error) {
+        request.log.error(error);
+        return reply.code(500).send({ error: "error.internal" });
+      }
+    }
+  );
+
+  app.post<{
+    Body: GuestEndRequest;
+    Reply: GuestEndResponse | AuthErrorResponse;
+  }>(
+    "/auth/guest/end",
+    {
+      schema: {
+        body: {
+          type: "object",
+          required: ["accessToken"],
+          properties: {
+            accessToken: { type: "string", minLength: 1 },
+          },
+        },
+      },
+    },
+    async (request, reply) => {
+      let payload: { id?: string; isGuest?: boolean };
+      try {
+        payload = app.jwt.verify(request.body.accessToken);
+      } catch {
+        return reply.code(401).send({ error: "error.unauthorized" });
+      }
+
+      if (!payload.id || payload.isGuest !== true) {
+        return reply.code(401).send({ error: "error.unauthorized" });
+      }
+
+      try {
+        await purgeGuest(new Types.ObjectId(payload.id));
+        app.clearRefreshCookie(reply);
+        return reply.send({ message: "Guest session ended" });
+      } catch (error) {
+        request.log.error(error);
+        return reply.code(500).send({ error: "error.internal" });
+      }
+    }
+  );
+
+  app.post<{
     Reply: RefreshResponse | AuthErrorResponse;
   }>(
     "/auth/refresh",
@@ -184,6 +267,16 @@ export async function authRoutes(app: FastifyInstance) {
         const payload = app.jwt.verify<{ userId: string }>(token);
         const user = await User.findById(payload.userId);
         if (!user) {
+          return reply.code(401).send({ error: "error.unauthorized" });
+        }
+
+        if (
+          user.isGuest &&
+          user.guestExpiresAt &&
+          user.guestExpiresAt.getTime() <= Date.now()
+        ) {
+          await purgeExpiredGuest(user._id as Types.ObjectId);
+          app.clearRefreshCookie(reply);
           return reply.code(401).send({ error: "error.unauthorized" });
         }
 
@@ -242,6 +335,15 @@ export async function authRoutes(app: FastifyInstance) {
         const { name, surname, email } = request.body;
         const uid = new Types.ObjectId(request.user.id);
         const normalizedEmail = email.toLowerCase();
+
+        if (
+          request.user.isGuest === true &&
+          normalizedEmail !== request.user.email.toLowerCase()
+        ) {
+          return reply
+            .code(403)
+            .send({ error: "error.auth.guest.emailRestricted" });
+        }
 
         const existing = await User.findOne({
           email: normalizedEmail,
@@ -351,6 +453,12 @@ export async function authRoutes(app: FastifyInstance) {
       try {
         const { newPassword } = request.body;
         const uid = new Types.ObjectId(request.user.id);
+
+        if (request.user.isGuest === true) {
+          return reply
+            .code(403)
+            .send({ error: "error.auth.guest.passwordRestricted" });
+        }
 
         const passwordHash = await Bun.password.hash(newPassword, {
           algorithm: "bcrypt",

@@ -106,6 +106,19 @@ sequenceDiagram
 
 > The access token lives only in memory and is lost on reload. The first request after a reload gets a 401, which triggers a transparent refresh from the httpOnly cookie so the session resumes automatically.
 
+### Guest mode
+
+Visitors can use the whole app without registering. "Continue as guest" creates a real, fully functional `User` document with `isGuest: true`, a `guest-${uuid}@guest.moviemark.local` email and no password hash, so every existing authorization check and data path works unchanged.
+
+Guest cleanup is layered so data is removed even when the browser cannot talk to the API:
+
+1. **Logout** - the client calls `POST /auth/guest/end` with its access token and the API deletes the guest and all of its documents.
+2. **Tab close** - the `pagehide` event fires a `sendBeacon` (with a `keepalive` fetch fallback) and the API purges the account from that beacon. Switching tabs or minimising the window does **not** purge anything, so a guest who comes back keeps their session.
+3. **Expiry backstop** - `guestExpiresAt` (`GUEST_TTL_MINUTES`, default `120`) is enforced on refresh and by a periodic sweep that purges expired guests plus orphaned guest documents.
+4. **Session cookie** - guests get a cookie without `Max-Age`, so a browser that never sends the beacon drops the refresh token when the tab is closed.
+
+Guest restrictions are enforced server-side: the reserved `@guest.moviemark.local` domain cannot be registered, guests cannot change their email or password, and `POST /auth/guest` is rate-limited to `GUEST_RATE_LIMIT_MAX` (default `5`) per hour. The web app shows a dismissible banner explaining that logging out or closing the tab deletes the data, linking to the registration page; guest data is never migrated into a real account.
+
 ## Tech stack
 
 | Category | Technology |
@@ -216,6 +229,8 @@ MONGO_URI=mongodb://admin:password@db-host:27017/moviemark?authSource=admin
 CORS_ORIGIN=https://<exact web host, no trailing slash>  # e.g. https://moviemark.pages.dev
 JWT_SECRET=<long random secret>
 TMDB_TOKEN=<your TMDB api token>
+GUEST_TTL_MINUTES=120       # optional, defaults to 120
+GUEST_RATE_LIMIT_MAX=5      # optional, guest sessions created per hour per IP
 ```
 
 Production web builds must point the API base at the deployed host, not localhost:

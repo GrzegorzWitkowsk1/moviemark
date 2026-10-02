@@ -11,6 +11,7 @@ export function useUser() {
   return {
     user: data ?? null,
     isAuthenticated: !!data && !error,
+    isGuest: !!data && !error && data.isGuest === true,
     isLoading,
   };
 }

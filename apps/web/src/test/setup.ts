@@ -19,6 +19,7 @@ afterAll(() => {
 
 beforeEach(() => {
   localStorage.clear();
+  sessionStorage.clear();
   i18n.changeLanguage("en");
 });
 

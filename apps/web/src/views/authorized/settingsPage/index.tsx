@@ -201,6 +201,7 @@ export default function SettingsPage() {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
   const { user } = useUser();
+  const isGuest = user?.isGuest === true;
   const { open } = useSnackbar();
   const { mode, setMode } = useThemeMode();
   const { language, setLanguage } = useLanguage();
@@ -225,7 +226,9 @@ export default function SettingsPage() {
   const [avatarUploading, setAvatarUploading] = useState(false);
 
   const initials = user
-    ? `${user.name.charAt(0)}${user.surname.charAt(0)}`.toUpperCase()
+    ? user.isGuest
+      ? "G"
+      : `${user.name.charAt(0)}${user.surname.charAt(0)}`.toUpperCase()
     : "";
 
   const onAvatarFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -263,7 +266,7 @@ export default function SettingsPage() {
       const result = await updateProfile({
         name: data.name,
         surname: data.surname,
-        email: data.email,
+        email: isGuest ? (user?.email ?? data.email) : data.email,
       });
       setAccessToken(result.accessToken);
       queryClient.setQueryData(["user"], result.user);
@@ -394,11 +397,21 @@ export default function SettingsPage() {
 							placeholder={t("common.emailPlaceholder")}
 							variant="outlined"
 							fullWidth
+							disabled={isGuest}
 							error={!!profileForm.formState.errors.email}
-							helperText={profileForm.formState.errors.email?.message}
+							helperText={
+								isGuest
+									? t("settings.guestEmailLocked")
+									: profileForm.formState.errors.email?.message
+							}
 							{...profileForm.register("email")}
 						/>
 					</Box>
+					{isGuest && (
+						<Typography variant="caption" sx={(theme) => ({ color: theme.palette.secondary.light })}>
+							{t("settings.guestAccountNotice")}
+						</Typography>
+					)}
 					<Box sx={{ display: "flex", justifyContent: "flex-start", mt: 1 }}>
 						<ContainedButton
 							type="submit"
@@ -415,6 +428,11 @@ export default function SettingsPage() {
 
 			<StyledCard>
 				<SectionHeader icon={<Lock size={20} />} title={t("settings.changePassword")} />
+				{isGuest ? (
+					<Typography variant="body2" sx={(theme) => ({ color: theme.palette.secondary.light })}>
+						{t("settings.guestPasswordLocked")}
+					</Typography>
+				) : (
 				<Box
 					component="form"
 					onSubmit={passwordForm.handleSubmit(onPasswordSubmit)}
@@ -494,12 +512,13 @@ export default function SettingsPage() {
 							sx={{ minWidth: 160 }}
 							disabled={passwordForm.formState.isSubmitting}
 						>
-							{passwordForm.formState.isSubmitting
+{passwordForm.formState.isSubmitting
 								? t("settings.changing")
 								: t("settings.changePassword")}
 						</ContainedButton>
 					</Box>
 				</Box>
+				)}
 			</StyledCard>
 
 			<StyledCard>

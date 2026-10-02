@@ -30,3 +30,4 @@ packages/shared:
 - Keep frontend and backend contracts synchronized.
 - Do not modify unrelated files.
 - Explain changes before applying them.
+- Create TODO list for every job.

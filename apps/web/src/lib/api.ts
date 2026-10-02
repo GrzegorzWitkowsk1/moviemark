@@ -11,6 +11,7 @@ import type {
   CustomSeriesRequest,
   FutureListResponse,
   FutureStatusResponse,
+  GuestEndResponse,
   LoginRequest,
   LoginResponse,
   MovieStatusResponse,
@@ -189,6 +190,29 @@ export async function logoutUser(): Promise<void> {
   try {
     await apiFetch<{ message: string }>("/auth/logout", {
       method: "POST",
+      useRefresh: false,
+    });
+  } finally {
+    clearAccessToken();
+  }
+}
+
+export async function startGuestSession(): Promise<LoginResponse> {
+  return apiFetch<LoginResponse>("/auth/guest", {
+    method: "POST",
+    includeAuth: false,
+    useRefresh: false,
+  });
+}
+
+export async function endGuestSession(
+  accessToken: string
+): Promise<void> {
+  try {
+    await apiFetch<GuestEndResponse>("/auth/guest/end", {
+      method: "POST",
+      body: { accessToken },
+      includeAuth: false,
       useRefresh: false,
     });
   } finally {

@@ -29,4 +29,18 @@ describe("refreshCookieAttributes", () => {
   it("sets a 1-day maxAge when remember is false", () => {
     expect(refreshCookieAttributes(false, false).maxAge).toBe(60 * 60 * 24);
   });
+
+  it("omits maxAge for session cookies", () => {
+    const attrs = refreshCookieAttributes(false, false, true);
+    expect(attrs).not.toHaveProperty("maxAge");
+    expect(attrs.httpOnly).toBe(true);
+    expect(attrs.path).toBe("/");
+  });
+
+  it("omits maxAge for session cookies in production too", () => {
+    const attrs = refreshCookieAttributes(true, true, true);
+    expect(attrs).not.toHaveProperty("maxAge");
+    expect(attrs.secure).toBe(true);
+    expect(attrs.sameSite).toBe("none");
+  });
 });

@@ -10,6 +10,7 @@ export interface TokenUser {
   name: string;
   surname: string;
   email: string;
+  isGuest?: boolean;
 }
 
 declare module "@fastify/jwt" {
@@ -21,6 +22,7 @@ declare module "@fastify/jwt" {
       name?: string;
       surname?: string;
       email?: string;
+      isGuest?: boolean;
     };
     user: TokenUser;
   }
@@ -39,17 +41,24 @@ declare module "fastify" {
       token: string,
       remember?: boolean
     ) => void;
+    setSessionCookie: (reply: FastifyReply, token: string) => void;
     clearRefreshCookie: (reply: FastifyReply) => void;
   }
 }
 
-export function refreshCookieAttributes(remember: boolean, isProduction: boolean) {
+export function refreshCookieAttributes(
+  remember: boolean,
+  isProduction: boolean,
+  session = false
+) {
   return {
     httpOnly: true,
     secure: isProduction,
     sameSite: isProduction ? ("none" as const) : ("lax" as const),
     path: "/",
-    maxAge: remember ? 60 * 60 * 24 * 7 : 60 * 60 * 24 * 1,
+    ...(session
+      ? {}
+      : { maxAge: remember ? 60 * 60 * 24 * 7 : 60 * 60 * 24 * 1 }),
   };
 }
 
@@ -68,6 +77,7 @@ export default fp(
         name: payload.name,
         surname: payload.surname,
         email: payload.email,
+        isGuest: payload.isGuest === true,
       };
     });
 
@@ -77,6 +87,7 @@ export default fp(
         name: payload.name,
         surname: payload.surname,
         email: payload.email,
+        isGuest: payload.isGuest,
       };
       return app.jwt.sign(tokenPayload, { expiresIn: config.accessTokenTtl });
     });
@@ -96,6 +107,12 @@ export default fp(
         });
       }
     );
+
+    app.decorate("setSessionCookie", (reply: FastifyReply, token: string) => {
+      reply.setCookie(config.cookieName, token, {
+        ...refreshCookieAttributes(false, config.isProduction, true),
+      });
+    });
 
     app.decorate("clearRefreshCookie", (reply: FastifyReply) => {
       reply.clearCookie(config.cookieName, {

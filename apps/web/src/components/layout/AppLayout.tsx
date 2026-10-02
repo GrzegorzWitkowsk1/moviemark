@@ -3,8 +3,15 @@ import { Box } from '@mui/material';
 
 import Header from './Header';
 import BottomNav from './BottomNav';
+import GuestBanner from './GuestBanner';
+import { useUser } from '@/hooks/useAuth';
+import { useGuestTeardown } from '@/hooks/useGuestTeardown';
 
 export default function AppLayout({ children }: { children: ReactNode }) {
+  const { isGuest } = useUser();
+
+  useGuestTeardown();
+
   return (
     <Box
       component="main"
@@ -24,6 +31,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         {children}
       </Box>
       <BottomNav />
+      {isGuest && <GuestBanner />}
     </Box>
   );
 }

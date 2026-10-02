@@ -17,7 +17,7 @@ import StyledTextField from "@/shared/components/textField";
 import ContainedButton from "@/shared/components/buttons/containedButton";
 import OutlinedButton from "@/shared/components/buttons/outlinedButton";
 import StyledRadio from "@/shared/components/buttons/radio";
-import { useLogin } from "@/hooks/useAuth";
+import { useLogin, useGuestSession } from "@/hooks/useAuth";
 import { useSnackbar } from "@/contexts/snackbarContext";
 import { createLoginSchema, type LoginFormValues } from "./schema";
 import logo from "@/assets/logo2.png";
@@ -25,6 +25,7 @@ import logo from "@/assets/logo2.png";
 export default function LoginPage() {
   const navigate = useNavigate();
   const loginMutation = useLogin();
+  const guestMutation = useGuestSession();
   const { open } = useSnackbar();
   const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
@@ -55,6 +56,18 @@ export default function LoginPage() {
         err instanceof Error
           ? err.message
           : t("common.somethingWentWrong"),
+        "failure"
+      );
+    }
+  };
+
+  const onContinueAsGuest = async () => {
+    try {
+      await guestMutation.mutateAsync();
+      navigate("/auth/home");
+    } catch (err) {
+      open(
+        err instanceof Error ? err.message : t("common.somethingWentWrong"),
         "failure"
       );
     }
@@ -185,6 +198,28 @@ export default function LoginPage() {
           </ContainedButton>
           <OutlinedButton type="button" onClick={() => navigate("/register")}>
             {t("auth.noAccount")}
+          </OutlinedButton>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              width: "100%",
+              my: "4px",
+            }}
+          >
+            <Box sx={{ flex: 1, height: "1px", backgroundColor: "divider" }} />
+            <Typography variant="caption" color="text.secondary">
+              {t("auth.or")}
+            </Typography>
+            <Box sx={{ flex: 1, height: "1px", backgroundColor: "divider" }} />
+          </Box>
+          <OutlinedButton
+            type="button"
+            onClick={onContinueAsGuest}
+            disabled={guestMutation.isPending || isSubmitting}
+          >
+            {guestMutation.isPending ? t("auth.guestEntering") : t("auth.guest")}
           </OutlinedButton>
         </Box>
       </StyledCard>

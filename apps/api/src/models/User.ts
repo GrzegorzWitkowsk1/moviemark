@@ -4,8 +4,10 @@ interface IUser {
   name: string;
   surname: string;
   email: string;
-  passwordHash: string;
+  passwordHash?: string;
   nextCustomId: number;
+  isGuest: boolean;
+  guestExpiresAt?: Date | null;
   avatar?: {
     data: Buffer;
     contentType: string;
@@ -49,7 +51,15 @@ const UserSchema = new mongoose.Schema<IUser>(
     },
     passwordHash: {
       type: String,
-      required: true,
+      required: false,
+    },
+    isGuest: {
+      type: Boolean,
+      default: false,
+    },
+    guestExpiresAt: {
+      type: Date,
+      default: null,
     },
     avatar: AvatarSchema,
   },
@@ -57,6 +67,8 @@ const UserSchema = new mongoose.Schema<IUser>(
     timestamps: true,
   }
 );
+
+UserSchema.index({ isGuest: 1, guestExpiresAt: 1 });
 
 export const User =
   (mongoose.models.User as mongoose.Model<IUser>) ||

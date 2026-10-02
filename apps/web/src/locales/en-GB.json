@@ -69,7 +69,16 @@
     "alreadyHaveAccount": "Already have an account?",
     "registrationSuccess": "Registration successful, you will be redirected to the login page",
     "namePlaceholder": "John",
-    "surnamePlaceholder": "Doe"
+    "surnamePlaceholder": "Doe",
+    "or": "or",
+    "guest": "Continue as guest",
+    "guestEntering": "Entering...",
+    "guestBanner": {
+      "bannerTitle": "You are using a guest account",
+      "bannerBody": "You can use MovieMark normally, but logging out or closing the app removes your watched list, want-to-watch list and stats for good. Create an account to keep your data.",
+      "bannerAction": "Create account",
+      "bannerDismiss": "Dismiss guest notice"
+    }
   },
   "validation": {
     "nameRequired": "Name is required",
@@ -94,10 +103,15 @@
         "invalidCredentials": "Invalid email or password"
       },
       "register": {
-        "emailTaken": "Email already registered"
+        "emailTaken": "Email already registered",
+        "reservedEmail": "This email address cannot be used"
       },
       "profile": {
         "emailTaken": "Email already registered"
+      },
+      "guest": {
+        "emailRestricted": "Guest accounts cannot change the email address",
+        "passwordRestricted": "Guest accounts cannot set a password"
       },
       "avatar": {
         "invalidType": "Only JPEG or PNG images are allowed",

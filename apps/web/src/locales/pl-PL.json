@@ -69,7 +69,16 @@
     "alreadyHaveAccount": "Masz już konto?",
     "registrationSuccess": "Rejestracja zakończona sukcesem, nastąpi przekierowanie do strony logowania",
     "namePlaceholder": "Jan",
-    "surnamePlaceholder": "Kowalski"
+    "surnamePlaceholder": "Kowalski",
+    "or": "lub",
+    "guest": "Kontynuuj jako gość",
+    "guestEntering": "Wchodzenie...",
+    "guestBanner": {
+      "bannerTitle": "Używasz konta gościa",
+      "bannerBody": "Możesz normalnie korzystać z MovieMark, ale wylogowanie lub zamknięcie aplikacji trwale usuwa obejrzane filmy, listę do obejrzenia i statystyki. Załóż konto, aby zachować swoje dane.",
+      "bannerAction": "Załóż konto",
+      "bannerDismiss": "Ukryj informację o koncie gościa"
+    }
   },
   "validation": {
     "nameRequired": "Imię jest wymagane",
@@ -94,10 +103,15 @@
         "invalidCredentials": "Nieprawidłowy e-mail lub hasło"
       },
       "register": {
-        "emailTaken": "Ten e-mail jest już zarejestrowany"
+        "emailTaken": "Ten e-mail jest już zarejestrowany",
+        "reservedEmail": "Ten adres e-mail nie może zostać użyty"
       },
       "profile": {
         "emailTaken": "Ten e-mail jest już zarejestrowany"
+      },
+      "guest": {
+        "emailRestricted": "Konta gościa nie mogą zmienić adresu e-mail",
+        "passwordRestricted": "Konta gościa nie mogą ustawić hasła"
       },
       "avatar": {
         "invalidType": "Dozwolone są tylko obrazy JPEG lub PNG",

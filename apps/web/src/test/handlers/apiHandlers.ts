@@ -6,6 +6,16 @@ export const TEST_USER = {
   surname: "Kowalska",
   email: "anna@test.com",
   avatar: null,
+  isGuest: false,
+};
+
+export const TEST_GUEST_USER = {
+  id: "2",
+  name: "Guest",
+  surname: "Account",
+  email: "guest-1234@guest.moviemark.local",
+  avatar: null,
+  isGuest: true,
 };
 
 const emptyCollection = { movies: [], series: [] };
@@ -46,6 +56,15 @@ export const apiHandlers = [
   }),
   http.post("http://localhost:3000/auth/logout", () =>
     HttpResponse.json({ message: "Logged out" })
+  ),
+  http.post("http://localhost:3000/auth/guest", () =>
+    HttpResponse.json(
+      { user: TEST_GUEST_USER, accessToken: "guest-token" },
+      { status: 201 }
+    )
+  ),
+  http.post("http://localhost:3000/auth/guest/end", () =>
+    HttpResponse.json({ message: "Guest session ended" })
   ),
   http.get("http://localhost:3000/auth/me", () =>
     HttpResponse.json(TEST_USER)

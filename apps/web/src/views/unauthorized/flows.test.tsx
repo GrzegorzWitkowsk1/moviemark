@@ -24,6 +24,15 @@ function LocationProbe() {
 
 const user = { id: "1", name: "Anna", surname: "Kowalska", email: "a@test.com" };
 
+const guestUser = {
+  id: "2",
+  name: "Guest",
+  surname: "Account",
+  email: "guest-1@guest.moviemark.local",
+  avatar: null,
+  isGuest: true,
+};
+
 describe("LoginPage flow", () => {
   it("signs in and navigates to the home page", async () => {
     let lastLoginBody: unknown;
@@ -112,6 +121,38 @@ describe("LoginPage flow", () => {
       screen.getByText("Don't have an account? Create it!")
     );
     expect(screen.getByTestId("probe").textContent).toBe("/register");
+  });
+
+  it("starts a guest session and enters the app", async () => {
+    server.use(
+      http.post(`${API}/auth/guest`, () =>
+        HttpResponse.json(
+          { user: guestUser, accessToken: "guest-token" },
+          { status: 201 }
+        )
+      ),
+      http.get(`${API}/auth/me`, () => HttpResponse.json(guestUser))
+    );
+    const userEventCtx = userEvent.setup();
+
+    renderWithProviders(
+      <>
+        <LoginPage />
+        <LocationProbe />
+      </>,
+      { route: "/login" }
+    );
+
+    await userEventCtx.click(
+      screen.getByRole("button", { name: "Continue as guest" })
+    );
+
+    await waitFor(
+      () => {
+        expect(screen.getByTestId("probe").textContent).toBe("/auth/home");
+      },
+      { timeout: 10_000 }
+    );
   });
 });
 
@@ -251,5 +292,23 @@ describe("route guards", () => {
       },
       { timeout: 10_000 }
     );
+  });
+
+  it("withPublic keeps guest sessions on the register page", async () => {
+    server.use(
+      http.get(`${API}/auth/me`, () => HttpResponse.json(guestUser))
+    );
+    const GuestComponent = withPublic(() => <span>Register form</span>);
+
+    renderWithProviders(
+      <>
+        <GuestComponent />
+        <LocationProbe />
+      </>,
+      { route: "/register" }
+    );
+
+    await waitFor(() => expect(screen.getByText("Register form")).toBeTruthy());
+    expect(screen.getByTestId("probe").textContent).toBe("/register");
   });
 });
